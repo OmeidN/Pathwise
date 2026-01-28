@@ -15,7 +15,7 @@
 
 | Student Name |   School Email    | GitHub Username |
 | :----------: | :---------------: | :-------------: |
-|   member1    |                   |                 |
+|   Omeid Nadery  | onadery@sfsu.edu  | OmeidN          |
 |   member2    |                   |                 |
 |   member3    |                   |                 |
 |   member4    |                   |                 |
