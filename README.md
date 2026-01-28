@@ -16,7 +16,7 @@
 | Student Name |   School Email    | GitHub Username |
 | :----------: | :---------------: | :-------------: |
 |   Omeid Nadery  | onadery@sfsu.edu  | OmeidN          |
-|   member2    |                   |                 |
+| Mikias Berhane | mberhane1@sfsu.edu | mberhane1    |
 |   member3    |                   |                 |
 |   member4    |                   |                 |
 | Brandon Sanchez| bsanchez15@sfsu.edu| Bsanchez200  |
