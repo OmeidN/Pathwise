@@ -19,7 +19,7 @@
 |   member2    |                   |                 |
 |   member3    |                   |                 |
 |   member4    |                   |                 |
-|   member5    |                   |                 |
+| Brandon Sanchez| bsanchez15@sfsu.edu| Bsanchez200  |
 | Damian Perez | dperez52@sfsu.edu |  banksybanksy   |
 
 ## NO code needs to be stored in the root of your repository. You may rename the application folder if you like to your team's application name. But all source code related to your team's application should be stored inside the application folder.
