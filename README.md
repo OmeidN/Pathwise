@@ -18,7 +18,7 @@
 |   Omeid Nadery  | onadery@sfsu.edu  | OmeidN          |
 | Mikias Berhane | mberhane1@sfsu.edu | mberhane1    |
 | Cielina Lubrino | clubrino@sfsu.edu  | ciemaree    |
-|   member4    |                   |                 |
+|  Laura Wong  |  lwong25@sfsu.edu  |  slibie  |
 | Brandon Sanchez| bsanchez15@sfsu.edu| Bsanchez200  |
 | Damian Perez | dperez52@sfsu.edu |  banksybanksy   |
 
