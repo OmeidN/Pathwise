@@ -1,0 +1,135 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background: #fff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.container {
+    max-width: 680px;
+    width: 100%;
+}
+
+.profile-card {
+    background: #fff;
+}
+
+.profile-header {
+    text-align: center;
+    padding: 40px 0;
+}
+
+.profile-image {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 24px;
+    filter: grayscale(100%);
+}
+
+.profile-header h1 {
+    font-size: 2.5em;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+
+.role {
+    font-size: 1.1em;
+    color: #86868b;
+    font-weight: 400;
+}
+
+.profile-info {
+    padding: 20px 0;
+}
+
+.profile-info h2 {
+    color: #1d1d1f;
+    margin-top: 40px;
+    margin-bottom: 12px;
+    font-size: 1.2em;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.profile-info h2:first-child {
+    margin-top: 0;
+}
+
+.profile-info p {
+    line-height: 1.7;
+    color: #1d1d1f;
+    font-weight: 400;
+}
+
+.skills-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.skills-list li {
+    background: #f5f5f7;
+    padding: 6px 14px;
+    border-radius: 4px;
+    color: #1d1d1f;
+    font-size: 0.9em;
+}
+
+.contact-links {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.contact-links a {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #1d1d1f;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.9em;
+    transition: opacity 0.2s ease;
+}
+
+.contact-links a:hover {
+    opacity: 0.8;
+}
+
+.profile-footer {
+    padding: 40px 0 20px;
+    text-align: center;
+    color: #86868b;
+    font-size: 0.85em;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .profile-header h1 {
+        font-size: 2em;
+    }
+
+    .profile-image {
+        width: 140px;
+        height: 140px;
+    }
+
+    .contact-links {
+        flex-direction: column;
+    }
+}
