@@ -17,9 +17,9 @@
 | :----------: | :---------------: | :-------------: |
 |   Omeid Nadery  | onadery@sfsu.edu  | OmeidN          |
 | Mikias Berhane | mberhane1@sfsu.edu | mberhane1    |
-|   member3    |                   |                 |
-|   member4    |                   |                 |
+| Cielina Lubrino | clubrino@sfsu.edu  | ciemaree    |
+|  Laura Wong  |  lwong25@sfsu.edu  |  slibie  |
 | Brandon Sanchez| bsanchez15@sfsu.edu| Bsanchez200  |
 | Damian Perez | dperez52@sfsu.edu |  banksybanksy   |
-
+| Jason Le | jle34@sfsu.edu |  Jason_Le1   |
 ## NO code needs to be stored in the root of your repository. You may rename the application folder if you like to your team's application name. But all source code related to your team's application should be stored inside the application folder.

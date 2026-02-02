@@ -7,16 +7,47 @@
 
 # Below is a list of items required. Missing items will causes points to be deducted from multiple milestone submissions.
 
-1. Server URL or IP
-2. SSH username
-3. SSH password or key.
-    <br> If a ssh key is used please upload the key to the credentials folder.
-4. Database URL or IP and port used.
-    <br><strong> NOTE THIS DOES NOT MEAN YOUR DATABASE NEEDS A PUBLIC FACING PORT.</strong> But knowing the IP and port number will help with SSH tunneling into the database. The default port is more than sufficient for this class.
-5. Database username
-6. Database password
-7. Database name (basically the name that contains all your tables)
-8. Instructions on how to use the above information.
+1. Server URL or IP: 3.135.184.72
+2. SSH username: ubuntu
+3. SSH password or key: Use the key file in this folder: csc648-team-key.pem
+4. Database URL or IP and port used: 127.0.0.1:3306
+5. Database username (app): csc648_user | (CTO, full privileges): cto
+6. Database password (app): sfsu648! | (CTO): ctoTeam2
+7. Database name: csc648_db
+8. Instructions on how to use the above information. (See "How to use" section below.)
+
+---
+
+## How to use
+
+### SSH into the server
+1. Clone this repo (or ensure you have the credentials folder):
+
+https://github.com/CSC-648-SFSU/CSC-648-848-S02-Spring2026-Team02.git
+
+2. From a terminal, run (replace PATH with the path to this repo's credentials folder):
+
+ssh -i PATH/csc648-team-key.pem ubuntu@3.135.184.72
+
+Example (Windows, from repo root): `ssh -i credentials/csc648-team-key.pem ubuntu@3.135.184.72`
+
+3. You are now on the EC2 server. The ubuntu user has sudo (root) access.
+
+### Connect to MySQL (from the server)
+- **App user:** `mysql -u csc648_user -p`  
+  Password: sfsu648!  
+  Then: `USE csc648_db;`
+- **CTO user (full privileges):** `mysql -u cto -p`  
+  Password: ctoTeam2
+
+### Connect to MySQL from your laptop (SSH tunnel)
+1. Open a tunnel (replace PATH with path to credentials folder):
+
+ssh -i PATH/csc648-team-key.pem -L 3306:127.0.0.1:3306 ubuntu@3.135.184.72
+
+2. In another terminal or a MySQL client, connect to host 127.0.0.1, port 3306, user csc648_user (or cto) with the password above.
+
+---
 
 # Most important things to Remember
 ## These values need to kept update to date throughout the semester. <br>
