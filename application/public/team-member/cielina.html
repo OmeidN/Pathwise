@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!--HEAD-->
+<head>
+    <link rel="icon" sizes="32x32" href="../../images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="../../images/192x192.png">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio of Cielina Lubrino, a Computer Science student at SFSU.">
+    <meta name="keywords" content="Cielina Lubrino,portfolio, computer science, web development, software engineering">
+    <meta name="author" content="Cielina Lubrino">
+    <title>Cielina Lubrino - CS Student Portfolio</title>
+
+    <!--CSS-->
+    <style>
+        :root{
+            --card: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+
+            --accent: #eebee4;
+            --accent-strong: #d48ac8;
+        }
+
+        *{ box-sizing: border-box; }
+
+        body{
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 28px 16px;
+            text-align: center;
+
+            background: linear-gradient(
+                180deg,
+                #fafafa 0%,
+                #fdf2f8 40%,
+                #fafafa 100%
+            );
+
+            color: var(--text);
+        }
+
+        header, nav, section, footer{
+            max-width: 980px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* HEADER */
+        header{
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 28px 18px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+        }
+
+        header img{
+            width: 160px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 18px;
+            border: 3px solid rgba(238,190,228,0.45);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+        }
+
+        header h1{
+            font-size: 2rem;
+            margin: 14px 0 6px;
+            letter-spacing: -0.02em;
+        }
+
+        header h2{
+            font-size: 1rem;
+            margin: 6px 0;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        /* NAV */
+        nav{
+            margin: 14px auto 22px;
+        }
+
+        nav ul{
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        nav a{
+            display: inline-block;
+            padding: 10px 14px;
+            border-radius: 999px;
+            text-decoration: none;
+            color: var(--text);
+            background: var(--card);
+            border: 1px solid var(--border);
+            font-weight: 600;
+            transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        }
+
+        nav a:hover{
+            border-color: rgba(212,138,200,0.55);
+            background: rgba(238,190,228,0.16);
+            transform: translateY(-1px);
+        }
+
+        /* SECTIONS */
+        section{
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 26px 22px;
+            margin: 18px auto;
+            text-align: left;
+            box-shadow: 0 10px 26px rgba(0,0,0,0.05);
+        }
+
+        section h2{
+            text-align: center;
+            font-size: 1.6rem;
+            margin: 6px 0 14px;
+            color: var(--text);
+            letter-spacing: -0.01em;
+            position: relative;
+        }
+
+        /* Pink accent */
+        section h2::after{
+            content: "";
+            display: block;
+            width: 64px;
+            height: 3px;
+            margin: 10px auto 0;
+            border-radius: 999px;
+            background: rgba(212,138,200,0.6);
+        }
+
+        p{
+            max-width: 72ch;
+            margin: 12px auto;
+            text-align: left;
+            line-height: 1.75;
+            color: #374151;
+        }
+
+        section img{
+            display: block;
+            margin: 12px auto;
+            max-width: 180px;
+            width: 55%;
+            height: auto;
+            border-radius: 14px;
+        }
+
+        /* EDUCATION LIST */
+        #education ul{
+            max-width: 72ch;
+            margin: 0 auto;
+            padding-left: 18px;
+        }
+
+        #education li{
+            margin: 10px 0;
+        }
+
+        /* EXPERIENCE TABLE */
+        table{
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+        }
+
+        td{
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            color: #374151;
+        }
+
+        tr:last-child td{
+            border-bottom: none;
+        }
+
+        tr:nth-child(odd) td{
+            background: #fbfbfb;
+        }
+
+        /* SKILLS */
+        .skills-container{
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .skill-pill{
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text);
+            background: rgba(238,190,228,0.18);
+            border: 1px solid rgba(212,138,200,0.45);
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        .skill-pill:hover{
+            transform: translateY(-2px);
+            background: rgba(238,190,228,0.28);
+        }
+
+        /* PROJECTS */
+        .project{
+            max-width: 72ch;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .project h3{
+            margin: 0 0 10px;
+        }
+
+        /* CONTACT */
+        .contact-links{
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .contact-links a{
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(212,138,200,0.5);
+            background: rgba(238,190,228,0.14);
+            color: var(--text);
+            font-weight: 700;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        .contact-links a:hover{
+            background: rgba(238,190,228,0.22);
+            transform: translateY(-1px);
+        }
+
+        /* FOOTER */
+        footer{
+            background: transparent;
+            color: var(--muted);
+            margin-top: 18px;
+            padding: 8px 0;
+        }
+
+        footer p{
+            text-align: center;
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        /* Mobile tweaks */
+        @media (max-width: 700px){
+            body{ padding: 18px 12px; }
+            section{ padding: 20px 16px; }
+            header h1{ font-size: 1.7rem; }
+        }
+    </style>
+
+</head>
+<body>
+<!-- HEADER -->
+<header>
+    <img src="../../images/me.jpg" alt="Cielina Lubrino" width="200">
+    <h1>Cielina Lubrino</h1>
+    <h2>Front-end Support</h2>
+
+</header>
+
+<!-- NAVIGATION -->
+<nav>
+    <ul>
+        <li><a href="../index.html">Team Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#education">Education</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#contact">Contact</a></li>
+    </ul>
+</nav>
+
+<!-- ABOUT SECTION -->
+<section id="about">
+    <h2>About Me</h2>
+
+    <!-- SCHOOL LOGO -->
+    <img src="../../images/sfsulogo.png" alt="School logo" width="200">
+
+    <p style="text-align: justify; text-indent: 20px; line-height: 1.5; margin-bottom: 10px;">
+        I am a student passionate about design and technological advancement. I enjoy learning new things and applying them into projects.
+        I am working towards a Computer Science degree at San Francisco State University. I'm interested in web development, software engineering,
+        and user experience design.
+    </p>
+
+    <!-- HOMETOWN LOGO -->
+    <img src="../../images/Belleville-NJ-Seal.png" alt="Hometown logo" width="200">
+
+    <p>
+        I moved here to the Bay Area from Belleville, New Jersey, known for its beautiful cherry blossom trees.Outside of school, I enjoy reading books, 
+        taking long walks in Golden Gate Park, and keeping up with the latest music scene. 
+    </p>
+
+</section>
+
+
+<!-- EDUCATION SECTION -->
+<section id="education">
+    <h2 style="font-size: 1.8em; text-align: center; color: #444;"> Education </h2>
+    <ul style="list-style-position: inside; text-align:left;">
+        <li>
+            <strong>San Francisco State University</strong>
+            <ul>
+                <li>Major: Computer Science</li>
+                <li>Expected Graduation: Spring 2026</li>
+            </ul>
+        </li>
+        <li>
+            <strong>City College Of San Francisco</strong>
+            <ul>
+                <li>Major: Computer Science</li>
+            </ul>
+        </li>
+        <li>
+            <strong>School of Fashion Design</strong>
+            <ul>
+                <li>Major: Fashion Design and Marketing</li>
+            </ul>
+        </li>
+    </ul>
+</section>
+
+<!-- EXPERIENCE SECTION -->
+<section id="experience">
+    <h2 style="font-size: 1.8em; color: #444;">Experience</h2>
+    <table style="border-collapse: collapse; width: 60%; margin: 0 auto;">
+        <tr>
+            <td>Barista</td>
+            <td>Compton's Coffee</td>
+            <td>2023-2024</td>
+        </tr>
+        <tr>
+            <td>Dialysis Tech</td>
+            <td>Davita</td>
+            <td>2018-2020</td>
+        </tr>
+        <tr>
+            <td>Office Assistant</td>
+            <td>Generations Healthcare</td>
+            <td>2017-2018</td>
+        </tr>
+        <tr>
+            <td>Sales Employee</td>
+            <td>G-Star</td>
+            <td>2016-2017</td>
+        </tr>
+    </table>
+</section>
+
+<!-- SKILLS SECTION -->
+<section id="skills">
+  <h2>Skills</h2>
+
+  <div class="skills-container">
+    <span class="skill-pill">Python</span>
+    <span class="skill-pill">Java</span>
+    <span class="skill-pill">C++</span>
+  </div>
+</section>
+
+<!-- PROJECTS SECTION -->
+<section id="projects">
+  <h2>Projects</h2>
+
+  <div class="project">
+    <h3>Song Sample Tracker</h3>
+    <p>
+      This passion project is to develop a website that will track different song
+      samples used in the music industry. It can serve as a tool for producers, DJs,
+      and musicians.
+    </p>
+  </div>
+</section>
+
+
+<!--CONTACT-->
+<section id="contact">
+    <h2 style="font-size: 1.8em; text-align:center;color: #444;">Contact Me</h2>
+    <div class="contact-links">
+        <a href="https://www.linkedin.com/in/cielina-lubrino-5882a6200/" target="_blank">LinkedIn</a>
+        <a href="https://github.com/ciemaree" target="_blank">GitHub</a>
+     </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2025 Cielina Lubrino &bull; All rights reserved </p>
+    </footer>
+
+    </body>
+</html>
