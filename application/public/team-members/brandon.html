@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brandon Sanchez</title>
+    <link rel="stylesheet" href="../../css/brandon.css">
+</head>
+<body>
+    <div class="stars-container">
+    </div>
+    <div class="profile-box">
+        <img src="../../images/brandon.jpg" alt="Brandon">
+    <header>
+        <h1>Brandon Sanchez</h1>
+        <h3>Front end</h3>
+    </header>
+    </div>
+
+    <div class="about-me">
+        <section class="bio">
+            <h2>About Me</h2>
+            <p class="centered"> Hello! My name is Brandon Sanchez, and I am a computer science student and im also working as an electrician.</p>
+        </section>
+    </div>
+
+    <h4>Connect with me:</h4>
+    <div class="button-container">
+    <a href="https://bsanchez650.github.io/" class="github-button" target="_blank">GitHub</a>
+    </div>
+
+    <div class="button-container">
+    <button class="toggle-button">Show More</button>
+</div>
+    <p class="hidden-text" style="display: none;">bsanchez15@sfsu.edu</p>
+    
+
+
+
+<script>
+    const button = document.querySelector('.toggle-button');
+    const hiddenText = document.querySelector('.hidden-text');
+    
+    button.addEventListener('click', function() {
+        if (hiddenText.style.display === 'none') {
+            hiddenText.style.display = 'block';
+            button.textContent = 'Show Less';
+        } else {
+            hiddenText.style.display = 'none';
+            button.textContent = 'Show More';
+        }
+    });
+</script>
+
+</body>
+</html>
+
+
