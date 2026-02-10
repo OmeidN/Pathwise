@@ -7,7 +7,7 @@
 
 # Below is a list of items required. Missing items will causes points to be deducted from multiple milestone submissions.
 
-1. Server URL or IP: 3.135.184.72
+1. Server URL or IP: http://3.135.184.72/
 2. SSH username: ubuntu
 3. SSH password or key: Use the key file in this folder: csc648-team-key.pem
 4. Database URL or IP and port used: 127.0.0.1:3306
@@ -28,6 +28,9 @@ https://github.com/CSC-648-SFSU/CSC-648-848-S02-Spring2026-Team02.git
 2. From a terminal, run (replace PATH with the path to this repo's credentials folder):
 
 ssh -i PATH/csc648-team-key.pem ubuntu@3.135.184.72
+OR
+(From IDE terminal at root of project):
+ssh -i credentials/csc648-team-key.pem ubuntu@3.135.184.72 
 
 Example (Windows, from repo root): `ssh -i credentials/csc648-team-key.pem ubuntu@3.135.184.72`
 
