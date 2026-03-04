@@ -46,7 +46,8 @@ Waiting for input
     </div>
 
     <script>
-        // src="js/search-test.js"
+        // uncomment this when ready
+        // src="js/search-test.js" 
         document.getElementById('searchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
