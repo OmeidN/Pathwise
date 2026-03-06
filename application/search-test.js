@@ -1,79 +1,137 @@
 //example test data
-const testData = {
+const mockData = {
     success: true,
-    count: 6,
+    count: 10,
     results: [
         {
-            id: 101,
-            title: "Internship Search Guide",
-            description: "A comprehensive guide to finding and applying for internships at SFSU and beyond.",
+            resource_id: 1,
+            title: "Resume Writing Guide",
+            description: "Step by step guide for writing a strong internship resume.",
             type: "resource",
-            category: "career",
-            tags: ["internship", "career", "jobs", "networking"],
-            url: "https://career.sfsu.edu/internships",
-            imagePath: "/uploads/resources/internship-guide.jpg",
-            isAiEnabled: false,
-            createdAt: "2026-02-15T10:30:00Z"
+            category_id: 2,
+            category_name: "Career",
+            tags: ["resume", "internship"],
+            url: "https://example.com/resume",
+            image_path: null,
+            is_ai_enabled: false,
+            created_at: "2026-03-06 00:57:39"
         },
         {
-            id: 102,
-            title: "Resume Writing Template",
-            description: "ATS-friendly resume template designed specifically for college students.",
-            type: "template",
-            category: "career",
-            tags: ["resume", "career", "template", "ats"],
-            createdBy: "SFSU Career Center",
-            imagePath: "/uploads/templates/resume-template.jpg",
-            isAiEnabled: false,
-            createdAt: "2026-02-10T14:20:00Z"
-        },
-        {
-            id: 103,
-            title: "AI-Powered Study Planner",
-            description: "Smart study schedule generator that adapts to your learning style and course load.",
+            resource_id: 2,
+            title: "Interview Prep Checklist",
+            description: "Checklist covering common interview questions and preparation tips.",
             type: "resource",
-            category: "academic",
-            tags: ["study", "ai", "planning", "productivity"],
-            url: "https://studyplanner.example.com",
-            imagePath: "/uploads/resources/ai-planner.jpg",
-            isAiEnabled: true,
-            createdAt: "2026-02-18T09:15:00Z"
+            category_id: 2,
+            category_name: "Career",
+            tags: ["interview"],
+            url: "https://example.com/interview",
+            image_path: null,
+            is_ai_enabled: false,
+            created_at: "2026-03-06 00:57:39"
         },
         {
-            id: 104,
-            title: "Research Paper Workflow",
-            description: "Step-by-step guide to writing research papers.",
-            type: "workflow",
-            category: "academic",
-            tags: ["research", "writing", "paper"],
-            createdBy: "Dr. Smith",
-            imagePath: null,
-            isAiEnabled: false,
-            createdAt: "2026-02-20T11:00:00Z"
-        },
-        {
-            id: 105,
-            title: "Stress Management Techniques",
-            description: "Learn to manage stress during exams.",
+            resource_id: 3,
+            title: "Internship Search Strategy",
+            description: "How to search, track applications, and follow up effectively.",
             type: "resource",
-            category: "personal",
-            tags: ["stress", "wellness", "mental health"],
+            category_id: 2,
+            category_name: "Career",
+            tags: ["internship"],
+            url: "https://example.com/internships",
+            image_path: null,
+            is_ai_enabled: false,
+            created_at: "2026-03-06 00:57:39"
+        },
+        {
+            resource_id: 4,
+            title: "Weekly Study Plan Template",
+            description: "A weekly schedule template for balancing classes and assignments.",
+            type: "resource",
+            category_id: 1,
+            category_name: "Academic",
+            tags: ["study"],
+            url: "https://example.com/studyplan",
+            image_path: null,
+            is_ai_enabled: false,
+            created_at: "2026-03-06 00:57:39"
+        },
+        {
+            resource_id: 5,
+            title: "How to Use Office Hours",
+            description: "Tips for getting the most value out of professor office hours.",
+            type: "resource",
+            category_id: 1,
+            category_name: "Academic",
+            tags: [],
+            url: "https://example.com/officehours",
+            image_path: null,
+            is_ai_enabled: false,
+            created_at: "2026-03-06 00:57:39"
+        },
+        {
+            resource_id: 6,
+            title: "Note Taking Methods",
+            description: "Overview of Cornell notes, outlining, and active recall strategies.",
+            type: "resource",
+            category_id: 1,
+            category_name: "Academic",
+            tags: [],
+            url: "https://example.com/notetaking",
+            image_path: null,
+            is_ai_enabled: false,
+            created_at: "2026-03-06 00:57:39"
+        },
+        {
+            resource_id: 7,
+            title: "Budgeting Basics for Students",
+            description: "Simple budgeting steps for managing money during the semester.",
+            type: "resource",
+            category_id: 3,
+            category_name: "Personal",
+            tags: [],
+            url: "https://example.com/budgeting",
+            image_path: null,
+            is_ai_enabled: false,
+            created_at: "2026-03-06 00:57:39"
+        },
+        {
+            resource_id: 8,
+            title: "Goal Setting Starter Guide",
+            description: "How to set realistic goals and track progress over time.",
+            type: "resource",
+            category_id: 3,
+            category_name: "Personal",
+            tags: [],
+            url: "https://example.com/goals",
+            image_path: null,
+            is_ai_enabled: true,
+            created_at: "2026-03-06 00:57:39"
+        },
+        {
+            resource_id: 9,
+            title: "Time Management Basics",
+            description: "Prioritizing tasks using small routines to reduce stress.",
+            type: "resource",
+            category_id: 4,
+            category_name: "Wellness",
+            tags: ["time-management"],
+            url: "https://example.com/time",
+            image_path: null,
+            is_ai_enabled: false,
+            created_at: "2026-03-06 00:57:39"
+        },
+        {
+            resource_id: 10,
+            title: "Stress Reset Techniques",
+            description: "Short breathing and reset techniques for high stress moments.",
+            type: "resource",
+            category_id: 4,
+            category_name: "Wellness",
+            tags: ["wellness"],
             url: "https://example.com/stress",
-            imagePath: null,
-            isAiEnabled: false,
-            createdAt: "2026-02-22T09:30:00Z"
-        },
-        {
-            id: 106,
-            title: "Job Interview Tips Template",
-            description: "Prepare for your job interviews with these tips.",
-            type: "template",
-            category: "career",
-            tags: ["interview", "jobs", "career"],
-            createdBy: "Career Center",
-            imagePath: null,
-            isAiEnabled: false,
-            createdAt: "2026-02-25T14:15:00Z"
+            image_path: null,
+            is_ai_enabled: false,
+            created_at: "2026-03-06 00:57:39"
         }
     ]
 };
@@ -92,14 +150,14 @@ const testErrorMessage = {
 
 //configs
 const config = {
-    //swap when backend is ready
-    useMock: true,
+    //swap to false when backend is ready
+    useMock: false,
     apiEndpoint: '/api/search',
     //mock delay in ms
-    mockDelay: 200
+    mockDelay: 50
 }
 
-console.log("search-test.js loaded into html page");
+console.log("search-test.js loaded into DB");
 
 //main event handler
 document.addEventListener('DOMContentLoaded', function() {
@@ -147,6 +205,28 @@ document.addEventListener('DOMContentLoaded', function() {
             'connected to live backend';
     }
 
+    //get category ID from name in DB
+    function getCategoryId(categoryName){
+        const categoryMap = {
+            'academic': 1,
+            'career': 2, 
+            'personal': 3,
+            'wellness': 4
+        };
+        return categoryMap[categoryName] || null;
+    }
+
+    //get category ,name from ID in DB
+    function getCategoryName(categoryId){
+        const categoryMap = {
+            1: 'academic',
+            2: 'career',
+            3: 'personal',
+            4: 'wellness'
+        };
+        return categoryMap[categoryId] || 'other';
+    }
+
     //visual update for testing
     function updateDisplay(data){
         console.log("updating display with:", data);
@@ -174,12 +254,36 @@ document.addEventListener('DOMContentLoaded', function() {
         
         //get params
         const searchTerm = params.get('q') || '';
-        const category = params.get('category') || '';
+        const categoryName = params.get('category') || '';
+        const categoryId = getCategoryId(categoryName);
+
+        console.log(`mock search: term="${searchTerm}", category="${categoryName}" (ID: ${categoryId})`);
         
-        console.log(`mock search: term = "${searchTerm}", category = "${category}"`);
+        //edge cases
+        if(searchTerm.toLowerCase() === 'error'){
+            return testErrorMessage;
+        }
         
+        if (searchTerm.toLowerCase() === 'empty' || searchTerm === 'test-empty') {
+            return testEmptyData;
+        }
+        
+        //if no search term and no category, return empty results
+        if(!searchTerm && !categoryName){
+            console.log("empty search: returning 0 results");
+            return{
+                success: true,
+                count: 0,
+                results: [],
+                _mock: true,
+                _query: {searchTerm, categoryName},
+                _note: "empty search returns 0 results"
+            };
+        }
+        
+
         //filter only applicable results
-        let filtered = [...testData.results];
+        let filtered = [...mockData.results];
         
         if(searchTerm){
             const term = searchTerm.toLowerCase();
@@ -190,29 +294,30 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
 
-        //return empty results with no category or search
-        if (!searchTerm && !category) {
-            console.log("empty search: returning 0 results");
-            return {
-                success: true,
-                count: 0,
-                results: [],
-                _mock: true,
-                _query: {searchTerm, category},
-                _note: "empty search returns 0 results"
-            };
+        if(categoryId){
+            filtered = filtered.filter(item => item.category_id === categoryId);
         }
         
-        if(category){
-            filtered = filtered.filter(item => item.category === category);
-        }
+        const results = filtered.map(item => ({
+            resource_id: item.resource_id,
+            title: item.title,
+            description: item.description,
+            type: item.type,
+            category_id: item.category_id,
+            category_name: item.category_name,
+            tags: item.tags,
+            url: item.url,
+            image_path: item.image_path,
+            is_ai_enabled: item.is_ai_enabled,
+            created_at: item.created_at
+        }));
         
         return{
             success: true,
-            count: filtered.length,
-            results: filtered,
+            count: results.length,
+            results: results,
             _mock: true,
-            _query: {searchTerm, category}
+            _query: {searchTerm, category: categoryName}
         };
     }
 
@@ -220,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function realSearch(params){
         const response = await fetch(`${config.apiEndpoint}?${params.toString()}`);
         if(!response.ok){
-            throw new Error(`http error! status: ${response.status}`);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         return await response.json();
     }
@@ -269,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.results.textContent = 'waiting for input';
         if (elements.resultCount) elements.resultCount.textContent = '';
     });
-    console.log("all handlers attached: tesdting ready");
+    console.log("all handlers attached: testing ready");
     console.log("try testing with: 'internship', 'resume', 'study', 'stress', or '123' for empty results");
 });
 
