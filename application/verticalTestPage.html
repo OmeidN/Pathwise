@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Search Test</title>
+</head>
+<body>
+    <!-- test area -->
+    <div style="padding: 20px;">
+        <h2>Test Home Page</h2>
+        <p>Team 2 - Backend Integration Test</p>
+        
+        <div style="margin: 20px 0;">
+            <form id="searchForm">
+                <!-- text search -->
+                <div style="margin-bottom: 10px;">
+                    <label for="searchInput">Search:</label><br>
+                    <input type="text" id="searchInput" name="q" placeholder="e.g., internship, study tips, etc" 
+                           style="width: 300px; padding: 5px;">
+                </div>
+                
+                <!-- category dropdown -->
+                <div style="margin-bottom: 10px;">
+                    <label for="category">Category:</label><br>
+                    <select id="category" name="category" style="width: 200px; padding: 5px;">
+                        <option value="">All Categories</option>
+                        <option value="academic">Academic</option>
+                        <option value="career">Career</option>
+                        <option value="personal">Personal</option>
+                        <option value="other">other</option>
+                    </select>
+                </div>
+                
+                <button type="submit" style="padding: 5px 15px;">Test Search</button>
+                <button type="button" id="resetBtn" style="padding: 5px 15px; margin-left: 10px;">Reset</button>
+            </form>
+        </div>
+        
+        <div id="results" style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 20px;">
+            <h3>Results: <span id="resultCount" style="font-size: 14px; color: #666;"></span></h3>
+            <pre id="resultsContent" style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow: auto; min-height: 200px; border: 1px solid #ddd;">
+waiting for input
+            </pre>
+        </div>
+
+    <!--uncomment this when ready-->
+    <script src="search-test.js"></script>
+</body>
+</html>
