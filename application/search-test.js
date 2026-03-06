@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     //visual update for testing
     function updateDisplay(data){
-        console.log("📝 Updating display with:", data);
+        console.log("updating display with:", data);
         
         //update pre elements
         elements.results.textContent = JSON.stringify(data, null, 2);
