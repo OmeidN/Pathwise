@@ -34,6 +34,7 @@
                         <option value="1">Academic</option>
                         <option value="2">Career</option>
                         <option value="3">Personal</option>
+                        <option value="4">Wellness</option>
                     </select>
                 </div>
 
@@ -45,12 +46,11 @@
             </form>
         </section>
 
-        <!-- TODO: Connect to backend API endpoint (TBD — waiting on Tban) -->
-        <!-- Results populated by app.js — currently renders raw JSON for testing -->
+        <!-- Results populated by app.js via GET /api/search?q=...&category=... -->
         <section id="results-section">
             <h2>Results</h2>
             <div id="results">
-                <pre id="resultsContent">Waiting for input...</pre>
+                <p>Waiting for input...</p>
             </div>
         </section>
     </main>

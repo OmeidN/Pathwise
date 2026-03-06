@@ -1,16 +1,13 @@
-// TODO: Handle search button click event
 document.getElementById('searchForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const q = document.getElementById('searchInput').value;
+    const q = document.getElementById('searchInput').value.trim();
     const category = document.getElementById('category').value;
-    const resultsEl = document.getElementById('resultsContent');
+    const resultsEl = document.getElementById('results');
 
-    resultsEl.textContent = 'Searching...';
+    resultsEl.innerHTML = '<p>Searching...</p>';
 
     try {
-        // TODO: Build and send GET request to backend API endpoint (TBD — waiting on Tban)
-        // Placeholder endpoint: /api/search — update once GET /api/... is finalized
         const params = new URLSearchParams();
         if (q) params.append('q', q);
         if (category) params.append('category', category);
@@ -18,11 +15,25 @@ document.getElementById('searchForm').addEventListener('submit', async (e) => {
         const response = await fetch(`/api/search?${params.toString()}`);
         const data = await response.json();
 
-        // TODO: Handle API response and render results to the page
-        // Currently dumps raw JSON — replace with proper result rendering
-        resultsEl.textContent = JSON.stringify(data, null, 2);
+        if (!data.success) {
+            resultsEl.innerHTML = `<p class="error">Error: ${data.error}</p>`;
+            return;
+        }
+
+        if (data.results.length === 0) {
+            resultsEl.innerHTML = '<p>No results found.</p>';
+            return;
+        }
+
+        // TODO: Style result cards in styles.css
+        resultsEl.innerHTML = data.results.map(r => `
+            <div class="result-card">
+                <h3><a href="${r.url}" target="_blank">${r.title}</a></h3>
+                <p>${r.description || ''}</p>
+            </div>
+        `).join('');
 
     } catch (error) {
-        resultsEl.textContent = `Error: ${error.message}`;
+        resultsEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
     }
 });
