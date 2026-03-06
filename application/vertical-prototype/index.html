@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pathwise - Vertical Prototype</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- TODO: Add team/section/class identification header -->
+    <header id="site-header">
+        <div class="header-inner">
+            <h1 class="site-title">Pathwise</h1>
+            <p class="site-subtitle">CSC 648-848 · Section 02 · Spring 2026 · Team 2</p>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <section id="search-section">
+            <form id="searchForm">
+
+                <!-- TODO: Add free text search input field -->
+                <div class="form-group">
+                    <label for="searchInput">Search:</label>
+                    <input type="text" id="searchInput" name="q" placeholder="e.g., internship, study tips..." autocomplete="off">
+                </div>
+
+                <!-- TODO: Add dropdown with 2-3 search category options (confirm category IDs with Tban/Justin) -->
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <select id="category" name="category">
+                        <option value="">All Categories</option>
+                        <option value="1">Academic</option>
+                        <option value="2">Career</option>
+                        <option value="3">Personal</option>
+                    </select>
+                </div>
+
+                <!-- TODO: Add search button -->
+                <div class="form-group">
+                    <button type="submit" id="searchBtn">Search</button>
+                </div>
+
+            </form>
+        </section>
+
+        <!-- TODO: Connect to backend API endpoint (TBD — waiting on Tban) -->
+        <!-- Results populated by app.js — currently renders raw JSON for testing -->
+        <section id="results-section">
+            <h2>Results</h2>
+            <div id="results">
+                <pre id="resultsContent">Waiting for input...</pre>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
