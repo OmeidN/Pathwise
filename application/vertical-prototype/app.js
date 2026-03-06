@@ -25,7 +25,6 @@ document.getElementById('searchForm').addEventListener('submit', async (e) => {
             return;
         }
 
-        // TODO: Style result cards in styles.css
         resultsEl.innerHTML = data.results.map(r => `
             <div class="result-card">
                 <h3><a href="${r.url}" target="_blank">${r.title}</a></h3>
