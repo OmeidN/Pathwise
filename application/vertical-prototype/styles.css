@@ -2,25 +2,23 @@
 /* Cielina: search form | Brandon: results */
 
 :root {
-  /* Colors — rooted in SFSU purple + gold */
-  --color-primary:        #6B2D8B;   /* SFSU purple */
-  --color-primary-hover:  #521F6C;
-  --color-primary-light:  #F5F0FA;
-  --color-accent:         #F0B429;   /* SFSU gold */
-  --color-accent-hover:   #D49B1A;
-  --color-secondary:      #6B7280;
-  --color-background:     #FAFAFA;
+  /* Colors — soft academic: off-white, forest green, dark teal */
+  --color-primary:        #4A7C6F;
+  --color-primary-hover:  #3A6A5E;
+  --color-primary-light:  #EEF3F1;
+  --color-secondary:      #7A9490;
+  --color-background:     #F7F8F6;
   --color-surface:        #FFFFFF;
-  --color-border:         #E9E4EE;   /* purple-tinted border */
-  --color-border-strong:  #2D1040;
-  --color-text:           #1A0A2E;   /* deep purple-black */
-  --color-text-muted:     #6B5F7A;
-  --color-text-subtle:    #A394B3;
-  --color-header-bg:      #2D1040;   /* deep SFSU-rooted header */
-  --color-header-text:    #FAF8FC;
-  --color-success:        #16A34A;
-  --color-warning:        #F0B429;
-  --color-danger:         #DC2626;
+  --color-border:         #E2E8E4;
+  --color-border-strong:  #1C2B2B;
+  --color-text:           #1C2B2B;
+  --color-text-muted:     #4A5E5C;
+  --color-text-subtle:    #8AA09E;
+  --color-header-bg:      #1C2B2B;
+  --color-header-text:    #F7F8F6;
+  --color-success:        #4A7C6F;
+  --color-warning:        #C9913A;
+  --color-danger:         #B94040;
 
   /* Typography */
   --font-family:          'Inter', sans-serif;
@@ -59,7 +57,7 @@
   --shadow-md:    0 4px 6px rgba(0, 0, 0, 0.07);
   --shadow-lg:    0 10px 25px rgba(0, 0, 0, 0.12);
   --shadow-card:  0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06);
-  --shadow-focus: 0 0 0 3px rgba(107, 45, 139, 0.2);
+  --shadow-focus: 0 0 0 3px rgba(74, 124, 111, 0.2);
 }
 
 /* Resets */
@@ -89,7 +87,7 @@ button, input, select { font-family: var(--font-family); }
 /* Header — Figma node 36:889 */
 #site-header {
   background-color: var(--color-header-bg);
-  border-bottom: 3px solid var(--color-accent);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.08);
   padding: var(--space-md) var(--space-xl);
   position: sticky;
   top: 0;
@@ -134,7 +132,7 @@ button, input, select { font-family: var(--font-family); }
 /* Cielina — search form */
 
 #search-section {
-  background: linear-gradient(135deg, var(--color-primary-light) 0%, #FAF7FC 100%);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, #F0F4F2 100%);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: var(--space-2xl);
