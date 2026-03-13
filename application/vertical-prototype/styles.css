@@ -340,11 +340,11 @@ button, input, select { font-family: var(--font-family); }
 }
 
 .guest-note p {
-  font-size: 0.75rem;
+  font-size: var(--font-size-nav);
   color: var(--color-text-subtle);
   line-height: 1.5;
 }
-}
+
 /* Brandon — results area */
 
 #results-section h2 {
