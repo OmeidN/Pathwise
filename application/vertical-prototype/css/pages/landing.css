@@ -1,0 +1,305 @@
+/* pages/landing.css — styles specific to landing.html */
+
+/* -------------------------------------------------------
+   Shared section layout
+------------------------------------------------------- */
+
+.section-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-3xl) var(--space-xl);
+  text-align: center;
+}
+
+.section-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+}
+
+.section-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2xl);
+}
+
+/* -------------------------------------------------------
+   Hero
+------------------------------------------------------- */
+
+.hero {
+  background-color: var(--color-header-bg);
+  padding: var(--space-3xl) var(--space-xl);
+}
+
+.hero-inner {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-header-text);
+  line-height: 1.2;
+  margin-bottom: var(--space-md);
+}
+
+.hero-subtitle {
+  font-size: var(--font-size-md);
+  color: var(--color-text-subtle);
+  line-height: var(--line-height);
+  margin-bottom: var(--space-xl);
+}
+
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* Override secondary button colors for dark hero background */
+.hero .btn-secondary {
+  color: var(--color-header-text);
+  border-color: var(--color-header-text);
+}
+
+.hero .btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* -------------------------------------------------------
+   Features — "What you can do"
+------------------------------------------------------- */
+
+.features {
+  background-color: var(--color-background);
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-lg);
+  text-align: left;
+}
+
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.feature-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.feature-card h3 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.feature-card p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: var(--line-height);
+}
+
+/* -------------------------------------------------------
+   Categories
+------------------------------------------------------- */
+
+.categories {
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+}
+
+.category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-lg) var(--space-md);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.category-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.category-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.category-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.category-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* -------------------------------------------------------
+   Guest vs Member tiers
+------------------------------------------------------- */
+
+.access-tiers {
+  background-color: var(--color-background);
+}
+
+.tiers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.tier-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* Featured tier gets a green left border accent */
+.tier-card--featured {
+  border-color: var(--color-primary);
+}
+
+.tier-label {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.tier-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  flex: 1;
+}
+
+.tier-item {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  padding-left: var(--space-md);
+  position: relative;
+}
+
+/* Checkmark for available features */
+.tier-item--yes::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--color-success);
+  font-weight: var(--font-weight-bold);
+}
+
+/* X for unavailable features */
+.tier-item--no::before {
+  content: "✗";
+  position: absolute;
+  left: 0;
+  color: var(--color-text-subtle);
+}
+
+.tier-item--no {
+  color: var(--color-text-subtle);
+}
+
+.tier-btn {
+  width: 100%;
+  text-align: center;
+}
+
+/* -------------------------------------------------------
+   Closing CTA banner
+------------------------------------------------------- */
+
+.cta-banner {
+  background-color: var(--color-header-bg);
+}
+
+.cta-inner {
+  text-align: center;
+}
+
+.cta-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-header-text);
+  margin-bottom: var(--space-sm);
+}
+
+.cta-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-subtle);
+  margin-bottom: var(--space-xl);
+}
+
+.cta-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* Override secondary button for dark background */
+.cta-banner .btn-secondary {
+  color: var(--color-header-text);
+  border-color: var(--color-header-text);
+}
+
+.cta-banner .btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* -------------------------------------------------------
+   Responsive
+------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .section-inner {
+    padding: var(--space-2xl) var(--space-md);
+  }
+
+  .hero-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tiers-grid {
+    grid-template-columns: 1fr;
+  }
+}
