@@ -10,8 +10,8 @@ function guestNavMarkup() {
 
 function authedNavMarkup(username) {
   return `
-    <a href="bookmarks.html" class="nav-link">Bookmarks</a>
-    <a href="profile.html" class="nav-link">Profile</a>
+  <a href="bookmarks.html" class="nav-link${currentPage === 'bookmarks' ? ' nav-link--active' : ''}">Bookmarks</a>
+    <a href="profile.html"   class="nav-link${currentPage === 'profile'   ? ' nav-link--active' : ''}">Profile</a>
     <span class="nav-user">${username}</span>
     <button type="button" class="nav-link nav-logout" id="logoutBtn">Logout</button>
   `;
