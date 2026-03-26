@@ -1,28 +1,25 @@
-/* pages/auth.css — login and register page styles */
-
-/* Centers the auth card on the page */
 .auth-page {
   min-height: 80vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-xl) var(--space-md);
+  background-color: var(--color-background);
 }
 
-/* The white card that holds the form */
 .auth-card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-2xl);
   width: 100%;
-  max-width: 420px;
-  box-shadow: var(--shadow-card);
+  max-width: 400px;
 }
 
 .auth-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
   color: var(--color-text);
   margin-bottom: var(--space-xs);
 }
@@ -31,16 +28,15 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   margin-bottom: var(--space-xl);
+  line-height: var(--line-height);
 }
 
-/* Stack form fields vertically */
 .auth-form {
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
 }
 
-/* Each label + input pair */
 .form-field {
   display: flex;
   flex-direction: column;
@@ -49,15 +45,14 @@
 
 .form-field label {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-muted);
+  font-weight: 600;
+  color: var(--color-text);
 }
 
-/* Submit button — full width */
 .auth-submit {
   width: 100%;
   padding: 11px;
-  margin-top: var(--space-sm);
+  margin-top: var(--space-xs);
   background-color: var(--color-primary);
   color: var(--color-surface);
   border: none;
@@ -72,7 +67,6 @@
   background-color: var(--color-primary-hover);
 }
 
-/* "Already have an account? Login" link below the form */
 .auth-footer {
   margin-top: var(--space-lg);
   text-align: center;
@@ -89,7 +83,7 @@
   text-decoration: underline;
 }
 
-/* Inline error banner — hidden by default, shown via JS with .is-visible */
+/* hidden by default, shown via JS when an error occurs */
 .auth-error {
   display: none;
   background-color: var(--color-danger-soft);
@@ -98,6 +92,7 @@
   padding: var(--space-sm) var(--space-md);
   font-size: var(--font-size-sm);
   color: var(--color-danger);
+  margin-bottom: var(--space-sm);
 }
 
 .auth-error.is-visible {

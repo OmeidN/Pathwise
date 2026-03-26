@@ -1,8 +1,3 @@
-/**
- * MySQL connection pool for Pathwise backend.
- * Uses mysql2 with environment variables. Load dotenv in server.js before requiring this.
- */
-
 const mysql = require('mysql2/promise');
 
 const config = {
@@ -22,10 +17,7 @@ if (!config.user || !config.password) {
 
 let pool = null;
 
-/**
- * Get the shared connection pool. Creates it on first call.
- * @returns {mysql.Pool}
- */
+// returns the shared pool, creating it on first call
 function getPool() {
   if (!pool) {
     pool = mysql.createPool(config);
@@ -33,10 +25,7 @@ function getPool() {
   return pool;
 }
 
-/**
- * Run a simple query to verify the database connection.
- * @returns {Promise<{ ok: boolean, message?: string, error?: string }>}
- */
+// runs SELECT 1 to verify the connection is alive
 async function testConnection() {
   const p = getPool();
   try {
@@ -50,18 +39,11 @@ async function testConnection() {
   }
 }
 
-/**
- * Fetch rows from Resources for db-test endpoint (resource_id, title, LIMIT 5).
- * @returns {Promise<Array>}
- */
+// used by /api/db-test to confirm the Resources table is readable
 async function getResourcesSample() {
   const p = getPool();
   const [rows] = await p.query('SELECT resource_id, title FROM Resources LIMIT 5');
   return rows;
 }
 
-module.exports = {
-  getPool,
-  testConnection,
-  getResourcesSample
-};
+module.exports = { getPool, testConnection, getResourcesSample };

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pathwise - Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/components.css">
@@ -82,7 +82,6 @@
         const form = document.getElementById('loginForm');
         const errorBox = document.getElementById('loginError');
 
-        // Helper to show/hide the error banner
         function showError(message) {
             errorBox.textContent = message;
             errorBox.classList.add('is-visible');
@@ -100,15 +99,12 @@
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
-            // Basic client-side check before hitting the server
             if (!email || !password) {
                 showError('Please fill in all fields.');
                 return;
             }
 
             try {
-                // TODO (F2): backend B1 still needs to provide POST /api/login.
-                // This request is wired now so frontend can be tested as soon as the route lands.
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -122,9 +118,7 @@
                     return;
                 }
 
-                // Login worked — go back to home
                 window.location.href = 'index.html';
-
             } catch (err) {
                 showError('Something went wrong. Please try again.');
             }

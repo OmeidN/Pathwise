@@ -18,81 +18,52 @@ function authedNavMarkup(username) {
 }
 
 function renderGuestNav() {
-  if (!navAuth) {
-    return;
-  }
-
+  if (!navAuth) return;
   navAuth.dataset.authState = 'guest';
   navAuth.innerHTML = guestNavMarkup();
 }
 
 function renderAuthedNav(user) {
-  if (!navAuth) {
-    return;
-  }
+  if (!navAuth) return;
 
   const username = user.username || user.name || 'Account';
-
   navAuth.dataset.authState = 'authenticated';
   navAuth.innerHTML = authedNavMarkup(username);
 
   const logoutBtn = document.getElementById('logoutBtn');
-
-  if (!logoutBtn) {
-    return;
-  }
+  if (!logoutBtn) return;
 
   logoutBtn.addEventListener('click', async () => {
     try {
-      // TODO (F4): enable once backend B1 adds POST /api/logout.
-      const response = await fetch('/api/logout', {
-        method: 'POST',
-        credentials: 'same-origin'
-      });
-
-      if (!response.ok) {
-        throw new Error('Logout failed.');
-      }
-
+      const response = await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' });
+      if (!response.ok) throw new Error('Logout failed.');
       renderGuestNav();
       window.location.href = 'index.html';
     } catch (error) {
-      console.warn('Logout route is not available yet.', error);
+      console.warn('Logout error:', error);
     }
   });
 }
 
 async function loadAuthState() {
-  if (!navAuth) {
-    return;
-  }
+  if (!navAuth) return;
 
-  renderGuestNav();
+  renderGuestNav(); // default to guest until /api/me responds
 
   try {
-    // TODO (F4): backend B8 still needs to provide GET /api/me.
-    const response = await fetch('/api/me', {
-      credentials: 'same-origin'
-    });
+    const response = await fetch('/api/me', { credentials: 'same-origin' });
 
-    if (response.status === 401 || response.status === 404) {
-      return;
-    }
-
-    if (!response.ok) {
-      throw new Error('Could not load auth state.');
-    }
+    if (response.status === 401 || response.status === 404) return;
+    if (!response.ok) throw new Error('Could not load auth state.');
 
     const data = await response.json();
     const user = data.user || data;
 
-    if (!user || (!user.username && !user.name)) {
-      return;
-    }
+    if (!user || (!user.username && !user.name)) return;
 
     renderAuthedNav(user);
   } catch (error) {
-    console.warn('Auth state is not available yet.', error);
+    console.warn('Auth state unavailable:', error);
   }
 }
 
