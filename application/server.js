@@ -6,16 +6,46 @@
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const express = require('express');
+const session = require('express-session');
 const path = require('path');
 const db = require('./db/connection');
+
+const authRoutes = require('./routes/auth');
+const bookmarkRoutes = require('./routes/bookmarks');
+const resourceRoutes = require('./routes/resources');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Static files (HTML, CSS, etc.) from application directory
-app.use(express.static(path.join(__dirname)));
+app.set('trust proxy', 1);
 
-// GET /api/db-test - simple DB test: run SELECT resource_id, title FROM Resources LIMIT 5
+app.use(express.json());
+
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret || sessionSecret.length < 16) {
+  console.warn('[session] SESSION_SECRET missing or short; set a long random value in .env for production.');
+}
+
+app.use(
+  session({
+    secret: sessionSecret || 'pathwise-dev-only-not-for-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: process.env.COOKIE_SECURE === 'true'
+    }
+  })
+);
+
+// API routes (before static so /api/* is never treated as a static file)
+app.use('/api', authRoutes);
+app.use('/api', bookmarkRoutes);
+app.use('/api', resourceRoutes);
+
+// GET /api/db-test - simple DB test
 app.get('/api/db-test', async (req, res) => {
   try {
     const connectionTest = await db.testConnection();
@@ -40,27 +70,48 @@ app.get('/api/db-test', async (req, res) => {
   }
 });
 
-// GET /api/search?q=...&category=... - keyword (LIKE) and category_id filter, parameterized
+// GET /api/search?q=...&category=...&tags=1,2&cost=free|paid
 app.get('/api/search', async (req, res) => {
   try {
     const pool = db.getPool();
     const q = (req.query.q || '').trim();
     const category = (req.query.category || '').trim();
+    const tagsParam = (req.query.tags || '').trim();
+    const cost = (req.query.cost || '').trim();
 
-    let sql = 'SELECT resource_id, title, description, url, category_id, image_path FROM Resources WHERE 1=1';
+    let sql = `SELECT resource_id, title, description, url, category_id, image_path, cost
+               FROM Resources r
+               WHERE 1=1`;
     const params = [];
 
     if (q) {
-      sql += ' AND (title LIKE ? OR description LIKE ?)';
+      sql += ' AND (r.title LIKE ? OR r.description LIKE ?)';
       const term = `%${q}%`;
       params.push(term, term);
     }
     if (category) {
-      sql += ' AND category_id = ?';
+      sql += ' AND r.category_id = ?';
       params.push(category);
     }
 
-    sql += ' ORDER BY title';
+    if (tagsParam) {
+      const tagIds = tagsParam
+        .split(',')
+        .map((s) => parseInt(s.trim(), 10))
+        .filter((n) => !Number.isNaN(n) && n > 0);
+      if (tagIds.length > 0) {
+        const ph = tagIds.map(() => '?').join(',');
+        sql += ` AND r.resource_id IN (SELECT resource_id FROM ResourceTags WHERE tag_id IN (${ph}))`;
+        params.push(...tagIds);
+      }
+    }
+
+    if (cost && cost !== 'all') {
+      sql += ' AND r.cost = ?';
+      params.push(cost);
+    }
+
+    sql += ' ORDER BY r.title';
 
     const [rows] = await pool.query(sql, params);
     res.json({ success: true, results: rows });
@@ -68,6 +119,9 @@ app.get('/api/search', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+// Static files (HTML, CSS, etc.) from application directory
+app.use(express.static(path.join(__dirname)));
 
 // Start server and run startup DB check (errors logged, server does not crash)
 app.listen(PORT, async () => {

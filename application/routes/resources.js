@@ -1,0 +1,159 @@
+/**
+ * Single resource fetch and create (submit). Requires auth for POST.
+ */
+
+const express = require('express');
+const db = require('../db/connection');
+const { requireAuth } = require('../middleware/requireAuth');
+
+const router = express.Router();
+
+router.get('/resources/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id) || id < 1) {
+      return res.status(400).json({ success: false, error: 'Invalid resource id' });
+    }
+
+    const pool = db.getPool();
+    const [rows] = await pool.query(
+      `SELECT r.resource_id, r.title, r.description, r.url, r.image_path, r.category_id,
+              r.submitted_by, r.cost, r.is_ai_enabled, r.visibility, r.created_at,
+              c.category_name
+       FROM Resources r
+       LEFT JOIN Categories c ON c.category_id = r.category_id
+       WHERE r.resource_id = ?
+       LIMIT 1`,
+      [id]
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({ success: false, error: 'Resource not found' });
+    }
+
+    const resource = rows[0];
+    const [tagRows] = await pool.query(
+      `SELECT t.tag_id, t.tag_name
+       FROM ResourceTags rt
+       JOIN Tags t ON t.tag_id = rt.tag_id
+       WHERE rt.resource_id = ?
+       ORDER BY t.tag_name`,
+      [id]
+    );
+
+    resource.tags = tagRows;
+    res.json({ success: true, resource });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post('/resources', requireAuth, async (req, res) => {
+  const {
+    title,
+    description,
+    url,
+    category_id: categoryIdRaw,
+    cost,
+    tags: tagIdsRaw,
+    visibility: visRaw
+  } = req.body || {};
+
+  if (!title || !description || categoryIdRaw === undefined || categoryIdRaw === null || categoryIdRaw === '') {
+    return res.status(400).json({
+      success: false,
+      error: 'title, description, and category_id are required'
+    });
+  }
+
+  const categoryId = parseInt(categoryIdRaw, 10);
+  if (Number.isNaN(categoryId)) {
+    return res.status(400).json({ success: false, error: 'Invalid category_id' });
+  }
+
+  const titleStr = String(title).trim();
+  const descStr = String(description).trim();
+  const urlStr = url != null && String(url).trim() !== '' ? String(url).trim() : null;
+  const costStr = cost != null && String(cost).trim() !== '' ? String(cost).trim().slice(0, 32) : null;
+  const visibility = visRaw === 'private' ? 'private' : 'public';
+
+  if (titleStr.length < 1 || titleStr.length > 255) {
+    return res.status(400).json({ success: false, error: 'Invalid title' });
+  }
+
+  let tagIds = [];
+  if (Array.isArray(tagIdsRaw)) {
+    tagIds = tagIdsRaw.map((t) => parseInt(t, 10)).filter((n) => !Number.isNaN(n) && n > 0);
+  } else if (typeof tagIdsRaw === 'string' && tagIdsRaw.trim()) {
+    tagIds = tagIdsRaw
+      .split(',')
+      .map((s) => parseInt(s.trim(), 10))
+      .filter((n) => !Number.isNaN(n) && n > 0);
+  }
+
+  const conn = await db.getPool().getConnection();
+  try {
+    const [catCheck] = await conn.query('SELECT category_id FROM Categories WHERE category_id = ? LIMIT 1', [
+      categoryId
+    ]);
+    if (!catCheck.length) {
+      return res.status(400).json({ success: false, error: 'Invalid category_id' });
+    }
+
+    if (tagIds.length > 0) {
+      const [existing] = await conn.query(
+        `SELECT tag_id FROM Tags WHERE tag_id IN (${tagIds.map(() => '?').join(',')})`,
+        tagIds
+      );
+      const valid = new Set(existing.map((r) => r.tag_id));
+      tagIds = tagIds.filter((id) => valid.has(id));
+    }
+
+    await conn.beginTransaction();
+
+    const [insertResult] = await conn.query(
+      `INSERT INTO Resources
+        (title, description, url, image_path, category_id, submitted_by, cost, is_ai_enabled, visibility)
+       VALUES (?, ?, ?, NULL, ?, ?, ?, 0, ?)`,
+      [titleStr, descStr, urlStr, categoryId, req.session.userId, costStr, visibility]
+    );
+
+    const resourceId = insertResult.insertId;
+
+    for (const tid of tagIds) {
+      await conn.query('INSERT INTO ResourceTags (resource_id, tag_id) VALUES (?, ?)', [resourceId, tid]);
+    }
+
+    await conn.commit();
+
+    const [created] = await conn.query(
+      `SELECT r.resource_id, r.title, r.description, r.url, r.image_path, r.category_id,
+              r.submitted_by, r.cost, r.visibility, r.created_at, c.category_name
+       FROM Resources r
+       LEFT JOIN Categories c ON c.category_id = r.category_id
+       WHERE r.resource_id = ?`,
+      [resourceId]
+    );
+
+    const resource = created[0];
+    const [tagRows] = await conn.query(
+      `SELECT t.tag_id, t.tag_name FROM ResourceTags rt
+       JOIN Tags t ON t.tag_id = rt.tag_id WHERE rt.resource_id = ?`,
+      [resourceId]
+    );
+    resource.tags = tagRows;
+
+    res.status(201).json({ success: true, resource });
+  } catch (err) {
+    try {
+      await conn.rollback();
+    } catch (_) {
+      /* ignore */
+    }
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    conn.release();
+  }
+});
+
+module.exports = router;
