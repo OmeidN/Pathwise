@@ -2,114 +2,45 @@ require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const express = require('express');
 const session = require('express-session');
-const bcrypt  = require('bcryptjs');
-const path    = require('path');
-const db      = require('./db/connection');
+const path = require('path');
+const db = require('./db/connection');
 
-const app  = express();
+const authRoutes = require('./routes/auth');
+const bookmarkRoutes = require('./routes/bookmarks');
+const resourceRoutes = require('./routes/resources');
+
+const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set('trust proxy', 1);
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'pathwise-dev-secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 } // 7 days
-}));
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret || sessionSecret.length < 16) {
+  console.warn('[session] SESSION_SECRET missing or short; set a long random value in .env for production.');
+}
 
-// serve landing page at root
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'vertical-prototype', 'landing.html'));
-});
-
-app.use(express.static(path.join(__dirname)));
-
-// POST /api/register — creates a new user
-// expects: { username, email, password }
-// assumes Users table: user_id, username, email, password_hash
-app.post('/api/register', async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
-
-    if (!username || !email || !password) {
-      return res.status(400).json({ success: false, error: 'All fields are required.' });
+app.use(
+  session({
+    secret: sessionSecret || 'pathwise-dev-only-not-for-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: process.env.COOKIE_SECURE === 'true'
     }
+  })
+);
 
-    if (password.length < 8) {
-      return res.status(400).json({ success: false, error: 'Password must be at least 8 characters.' });
-    }
+// API routes (before static so /api/* is never treated as a static file)
+app.use('/api', authRoutes);
+app.use('/api', bookmarkRoutes);
+app.use('/api', resourceRoutes);
 
-    const pool = db.getPool();
-
-    const [existing] = await pool.query('SELECT user_id FROM Users WHERE email = ?', [email]);
-    if (existing.length > 0) {
-      return res.status(409).json({ success: false, error: 'An account with that email already exists.' });
-    }
-
-    const passwordHash = await bcrypt.hash(password, 12);
-    await pool.query(
-      'INSERT INTO Users (username, email, password_hash) VALUES (?, ?, ?)',
-      [username, email, passwordHash]
-    );
-
-    res.status(201).json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// POST /api/login — verifies credentials and sets session
-// expects: { email, password }
-app.post('/api/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ success: false, error: 'Email and password are required.' });
-    }
-
-    const pool = db.getPool();
-    const [rows] = await pool.query(
-      'SELECT user_id, username, email, password_hash FROM Users WHERE email = ?',
-      [email]
-    );
-
-    if (rows.length === 0) {
-      return res.status(401).json({ success: false, error: 'Invalid email or password.' });
-    }
-
-    const user = rows[0];
-    const match = await bcrypt.compare(password, user.password_hash);
-
-    if (!match) {
-      return res.status(401).json({ success: false, error: 'Invalid email or password.' });
-    }
-
-    req.session.user = { id: user.user_id, username: user.username, email: user.email };
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// GET /api/me — returns logged-in user or 401
-app.get('/api/me', (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).json({ success: false, error: 'Not authenticated.' });
-  }
-  res.json({ success: true, user: req.session.user });
-});
-
-// POST /api/logout — destroys session
-app.post('/api/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.json({ success: true });
-  });
-});
-
-// GET /api/db-test — verifies DB connection and returns a sample
+// GET /api/db-test - simple DB test
 app.get('/api/db-test', async (req, res) => {
   try {
     const connectionTest = await db.testConnection();
@@ -127,27 +58,48 @@ app.get('/api/db-test', async (req, res) => {
   }
 });
 
-// GET /api/search?q=...&category=... — keyword and category filter
+// GET /api/search?q=...&category=...&tags=1,2&cost=free|paid
 app.get('/api/search', async (req, res) => {
   try {
     const pool = db.getPool();
     const q        = (req.query.q        || '').trim();
     const category = (req.query.category || '').trim();
+    const tagsParam = (req.query.tags || '').trim();
+    const cost = (req.query.cost || '').trim();
 
-    let sql = 'SELECT resource_id, title, description, url, category_id, image_path FROM Resources WHERE 1=1';
+    let sql = `SELECT resource_id, title, description, url, category_id, image_path, cost
+               FROM Resources r
+               WHERE 1=1`;
     const params = [];
 
     if (q) {
-      sql += ' AND (title LIKE ? OR description LIKE ?)';
+      sql += ' AND (r.title LIKE ? OR r.description LIKE ?)';
       const term = `%${q}%`;
       params.push(term, term);
     }
     if (category) {
-      sql += ' AND category_id = ?';
+      sql += ' AND r.category_id = ?';
       params.push(category);
     }
 
-    sql += ' ORDER BY title';
+    if (tagsParam) {
+      const tagIds = tagsParam
+        .split(',')
+        .map((s) => parseInt(s.trim(), 10))
+        .filter((n) => !Number.isNaN(n) && n > 0);
+      if (tagIds.length > 0) {
+        const ph = tagIds.map(() => '?').join(',');
+        sql += ` AND r.resource_id IN (SELECT resource_id FROM ResourceTags WHERE tag_id IN (${ph}))`;
+        params.push(...tagIds);
+      }
+    }
+
+    if (cost && cost !== 'all') {
+      sql += ' AND r.cost = ?';
+      params.push(cost);
+    }
+
+    sql += ' ORDER BY r.title';
 
     const [rows] = await pool.query(sql, params);
     res.json({ success: true, results: rows });
@@ -156,6 +108,10 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
+// Static files (HTML, CSS, etc.) from application directory
+app.use(express.static(path.join(__dirname)));
+
+// Start server and run startup DB check (errors logged, server does not crash)
 app.listen(PORT, async () => {
   console.log(`Pathwise server listening on port ${PORT}`);
 

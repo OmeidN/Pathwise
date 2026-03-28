@@ -35,7 +35,7 @@ function renderAuthedNav(user) {
 
   logoutBtn.addEventListener('click', async () => {
     try {
-      const response = await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' });
+      const response = await fetch('/api/logout', { method: 'POST', credentials: 'include' });
       if (!response.ok) throw new Error('Logout failed.');
       renderGuestNav();
       window.location.href = 'index.html';
@@ -51,7 +51,7 @@ async function loadAuthState() {
   renderGuestNav(); // default to guest until /api/me responds
 
   try {
-    const response = await fetch('/api/me', { credentials: 'same-origin' });
+    const response = await fetch('/api/me', { credentials: 'include' });
 
     if (response.status === 401 || response.status === 404) return;
     if (!response.ok) throw new Error('Could not load auth state.');
