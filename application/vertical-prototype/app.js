@@ -44,7 +44,7 @@ document.getElementById("searchForm").addEventListener("submit", async (e) => {
       .map(
         (r) => `
             <div class="result-card">
-                <h3><a href="${r.url}" target="_blank">${r.title}</a></h3>
+                <h3><a href="resource.html?id=${r.resource_id}">${r.title}</a></h3>
                 <p>${r.description || ""}</p>
             </div>
         `,
