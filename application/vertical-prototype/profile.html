@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile — Pathwise</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/pages/profile.css" />
+</head>
+<body data-page="profile">
+
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="landing.html" class="site-title">Pathwise</a>
+      <nav id="main-nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link">Browse</a>
+        <a href="submit.html" class="nav-link">Submit Resource</a>
+        <div id="nav-auth"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="profile-main">
+    <div class="profile-inner">
+
+      <!-- Error banner — hidden until needed -->
+      <div id="profile-error" class="profile-error" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="profile-error-msg">Could not load profile.</span>
+      </div>
+
+      <div class="profile-layout">
+
+        <!-- Left: user info card -->
+        <aside class="profile-sidebar">
+          <div class="card profile-card" id="profile-card">
+            <!-- Skeleton shown while loading -->
+            <div class="skeleton-block skeleton-avatar"></div>
+            <div class="skeleton-block skeleton-name"></div>
+            <div class="skeleton-block skeleton-email"></div>
+          </div>
+        </aside>
+
+        <!-- Right: submitted resources -->
+        <section class="profile-content">
+          <h2 class="profile-section-title">Submitted Resources</h2>
+          <div id="submitted-results"></div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <script src="nav.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>

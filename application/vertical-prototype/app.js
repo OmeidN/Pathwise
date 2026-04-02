@@ -1,3 +1,4 @@
+
 document.getElementById("searchForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -6,7 +7,13 @@ document.getElementById("searchForm").addEventListener("submit", async (e) => {
   const category = document.getElementById("category").value;
   const resultsEl = document.getElementById("results");
 
-  resultsEl.innerHTML = "<p>Searching...</p>";
+  resultsEl.innerHTML = Array.from({ length: 6 }).map(() => `
+  <div class="result-card result-card--skeleton">
+    <div class="skeleton-block skeleton-title"></div>
+    <div class="skeleton-block skeleton-line"></div>
+    <div class="skeleton-block skeleton-line skeleton-line--short"></div>
+    </div>
+`).join('');
 
   // Basic client-side validation
   try {
@@ -25,7 +32,10 @@ document.getElementById("searchForm").addEventListener("submit", async (e) => {
 
     // Handle no results
     if (data.results.length === 0) {
-      resultsEl.innerHTML = "<p>No results found.</p>";
+      resultsEl.innerHTML = `
+      <div class="results-empty">
+      <p>No resources match your filters. Try adjusting your search.</p>
+      </div>`;
       return;
     }
 
@@ -34,7 +44,7 @@ document.getElementById("searchForm").addEventListener("submit", async (e) => {
       .map(
         (r) => `
             <div class="result-card">
-                <h3><a href="${r.url}" target="_blank">${r.title}</a></h3>
+                <h3><a href="resource.html?id=${r.resource_id}">${r.title}</a></h3>
                 <p>${r.description || ""}</p>
             </div>
         `,
@@ -46,3 +56,18 @@ document.getElementById("searchForm").addEventListener("submit", async (e) => {
     resultsEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
   }
 });
+
+// ADDED 3/26 — wire cost dropdown and tag checkboxes to re-submit the form
+const costFilter = document.getElementById("cost-filter");
+if (costFilter) {
+  costFilter.addEventListener("change", () => {
+    document.getElementById("searchForm").dispatchEvent(new Event("submit"));
+  });
+}
+
+document.querySelectorAll('input[type="checkbox"][data-tag]')
+  .forEach(cb => {
+    cb.addEventListener("change", () => {
+      document.getElementById("searchForm").dispatchEvent(new Event("submit"));
+    });
+  });

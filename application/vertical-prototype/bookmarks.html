@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bookmarks — Pathwise</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/pages/bookmarks.css" />
+</head>
+<body data-page="bookmarks">
+
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="landing.html" class="site-title">Pathwise</a>
+      <nav id="main-nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link">Browse</a>
+        <a href="submit.html" class="nav-link">Submit Resource</a>
+        <div id="nav-auth"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="bookmarks-main">
+    <div class="bookmarks-inner">
+
+      <div class="bookmarks-header">
+        <h1>Bookmarks</h1>
+        <span id="bookmark-count" class="bookmark-count-badge" hidden></span>
+      </div>
+
+      <!-- Error banner — hidden until needed -->
+      <div id="bookmarks-error" class="bookmarks-error" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="bookmarks-error-msg">Could not load bookmarks.</span>
+      </div>
+
+      <!-- Populated by bookmarks.js -->
+      <div id="bookmarks-results"></div>
+
+    </div>
+  </main>
+
+  <script src="nav.js"></script>
+  <script src="js/bookmarks.js"></script>
+</body>
+</html>

@@ -1,8 +1,3 @@
-/**
- * Pathwise backend - Express server with MySQL (RDS).
- * Load .env from the application directory (where server.js lives).
- */
-
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const express = require('express');
@@ -57,16 +52,9 @@ app.get('/api/db-test', async (req, res) => {
       });
     }
     const sample = await db.getResourcesSample();
-    res.json({
-      success: true,
-      database: connectionTest.message,
-      resourcesSample: sample
-    });
+    res.json({ success: true, database: connectionTest.message, resourcesSample: sample });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: err.message
-    });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -74,7 +62,7 @@ app.get('/api/db-test', async (req, res) => {
 app.get('/api/search', async (req, res) => {
   try {
     const pool = db.getPool();
-    const q = (req.query.q || '').trim();
+    const q        = (req.query.q        || '').trim();
     const category = (req.query.category || '').trim();
     const tagsParam = (req.query.tags || '').trim();
     const cost = (req.query.cost || '').trim();
@@ -132,9 +120,9 @@ app.listen(PORT, async () => {
     if (connectionTest.ok) {
       console.log('[startup]', connectionTest.message);
       const sample = await db.getResourcesSample();
-      console.log('[startup] Resources table read OK, sample count:', sample.length);
+      console.log('[startup] Resources sample count:', sample.length);
     } else {
-      console.error('[startup] Database connection failed:', connectionTest.error || connectionTest.message);
+      console.error('[startup] DB connection failed:', connectionTest.error || connectionTest.message);
     }
   } catch (e) {
     console.error('[startup] Could not read Resources:', e.message);
