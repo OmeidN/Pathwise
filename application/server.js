@@ -83,14 +83,43 @@ app.get('/api/search', async (req, res) => {
     }
 
     if (tagsParam) {
-      const tagIds = tagsParam
+      const rawTags = tagsParam
         .split(',')
-        .map((s) => parseInt(s.trim(), 10))
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      const tagIds = rawTags
+        .map((s) => parseInt(s, 10))
         .filter((n) => !Number.isNaN(n) && n > 0);
-      if (tagIds.length > 0) {
-        const ph = tagIds.map(() => '?').join(',');
-        sql += ` AND r.resource_id IN (SELECT resource_id FROM ResourceTags WHERE tag_id IN (${ph}))`;
-        params.push(...tagIds);
+
+      const tagSlugs = rawTags
+        .filter((s) => Number.isNaN(parseInt(s, 10)))
+        .map((s) => s.toLowerCase());
+
+      if (tagIds.length > 0 || tagSlugs.length > 0) {
+        const tagFilters = [];
+
+        if (tagIds.length > 0) {
+          tagFilters.push(`tag_id IN (${tagIds.map(() => '?').join(',')})`);
+          params.push(...tagIds);
+        }
+
+        if (tagSlugs.length > 0) {
+          tagFilters.push(
+            `LOWER(REPLACE(tag_name, ' ', '-')) IN (${tagSlugs.map(() => '?').join(',')})`
+          );
+          params.push(...tagSlugs);
+        }
+
+        sql += ` AND r.resource_id IN (
+          SELECT resource_id
+          FROM ResourceTags
+          WHERE tag_id IN (
+            SELECT tag_id
+            FROM Tags
+            WHERE ${tagFilters.join(' OR ')}
+          )
+        )`;
       }
     }
 

@@ -18,8 +18,14 @@ document.getElementById("searchForm").addEventListener("submit", async (e) => {
   // Basic client-side validation
   try {
     const params = new URLSearchParams();
+    const selectedTags = Array.from(document.querySelectorAll('input[type="checkbox"][data-tag]:checked'))
+      .map((checkbox) => checkbox.value);
+    const cost = document.getElementById("cost-filter")?.value || "";
+
     if (q) params.append("q", q);
     if (category) params.append("category", category);
+    if (selectedTags.length > 0) params.append("tags", selectedTags.join(","));
+    if (cost) params.append("cost", cost);
 
     const response = await fetch(`/api/search?${params.toString()}`);
     const data = await response.json();
@@ -46,6 +52,9 @@ document.getElementById("searchForm").addEventListener("submit", async (e) => {
             <div class="result-card">
                 <h3><a href="resource.html?id=${r.resource_id}">${r.title}</a></h3>
                 <p>${r.description || ""}</p>
+                <div class="result-card-actions">
+                  <a href="resource.html?id=${r.resource_id}" class="btn btn-secondary result-card-link">View Details</a>
+                </div>
             </div>
         `,
       )
