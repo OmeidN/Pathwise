@@ -8,6 +8,10 @@ const db = require('./db/connection');
 const authRoutes = require('./routes/auth');
 const bookmarkRoutes = require('./routes/bookmarks');
 const resourceRoutes = require('./routes/resources');
+const goalsRoutes = require('./routes/goals');
+const projectsRoutes = require('./routes/projects');
+const milestonesRoutes = require('./routes/milestones');
+const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,6 +43,10 @@ app.use(
 app.use('/api', authRoutes);
 app.use('/api', bookmarkRoutes);
 app.use('/api', resourceRoutes);
+app.use('/api', goalsRoutes);
+app.use('/api', projectsRoutes);
+app.use('/api', milestonesRoutes);
+app.use('/api', dashboardRoutes);
 
 // GET /api/db-test - simple DB test
 app.get('/api/db-test', async (req, res) => {
@@ -71,6 +79,13 @@ app.get('/api/search', async (req, res) => {
                FROM Resources r
                WHERE 1=1`;
     const params = [];
+
+    if (q && !/^[a-z0-9 ]{1,40}$/i.test(q)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Search query must be 1-40 characters and use only letters, numbers, and spaces'
+      });
+    }
 
     if (q) {
       sql += ' AND (r.title LIKE ? OR r.description LIKE ?)';

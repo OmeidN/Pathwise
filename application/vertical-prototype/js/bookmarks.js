@@ -4,6 +4,10 @@
   const errorMsg = document.getElementById('bookmarks-error-msg');
   const countBadge = document.getElementById('bookmark-count');
 
+  // Clear stale error state before each load attempt.
+  errorBanner.hidden = true;
+  errorMsg.textContent = '';
+
   // Show skeleton while fetching
   resultsEl.innerHTML = skeletonGrid();
 
@@ -17,6 +21,8 @@
     const data = await res.json();
     if (!data.success) throw new Error(data.message || 'Could not load bookmarks.');
     bookmarks = data.results ?? [];
+    errorBanner.hidden = true;
+    errorMsg.textContent = '';
   } catch (err) {
     resultsEl.innerHTML = '';
     errorMsg.textContent = err.message || 'Could not load bookmarks.';

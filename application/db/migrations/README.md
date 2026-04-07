@@ -1,5 +1,30 @@
 # Database migrations (Pathwise)
 
+Run these in order from the `application/db/migrations` directory on EC2:
+
+1. `001_m3_users_bookmarks.sql`
+2. `002_m3_goals_projects_milestones.sql`
+3. `003_m3_seed_demo.sql` (optional demo data)
+
+Example:
+
+```bash
+cd /var/www/html/db/migrations
+mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p "$DB_NAME" < 001_m3_users_bookmarks.sql
+mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p "$DB_NAME" < 002_m3_goals_projects_milestones.sql
+mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p "$DB_NAME" < 003_m3_seed_demo.sql
+```
+
+Verify:
+
+```sql
+SHOW TABLES;
+DESCRIBE Goals;
+DESCRIBE Projects;
+DESCRIBE Milestones;
+```
+# Database migrations (Pathwise)
+
 ## M3 — `001_m3_users_bookmarks.sql`
 
 Creates:

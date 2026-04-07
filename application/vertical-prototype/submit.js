@@ -3,6 +3,17 @@ const submitButton = document.getElementById('submitButton');
 const submitError = document.getElementById('submit-error');
 const submitSuccess = document.getElementById('submit-success');
 
+(async function requireAuthForSubmitPage() {
+  try {
+    const response = await fetch('/api/me', { credentials: 'include' });
+    if (response.status === 401) {
+      window.location.href = 'login.html';
+    }
+  } catch (_) {
+    // ignore transient check failures
+  }
+})();
+
 function showSubmitMessage(element, message) {
   submitError.hidden = true;
   submitSuccess.hidden = true;

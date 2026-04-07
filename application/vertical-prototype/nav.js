@@ -10,6 +10,7 @@ function guestNavMarkup() {
 
 function authedNavMarkup(username) {
   return `
+  <a href="dashboard.html" class="nav-link${currentPage === 'dashboard' ? ' nav-link--active' : ''}">Dashboard</a>
   <a href="bookmarks.html" class="nav-link${currentPage === 'bookmarks' ? ' nav-link--active' : ''}">Bookmarks</a>
     <a href="profile.html"   class="nav-link${currentPage === 'profile'   ? ' nav-link--active' : ''}">Profile</a>
     <span class="nav-user">${username}</span>
@@ -38,7 +39,7 @@ function renderAuthedNav(user) {
       const response = await fetch('/api/logout', { method: 'POST', credentials: 'include' });
       if (!response.ok) throw new Error('Logout failed.');
       renderGuestNav();
-      window.location.href = 'index.html';
+      window.location.href = 'landing.html';
     } catch (error) {
       console.warn('Logout error:', error);
     }

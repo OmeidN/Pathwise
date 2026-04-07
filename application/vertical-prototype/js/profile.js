@@ -1,6 +1,7 @@
 (async () => {
   const profileCard = document.getElementById('profile-card');
   const submittedEl = document.getElementById('submitted-results');
+  const savedEl = document.getElementById('saved-results');
   const errorBanner = document.getElementById('profile-error');
   const errorMsg = document.getElementById('profile-error-msg');
 
@@ -9,20 +10,24 @@
 
   let user;
   let submissions;
+  let saved;
   try {
-    const [meRes, subRes] = await Promise.all([
+    const [meRes, subRes, savedRes] = await Promise.all([
       fetch('/api/me', { credentials: 'include' }),
       fetch('/api/me/submissions', { credentials: 'include' }),
+      fetch('/api/bookmarks', { credentials: 'include' }),
     ]);
-    if (meRes.status === 401 || subRes.status === 401) {
+    if (meRes.status === 401 || subRes.status === 401 || savedRes.status === 401) {
       window.location.href = 'login.html';
       return;
     }
-    const [meData, subData] = await Promise.all([meRes.json(), subRes.json()]);
+    const [meData, subData, savedData] = await Promise.all([meRes.json(), subRes.json(), savedRes.json()]);
     if (!meData.success) throw new Error(meData.message || 'Could not load profile.');
     if (!subData.success) throw new Error(subData.message || 'Could not load submissions.');
+    if (!savedData.success) throw new Error(savedData.message || 'Could not load saved resources.');
     user = meData.user;
     submissions = subData.results ?? [];
+    saved = savedData.results ?? [];
   } catch (err) {
     submittedEl.innerHTML = '';
     errorMsg.textContent = err.message || 'Could not load profile.';
@@ -41,6 +46,10 @@
         <span class="profile-stat__value">${submissions.length}</span>
         <span class="profile-stat__label">Submitted</span>
       </div>
+      <div class="profile-stat">
+        <span class="profile-stat__value">${saved.length}</span>
+        <span class="profile-stat__label">Saved</span>
+      </div>
     </div>`;
 
   if (submissions.length === 0) {
@@ -56,6 +65,12 @@
     <div class="submitted-list">
       ${submissions.map(buildRow).join('')}
     </div>`;
+
+  if (saved.length === 0) {
+    savedEl.innerHTML = `<div class="submitted-empty"><p class="submitted-empty__message">No saved resources yet.</p></div>`;
+  } else {
+    savedEl.innerHTML = `<div class="submitted-list">${saved.map(buildSavedRow).join('')}</div>`;
+  }
 })();
 
 function buildRow(r) {
@@ -92,6 +107,16 @@ function skeletonList() {
       </div>
     </div>`).join('');
   return `<div class="submitted-list">${rows}</div>`;
+}
+
+function buildSavedRow(r) {
+  return `
+    <div class="submitted-row">
+      <div class="submitted-row__body">
+        <p class="submitted-row__title"><a href="resource.html?id=${r.resource_id}">${esc(r.title)}</a></p>
+        <p class="submitted-row__meta">${esc(r.description || '')}</p>
+      </div>
+    </div>`;
 }
 
 function initials(username) {

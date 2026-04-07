@@ -1,10 +1,15 @@
 
-document.getElementById("searchForm").addEventListener("submit", async (e) => {
+const searchForm = document.getElementById("searchForm");
+const searchInput = document.getElementById("searchInput");
+const categoryInput = document.getElementById("category");
+const costInput = document.getElementById("cost-filter");
+const queryRegex = /^[a-z0-9 ]{1,40}$/i;
+
+searchForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // Get search query and category
-  const q = document.getElementById("searchInput").value.trim();
-  const category = document.getElementById("category").value;
+  const q = searchInput.value.trim();
+  const category = categoryInput.value;
   const resultsEl = document.getElementById("results");
 
   resultsEl.innerHTML = Array.from({ length: 6 }).map(() => `
@@ -15,17 +20,22 @@ document.getElementById("searchForm").addEventListener("submit", async (e) => {
     </div>
 `).join('');
 
-  // Basic client-side validation
+  if (q && !queryRegex.test(q)) {
+    resultsEl.innerHTML = `<p class="error">Search must be 1-40 characters with letters, numbers, and spaces only.</p>`;
+    return;
+  }
+
   try {
     const params = new URLSearchParams();
     const selectedTags = Array.from(document.querySelectorAll('input[type="checkbox"][data-tag]:checked'))
       .map((checkbox) => checkbox.value);
-    const cost = document.getElementById("cost-filter")?.value || "";
+    const cost = costInput?.value || "";
 
     if (q) params.append("q", q);
     if (category) params.append("category", category);
     if (selectedTags.length > 0) params.append("tags", selectedTags.join(","));
     if (cost) params.append("cost", cost);
+    history.replaceState(null, "", `?${params.toString()}`);
 
     const response = await fetch(`/api/search?${params.toString()}`);
     const data = await response.json();
@@ -67,16 +77,30 @@ document.getElementById("searchForm").addEventListener("submit", async (e) => {
 });
 
 // ADDED 3/26 — wire cost dropdown and tag checkboxes to re-submit the form
-const costFilter = document.getElementById("cost-filter");
-if (costFilter) {
-  costFilter.addEventListener("change", () => {
-    document.getElementById("searchForm").dispatchEvent(new Event("submit"));
+if (costInput) {
+  costInput.addEventListener("change", () => {
+    searchForm.dispatchEvent(new Event("submit"));
   });
 }
 
 document.querySelectorAll('input[type="checkbox"][data-tag]')
   .forEach(cb => {
     cb.addEventListener("change", () => {
-      document.getElementById("searchForm").dispatchEvent(new Event("submit"));
+      searchForm.dispatchEvent(new Event("submit"));
     });
   });
+
+const pageParams = new URLSearchParams(window.location.search);
+if (pageParams.get("q")) searchInput.value = pageParams.get("q");
+if (pageParams.get("category")) categoryInput.value = pageParams.get("category");
+if (pageParams.get("cost") && costInput) costInput.value = pageParams.get("cost");
+if (pageParams.get("tags")) {
+  const tags = pageParams.get("tags").split(",").map((v) => v.trim());
+  document.querySelectorAll('input[type="checkbox"][data-tag]').forEach((cb) => {
+    cb.checked = tags.includes(cb.value);
+  });
+}
+
+if ([...pageParams.keys()].length > 0) {
+  searchForm.dispatchEvent(new Event("submit"));
+}

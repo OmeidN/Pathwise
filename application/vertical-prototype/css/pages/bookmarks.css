@@ -51,6 +51,10 @@
   margin-bottom: var(--space-lg);
 }
 
+.bookmarks-error[hidden] {
+  display: none !important;
+}
+
 /* ── Card grid (mirrors #results in search.css) ────────── */
 
 .bookmarks-grid {
