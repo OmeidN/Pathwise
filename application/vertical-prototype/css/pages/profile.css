@@ -24,6 +24,10 @@
   margin-bottom: var(--space-lg);
 }
 
+.profile-error[hidden] {
+  display: none !important;
+}
+
 /* ── Two-column layout ─────────────────────────────────── */
 
 .profile-layout {

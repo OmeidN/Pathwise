@@ -5,6 +5,10 @@
   const errorBanner = document.getElementById('profile-error');
   const errorMsg = document.getElementById('profile-error-msg');
 
+  // Clear stale error state before each load attempt.
+  errorBanner.hidden = true;
+  errorMsg.textContent = '';
+
   // Show skeleton rows while fetching
   submittedEl.innerHTML = skeletonList();
 
@@ -28,6 +32,8 @@
     user = meData.user;
     submissions = subData.results ?? [];
     saved = savedData.results ?? [];
+    errorBanner.hidden = true;
+    errorMsg.textContent = '';
   } catch (err) {
     submittedEl.innerHTML = '';
     errorMsg.textContent = err.message || 'Could not load profile.';
