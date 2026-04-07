@@ -8,6 +8,49 @@ const { requireAuth } = require('../middleware/requireAuth');
 
 const router = express.Router();
 
+async function resolveTagIds(conn, tagValuesRaw) {
+  const rawValues = Array.isArray(tagValuesRaw)
+    ? tagValuesRaw
+    : typeof tagValuesRaw === 'string'
+      ? tagValuesRaw.split(',')
+      : [];
+
+  const cleaned = rawValues.map((value) => String(value).trim()).filter(Boolean);
+  if (cleaned.length === 0) {
+    return [];
+  }
+
+  const numericIds = cleaned
+    .map((value) => parseInt(value, 10))
+    .filter((value) => !Number.isNaN(value) && value > 0);
+
+  const tagSlugs = cleaned
+    .filter((value) => Number.isNaN(parseInt(value, 10)))
+    .map((value) => value.toLowerCase());
+
+  const resolvedIds = new Set();
+
+  if (numericIds.length > 0) {
+    const [existingById] = await conn.query(
+      `SELECT tag_id FROM Tags WHERE tag_id IN (${numericIds.map(() => '?').join(',')})`,
+      numericIds
+    );
+    existingById.forEach((row) => resolvedIds.add(row.tag_id));
+  }
+
+  if (tagSlugs.length > 0) {
+    const [existingBySlug] = await conn.query(
+      `SELECT tag_id
+       FROM Tags
+       WHERE LOWER(REPLACE(tag_name, ' ', '-')) IN (${tagSlugs.map(() => '?').join(',')})`,
+      tagSlugs
+    );
+    existingBySlug.forEach((row) => resolvedIds.add(row.tag_id));
+  }
+
+  return Array.from(resolvedIds);
+}
+
 router.get('/resources/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -81,32 +124,15 @@ router.post('/resources', requireAuth, async (req, res) => {
     return res.status(400).json({ success: false, error: 'Invalid title' });
   }
 
-  let tagIds = [];
-  if (Array.isArray(tagIdsRaw)) {
-    tagIds = tagIdsRaw.map((t) => parseInt(t, 10)).filter((n) => !Number.isNaN(n) && n > 0);
-  } else if (typeof tagIdsRaw === 'string' && tagIdsRaw.trim()) {
-    tagIds = tagIdsRaw
-      .split(',')
-      .map((s) => parseInt(s.trim(), 10))
-      .filter((n) => !Number.isNaN(n) && n > 0);
-  }
-
   const conn = await db.getPool().getConnection();
   try {
+    let tagIds = await resolveTagIds(conn, tagIdsRaw);
+
     const [catCheck] = await conn.query('SELECT category_id FROM Categories WHERE category_id = ? LIMIT 1', [
       categoryId
     ]);
     if (!catCheck.length) {
       return res.status(400).json({ success: false, error: 'Invalid category_id' });
-    }
-
-    if (tagIds.length > 0) {
-      const [existing] = await conn.query(
-        `SELECT tag_id FROM Tags WHERE tag_id IN (${tagIds.map(() => '?').join(',')})`,
-        tagIds
-      );
-      const valid = new Set(existing.map((r) => r.tag_id));
-      tagIds = tagIds.filter((id) => valid.has(id));
     }
 
     await conn.beginTransaction();

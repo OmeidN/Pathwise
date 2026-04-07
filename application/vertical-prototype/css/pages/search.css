@@ -288,6 +288,16 @@
   line-height: 1.55;
 }
 
+.result-card-actions {
+  margin-top: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.result-card-link {
+  width: 100%;
+}
+
 .error {
   grid-column: 1 / -1;
 }

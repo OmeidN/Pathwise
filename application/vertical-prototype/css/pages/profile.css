@@ -189,9 +189,9 @@
 }
 
 .status-badge--pending {
-  background-color: #FEF9EE;
+  background-color: var(--color-warning-soft);
   color: var(--color-warning);
-  border: 1px solid #F5D78B;
+  border: 1px solid var(--color-warning-border);
 }
 
 .status-badge--rejected {
@@ -205,7 +205,7 @@
   background: linear-gradient(
     90deg,
     var(--color-border) 25%,
-    #d8ddd9 50%,
+    var(--color-skeleton-mid) 50%,
     var(--color-border) 75%
   );
   background-size: 300% 100%;

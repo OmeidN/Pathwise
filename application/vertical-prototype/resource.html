@@ -3,20 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resource Details - PATHWISE</title>
-  <link rel="stylesheet" href="../css/variables.css">
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/components.css">
-  <link rel="stylesheet" href="../css/layout.css">
+  <title>Pathwise - Resource Details</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/pages/resource.css">
 </head>
-<body>
-  <div id="nav-auth"></div>
-  <script src="nav.js"></script>
+<body data-page="resource">
 
-  <main class="container">
-    <div id="resource-detail">Loading...</div>
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="landing.html" class="site-title">Pathwise</a>
+
+      <nav id="main-nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link">Browse</a>
+        <a href="submit.html" class="nav-link">Submit Resource</a>
+        <div id="nav-auth" data-auth-state="guest"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="resource-main">
+    <div class="resource-inner">
+      <div id="resource-error" class="resource-error" hidden></div>
+      <div id="resource-detail" class="resource-shell">
+        <div class="resource-card resource-card--loading">
+          <div class="resource-skeleton resource-skeleton-title"></div>
+          <div class="resource-skeleton resource-skeleton-meta"></div>
+          <div class="resource-skeleton resource-skeleton-body"></div>
+          <div class="resource-skeleton resource-skeleton-body resource-skeleton-body--short"></div>
+        </div>
+      </div>
+    </div>
   </main>
 
+  <script src="nav.js"></script>
   <script src="resource.js"></script>
 </body>
 </html>

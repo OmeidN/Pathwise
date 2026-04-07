@@ -1,63 +1,147 @@
 const params = new URLSearchParams(window.location.search);
 const resourceId = params.get('id');
+const detailEl = document.getElementById('resource-detail');
+const errorEl = document.getElementById('resource-error');
 
-console.log(resourceId);
+let currentResource = null;
+let isSaved = false;
 
-async function loadResource() {
-  try {
-    const response = await fetch(`/api/resources/${resourceId}`, {
-      credentials: 'include'  
-    });
-    
-    const data = await response.json();
-    
-    if (!data.success) {
-      document.getElementById('resource-detail').innerHTML = 
-        `<p class="error">Error: ${data.error}</p>`;
-      return;
-    }
-    
-    console.log(data.resource); 
-    displayResource(data.resource);
-    
-  } catch (error) {
-    document.getElementById('resource-detail').innerHTML = 
-      `<p class="error">Error loading resource: ${error.message}</p>`;
+function showResourceError(message) {
+  errorEl.textContent = message;
+  errorEl.hidden = false;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+function formatCost(cost) {
+  if (!cost) {
+    return 'Unknown';
+  }
+  return cost.charAt(0).toUpperCase() + cost.slice(1);
+}
+
+function renderResource(resource) {
+  const tagMarkup = resource.tags.length > 0
+    ? resource.tags
+        .map((tag) => `<span class="resource-tag">${escapeHtml(tag.tag_name)}</span>`)
+        .join('')
+    : '<span class="resource-tag resource-tag--muted">No tags listed</span>';
+
+  detailEl.innerHTML = `
+    <article class="resource-card">
+      <a href="index.html" class="resource-back">Back to Search</a>
+      <div class="resource-header">
+        <div>
+          <p class="resource-kicker">${escapeHtml(resource.category_name || 'Resource')}</p>
+          <h1 class="resource-title">${escapeHtml(resource.title)}</h1>
+        </div>
+        <span class="resource-cost">${escapeHtml(formatCost(resource.cost))}</span>
+      </div>
+      <p class="resource-description">${escapeHtml(resource.description || 'No description provided.')}</p>
+      <div class="resource-tags">${tagMarkup}</div>
+      <div class="resource-actions">
+        <a href="${escapeHtml(resource.url)}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+          View Original Resource
+        </a>
+        <button type="button" id="bookmarkBtn" class="btn btn-secondary">
+          ${isSaved ? 'Unsave Resource' : 'Save Resource'}
+        </button>
+      </div>
+    </article>
+  `;
+
+  const bookmarkBtn = document.getElementById('bookmarkBtn');
+  if (bookmarkBtn) {
+    bookmarkBtn.addEventListener('click', toggleBookmark);
   }
 }
 
-// Call it when the page loads
-loadResource();
+async function loadBookmarkState() {
+  try {
+    const response = await fetch('/api/bookmarks', { credentials: 'include' });
 
-function displayResource(resource) {
-  const html = `
-    <div class="resource-header">
-      <a href="index.html" class="back-link">← Back to Search</a>
-      <h1>${resource.title}</h1>
-      <p class="resource-meta">
-        Category: ${resource.category_name} | 
-        Cost: ${resource.cost} | 
-         ${resource.rating || 'N/A'}
-      </p>
-    </div>
-    
-    <div class="resource-body">
-      <p class="description">${resource.description}</p>
-      
-      <div class="tags">
-        ${resource.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-      </div>
-      
-      <div class="actions">
-        <a href="${resource.url}" target="_blank" class="btn btn-primary">
-          View Original Resource →
-        </a>
-        <button class="btn btn-secondary" onclick="saveResource(${resource.id})">
-           Save Resource
-        </button>
-      </div>
-    </div>
-  `;
-  
-  document.getElementById('resource-detail').innerHTML = html;
+    if (response.status === 401) {
+      isSaved = false;
+      return;
+    }
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      return;
+    }
+
+    isSaved = (data.results || []).some((resource) => String(resource.resource_id) === String(resourceId));
+  } catch (_) {
+    isSaved = false;
+  }
 }
+
+async function loadResource() {
+  if (!resourceId) {
+    showResourceError('Missing resource id.');
+    detailEl.innerHTML = '';
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/resources/${resourceId}`, {
+      credentials: 'include'
+    });
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      detailEl.innerHTML = '';
+      showResourceError(data.error || 'Could not load resource details.');
+      return;
+    }
+
+    currentResource = data.resource;
+    await loadBookmarkState();
+    renderResource(currentResource);
+  } catch (error) {
+    detailEl.innerHTML = '';
+    showResourceError(`Error loading resource: ${error.message}`);
+  }
+}
+
+async function toggleBookmark() {
+  if (!currentResource) {
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/bookmarks', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        resource_id: currentResource.resource_id,
+        action: isSaved ? 'remove' : 'add'
+      })
+    });
+
+    if (response.status === 401) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Could not update bookmark.');
+    }
+
+    isSaved = !isSaved;
+    renderResource(currentResource);
+  } catch (error) {
+    showResourceError(error.message);
+  }
+}
+
+loadResource();

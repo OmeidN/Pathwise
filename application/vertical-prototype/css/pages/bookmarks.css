@@ -135,7 +135,7 @@
   background: linear-gradient(
     90deg,
     var(--color-border) 25%,
-    #d8ddd9 50%,
+    var(--color-skeleton-mid) 50%,
     var(--color-border) 75%
   );
   background-size: 300% 100%;
