@@ -5,3 +5,4 @@ node_modules/
 application/node_modules/
 .env
 application/.env
+.conductor
