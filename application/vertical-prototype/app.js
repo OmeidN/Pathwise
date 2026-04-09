@@ -34,7 +34,7 @@ async function loadRecommendations() {
     recommendedSection.hidden = false;
     recommendedResults.innerHTML = "<p>Loading recommendations...</p>";
 
-    const recResponse = await fetch("/api/recommendations?limit=3", { credentials: "include" });
+    const recResponse = await fetch("/api/recommendations?limit=4", { credentials: "include" });
     const recData = await recResponse.json();
     if (!recResponse.ok || !recData.success) {
       throw new Error(recData.error || "Could not load recommendations.");
