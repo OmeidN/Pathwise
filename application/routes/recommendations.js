@@ -42,6 +42,15 @@ function buildScoreParts({ goalTitleTerms, goalDescTerms, projectTitleTerms, pro
   return { scoreParts, scoreParams };
 }
 
+function shuffle(list) {
+  const arr = [...list];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 /**
  * Browse-page recommendations:
  * 1) If user has current goals/projects, rank resources by text similarity.
@@ -95,12 +104,10 @@ router.get('/recommendations', requireAuth, async (req, res) => {
       projectsByGoal.set(p.goal_id, list);
     }
 
-    const selected = [];
-    const selectedIds = new Set();
-    const goalsToEvaluate = goalRows.slice(0, limit);
+    const candidateMap = new Map();
+    const goalsToEvaluate = goalRows;
 
     for (const goal of goalsToEvaluate) {
-      if (selected.length >= limit) break;
       const relatedProjects = projectsByGoal.get(goal.goal_id) || [];
 
       const goalTitleTerms = tokenize([goal.title], 14);
@@ -119,30 +126,60 @@ router.get('/recommendations', requireAuth, async (req, res) => {
 
       const scoreExpr = scoreParts.join(' + ');
       const params = [...scoreParams];
-      let sql = `SELECT
+      const sql = `SELECT
                    r.resource_id, r.title, r.description, r.url, r.category_id, r.image_path, r.cost, r.is_ai_enabled,
                    (${scoreExpr}) AS score
                  FROM Resources r
-                 WHERE r.visibility = 'public'`;
-
-      if (selectedIds.size > 0) {
-        sql += ` AND r.resource_id NOT IN (${Array.from(selectedIds).map(() => '?').join(',')})`;
-        params.push(...Array.from(selectedIds));
-      }
-
-      sql += ` HAVING score > 0
+                 WHERE r.visibility = 'public'
+                 HAVING score > 0
                ORDER BY score DESC
-               LIMIT 12`;
+               LIMIT 20`;
 
       const [candidates] = await pool.query(sql, params);
-      if (!candidates.length) continue;
+      for (const candidate of candidates) {
+        const existing = candidateMap.get(candidate.resource_id);
+        if (!existing || Number(candidate.score) > Number(existing.score)) {
+          candidateMap.set(candidate.resource_id, candidate);
+        } else if (existing && Number(candidate.score) === Number(existing.score) && Math.random() < 0.5) {
+          // Random tie-break across equal-score candidates.
+          candidateMap.set(candidate.resource_id, candidate);
+        }
+      }
+    }
 
-      const maxScore = candidates[0].score;
-      const best = candidates.filter((c) => c.score === maxScore);
-      const pick = best[Math.floor(Math.random() * best.length)];
+    const grouped = new Map();
+    for (const row of candidateMap.values()) {
+      const key = Number(row.score) || 0;
+      const list = grouped.get(key) || [];
+      list.push(row);
+      grouped.set(key, list);
+    }
+    const sortedScores = Array.from(grouped.keys()).sort((a, b) => b - a);
+    const matched = [];
+    for (const score of sortedScores) {
+      matched.push(...shuffle(grouped.get(score)));
+    }
 
-      selected.push(pick);
-      selectedIds.add(pick.resource_id);
+    let selected = matched.slice(0, limit);
+    const selectedIds = new Set(selected.map((r) => r.resource_id));
+
+    // If user has goals/projects but no matching recs, fallback to random unsaved.
+    if (selected.length === 0) {
+      const [fallback] = await pool.query(
+        `SELECT resource_id, title, description, url, category_id, image_path, cost, is_ai_enabled
+         FROM Resources r
+         WHERE r.visibility = 'public'
+           AND NOT EXISTS (
+             SELECT 1
+             FROM Bookmarks b
+             WHERE b.user_id = ?
+               AND b.resource_id = r.resource_id
+           )
+         ORDER BY RAND()
+         LIMIT ?`,
+        [userId, limit]
+      );
+      return res.json({ success: true, results: fallback, strategy: 'random_unsaved_no_matches' });
     }
 
     if (selected.length < limit) {
@@ -172,7 +209,7 @@ router.get('/recommendations', requireAuth, async (req, res) => {
       }
     }
 
-    res.json({ success: true, results: selected, strategy: 'goal_per_slot_plus_random_fill' });
+    res.json({ success: true, results: selected, strategy: 'goal_project_matches_plus_random_fill' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
