@@ -2,6 +2,7 @@ const submitForm = document.getElementById('submitForm');
 const submitButton = document.getElementById('submitButton');
 const submitError = document.getElementById('submit-error');
 const submitSuccess = document.getElementById('submit-success');
+const imageInput = document.getElementById('image');
 
 (async function requireAuthForSubmitPage() {
   try {
@@ -41,18 +42,22 @@ submitForm.addEventListener('submit', async (event) => {
   submitButton.textContent = 'Submitting...';
 
   try {
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('category_id', categoryId);
+    if (url) formData.append('url', url);
+    if (cost) formData.append('cost', cost);
+    formData.append('tags', JSON.stringify(tags));
+
+    if (imageInput && imageInput.files && imageInput.files[0]) {
+      formData.append('image', imageInput.files[0]);
+    }
+
     const response = await fetch('/api/resources', {
       method: 'POST',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title,
-        url,
-        description,
-        category_id: categoryId,
-        cost,
-        tags
-      })
+      body: formData
     });
 
     if (response.status === 401) {

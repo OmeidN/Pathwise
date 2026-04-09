@@ -1,0 +1,96 @@
+(function () {
+  const listEl = document.getElementById('refl-list');
+  const errEl = document.getElementById('refl-error');
+  const form = document.getElementById('refl-form');
+
+  function esc(s) {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function showErr(msg) {
+    errEl.textContent = msg || '';
+    errEl.hidden = !msg;
+  }
+
+  async function load() {
+    showErr('');
+    const res = await fetch('/api/reflections', { credentials: 'include' });
+    if (res.status === 401) {
+      window.location.href = 'login.html';
+      return;
+    }
+    const data = await res.json();
+    if (!data.success) {
+      listEl.innerHTML = '';
+      showErr(data.error || 'Could not load reflections.');
+      return;
+    }
+    const rows = data.results || [];
+    if (rows.length === 0) {
+      listEl.innerHTML = '<p>No reflections yet.</p>';
+      return;
+    }
+    listEl.innerHTML = rows
+      .map(
+        (r) => `
+      <article class="goal-row">
+        <div>
+          <p>${esc(r.body)}</p>
+          <p class="goal-row__meta">${esc(String(r.created_at).slice(0, 19).replace('T', ' '))}
+            ${r.goal_id ? ` · Goal #${r.goal_id}` : ''}${r.project_id ? ` · Project #${r.project_id}` : ''}</p>
+        </div>
+        <div class="goal-row__actions">
+          <button type="button" class="btn btn-secondary btn-del" data-id="${r.reflection_id}">Delete</button>
+        </div>
+      </article>`
+      )
+      .join('');
+
+    listEl.querySelectorAll('.btn-del').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete this reflection?')) return;
+        const id = btn.getAttribute('data-id');
+        const r = await fetch(`/api/reflections/${id}`, { method: 'DELETE', credentials: 'include' });
+        const d = await r.json();
+        if (!d.success) {
+          showErr(d.error || 'Delete failed');
+          return;
+        }
+        load();
+      });
+    });
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const body = document.getElementById('refl-body').value.trim();
+    const goalRaw = document.getElementById('refl-goal').value.trim();
+    const projRaw = document.getElementById('refl-project').value.trim();
+    const res = await fetch('/api/reflections', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        body,
+        goal_id: goalRaw ? Number(goalRaw) : null,
+        project_id: projRaw ? Number(projRaw) : null
+      })
+    });
+    if (res.status === 401) {
+      window.location.href = 'login.html';
+      return;
+    }
+    const data = await res.json();
+    if (!data.success) {
+      showErr(data.error || 'Could not save.');
+      return;
+    }
+    form.reset();
+    load();
+  });
+
+  load();
+})();

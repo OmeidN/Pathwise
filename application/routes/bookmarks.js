@@ -1,15 +1,17 @@
 /**
  * Saved resources for the logged-in user.
  * POST body: { resource_id, action?: 'add' | 'remove' } — default action is add.
+ * Aliases: GET/POST /saved-resources (same handlers).
  */
 
 const express = require('express');
 const db = require('../db/connection');
 const { requireAuth } = require('../middleware/requireAuth');
+const { logActivity } = require('../services/activityLog');
 
 const router = express.Router();
 
-router.get('/bookmarks', requireAuth, async (req, res) => {
+async function listSavedResources(req, res) {
   try {
     const pool = db.getPool();
     const [rows] = await pool.query(
@@ -25,9 +27,9 @@ router.get('/bookmarks', requireAuth, async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
-});
+}
 
-router.post('/bookmarks', requireAuth, async (req, res) => {
+async function mutateSavedResource(req, res) {
   try {
     const { resource_id: ridRaw, action } = req.body || {};
     const resourceId = parseInt(ridRaw, 10);
@@ -53,14 +55,27 @@ router.post('/bookmarks', requireAuth, async (req, res) => {
       return res.json({ success: true, saved: false });
     }
 
-    await pool.query('INSERT IGNORE INTO Bookmarks (user_id, resource_id) VALUES (?, ?)', [
+    const [ins] = await pool.query('INSERT IGNORE INTO Bookmarks (user_id, resource_id) VALUES (?, ?)', [
       req.session.userId,
       resourceId
     ]);
+    if (ins.affectedRows > 0) {
+      await logActivity({
+        userId: req.session.userId,
+        actionType: 'resource_saved',
+        entityType: 'resource',
+        entityId: resourceId
+      });
+    }
     res.json({ success: true, saved: true });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
-});
+}
+
+router.get('/bookmarks', requireAuth, listSavedResources);
+router.post('/bookmarks', requireAuth, mutateSavedResource);
+router.get('/saved-resources', requireAuth, listSavedResources);
+router.post('/saved-resources', requireAuth, mutateSavedResource);
 
 module.exports = router;

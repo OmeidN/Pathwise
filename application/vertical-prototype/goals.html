@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Goals - Pathwise</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/pages/goals.css" />
+</head>
+<body data-page="goals">
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="landing.html" class="site-title">Pathwise</a>
+      <nav id="main-nav">
+        <a href="landing.html" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link">Browse</a>
+        <a href="submit.html" class="nav-link">Submit Resource</a>
+        <div id="nav-auth"></div>
+      </nav>
+    </div>
+  </header>
+  <main class="goals-main">
+    <div class="goals-header">
+      <div>
+        <h1>Your goals</h1>
+        <p class="goals-subtitle">Start broad here, then open a goal hub to manage its projects and milestones.</p>
+      </div>
+      <button type="button" class="btn btn-primary" id="openCreateBtn">New goal</button>
+    </div>
+    <section class="goals-toolbar card">
+      <div>
+        <label for="statusFilter">Status</label>
+        <select id="statusFilter" class="input">
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="paused">Paused</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <div>
+        <label for="sortBy">Sort by</label>
+        <select id="sortBy" class="input">
+          <option value="recent">Recently updated</option>
+          <option value="progress-desc">Progress (high to low)</option>
+          <option value="progress-asc">Progress (low to high)</option>
+          <option value="target-date">Target date</option>
+        </select>
+      </div>
+    </section>
+    <p id="goals-error" class="error" hidden></p>
+    <div id="goals-list" class="goal-grid">Loading…</div>
+  </main>
+
+  <div class="modal-backdrop" id="goalModal" hidden>
+    <div class="modal-card" role="dialog" aria-labelledby="goalModalTitle">
+      <h2 id="goalModalTitle">New goal</h2>
+      <form id="goalForm" class="goal-form-grid">
+        <input type="hidden" id="goalId" value="" />
+        <div>
+          <label for="goalTitle">Title</label>
+          <input type="text" id="goalTitle" class="input" required minlength="2" maxlength="255" />
+        </div>
+        <div>
+          <label for="goalDescription">Description</label>
+          <textarea id="goalDescription" class="input" rows="3"></textarea>
+        </div>
+        <div>
+          <label for="goalCategory">Category</label>
+          <input type="text" id="goalCategory" class="input" maxlength="100" placeholder="e.g. Career" />
+        </div>
+        <div>
+          <label for="goalTargetDate">Target date</label>
+          <input type="date" id="goalTargetDate" class="input" />
+        </div>
+        <div class="form-row--actions">
+          <button type="submit" class="btn btn-primary" id="goalSaveBtn">Save</button>
+          <button type="button" class="btn btn-secondary" id="goalCancelBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="nav.js"></script>
+  <script src="js/goals.js"></script>
+</body>
+</html>

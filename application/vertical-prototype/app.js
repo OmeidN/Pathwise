@@ -3,7 +3,53 @@ const searchForm = document.getElementById("searchForm");
 const searchInput = document.getElementById("searchInput");
 const categoryInput = document.getElementById("category");
 const costInput = document.getElementById("cost-filter");
+const aiOnlyInput = document.getElementById("filter-ai-only");
+const recommendedSection = document.getElementById("recommended-section");
+const recommendedResults = document.getElementById("recommended-results");
 const queryRegex = /^[a-z0-9 ]{1,40}$/i;
+
+function resourceCardMarkup(resource) {
+  return `
+    <div class="result-card">
+      <h3><a href="resource.html?id=${resource.resource_id}">${resource.title}</a></h3>
+      <p>${resource.description || ""}</p>
+      ${Number(resource.is_ai_enabled) ? '<p class="result-card-badge">AI-enabled</p>' : ""}
+      <div class="result-card-actions">
+        <a href="resource.html?id=${resource.resource_id}" class="btn btn-secondary result-card-link">View Details</a>
+      </div>
+    </div>
+  `;
+}
+
+async function loadRecommendations() {
+  if (!recommendedSection || !recommendedResults) return;
+
+  try {
+    const meResponse = await fetch("/api/me", { credentials: "include" });
+    if (!meResponse.ok) {
+      recommendedSection.hidden = true;
+      return;
+    }
+
+    recommendedSection.hidden = false;
+    recommendedResults.innerHTML = "<p>Loading recommendations...</p>";
+
+    const recResponse = await fetch("/api/recommendations?limit=3", { credentials: "include" });
+    const recData = await recResponse.json();
+    if (!recResponse.ok || !recData.success) {
+      throw new Error(recData.error || "Could not load recommendations.");
+    }
+
+    if (!Array.isArray(recData.results) || recData.results.length === 0) {
+      recommendedResults.innerHTML = '<p class="results-empty">No recommendations yet. Add goals/projects to improve suggestions.</p>';
+      return;
+    }
+
+    recommendedResults.innerHTML = recData.results.map((r) => resourceCardMarkup(r)).join("");
+  } catch (_) {
+    recommendedSection.hidden = true;
+  }
+}
 
 searchForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -35,6 +81,7 @@ searchForm.addEventListener("submit", async (e) => {
     if (category) params.append("category", category);
     if (selectedTags.length > 0) params.append("tags", selectedTags.join(","));
     if (cost) params.append("cost", cost);
+    if (aiOnlyInput && aiOnlyInput.checked) params.append("ai", "1");
     history.replaceState(null, "", `?${params.toString()}`);
 
     const response = await fetch(`/api/search?${params.toString()}`);
@@ -56,19 +103,7 @@ searchForm.addEventListener("submit", async (e) => {
     }
 
     // Render results
-    resultsEl.innerHTML = data.results
-      .map(
-        (r) => `
-            <div class="result-card">
-                <h3><a href="resource.html?id=${r.resource_id}">${r.title}</a></h3>
-                <p>${r.description || ""}</p>
-                <div class="result-card-actions">
-                  <a href="resource.html?id=${r.resource_id}" class="btn btn-secondary result-card-link">View Details</a>
-                </div>
-            </div>
-        `,
-      )
-      .join("");
+    resultsEl.innerHTML = data.results.map((r) => resourceCardMarkup(r)).join("");
 
     // Handle fetch errors
   } catch (error) {
@@ -90,10 +125,17 @@ document.querySelectorAll('input[type="checkbox"][data-tag]')
     });
   });
 
+if (aiOnlyInput) {
+  aiOnlyInput.addEventListener("change", () => {
+    searchForm.dispatchEvent(new Event("submit"));
+  });
+}
+
 const pageParams = new URLSearchParams(window.location.search);
 if (pageParams.get("q")) searchInput.value = pageParams.get("q");
 if (pageParams.get("category")) categoryInput.value = pageParams.get("category");
 if (pageParams.get("cost") && costInput) costInput.value = pageParams.get("cost");
+if (pageParams.get("ai") === "1" && aiOnlyInput) aiOnlyInput.checked = true;
 if (pageParams.get("tags")) {
   const tags = pageParams.get("tags").split(",").map((v) => v.trim());
   document.querySelectorAll('input[type="checkbox"][data-tag]').forEach((cb) => {
@@ -104,3 +146,5 @@ if (pageParams.get("tags")) {
 if ([...pageParams.keys()].length > 0) {
   searchForm.dispatchEvent(new Event("submit"));
 }
+
+loadRecommendations();

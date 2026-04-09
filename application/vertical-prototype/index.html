@@ -24,11 +24,7 @@
                 <a href="index.html" class="nav-link">Browse</a>
                 <a href="submit.html" class="nav-link">Submit Resource</a>
 
-                <!-- Auth links stay static until F4 can use backend B8: GET /api/me -->
-                <div id="nav-auth" data-auth-state="guest">
-                    <a href="login.html" class="nav-link">Login</a>
-                    <a href="register.html" class="nav-btn">Register</a>
-                </div>
+                <div id="nav-auth" data-auth-state="guest"></div>
             </nav>
         </div>
     </header>
@@ -78,6 +74,13 @@
                 </select>
             </div>
 
+            <div class="filter-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="filter-ai-only" />
+                    AI-enabled resources only
+                </label>
+            </div>
+
             <button type="button" class="btn-apply-filters">Apply Filters</button>
             <button type="button" class="btn-clear-filters">Clear</button>
 
@@ -90,6 +93,10 @@
 
         <!-- Results populated by app.js via GET /api/search?q=...&category=... -->
         <section id="results-section">
+            <section id="recommended-section" hidden>
+                <h2>Recommended for you</h2>
+                <div id="recommended-results"></div>
+            </section>
             <h2>Results</h2>
             <div id="results">
                 <p>Waiting for input...</p>

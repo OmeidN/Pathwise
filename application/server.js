@@ -12,6 +12,13 @@ const goalsRoutes = require('./routes/goals');
 const projectsRoutes = require('./routes/projects');
 const milestonesRoutes = require('./routes/milestones');
 const dashboardRoutes = require('./routes/dashboard');
+const profileRoutes = require('./routes/profile');
+const reflectionsRoutes = require('./routes/reflections');
+const activityRoutes = require('./routes/activity');
+const messagesRoutes = require('./routes/messages');
+const recommendationsRoutes = require('./routes/recommendations');
+const ratingsRoutes = require('./routes/ratings');
+const usersRoutes = require('./routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -47,6 +54,13 @@ app.use('/api', goalsRoutes);
 app.use('/api', projectsRoutes);
 app.use('/api', milestonesRoutes);
 app.use('/api', dashboardRoutes);
+app.use('/api', profileRoutes);
+app.use('/api', reflectionsRoutes);
+app.use('/api', activityRoutes);
+app.use('/api', messagesRoutes);
+app.use('/api', recommendationsRoutes);
+app.use('/api', ratingsRoutes);
+app.use('/api', usersRoutes);
 
 // GET /api/db-test - simple DB test
 app.get('/api/db-test', async (req, res) => {
@@ -74,8 +88,10 @@ app.get('/api/search', async (req, res) => {
     const category = (req.query.category || '').trim();
     const tagsParam = (req.query.tags || '').trim();
     const cost = (req.query.cost || '').trim();
+    const aiRaw = (req.query.ai ?? req.query.is_ai_enabled ?? '').toString().trim().toLowerCase();
+    const aiOnly = aiRaw === '1' || aiRaw === 'true' || aiRaw === 'yes';
 
-    let sql = `SELECT resource_id, title, description, url, category_id, image_path, cost
+    let sql = `SELECT resource_id, title, description, url, category_id, image_path, cost, is_ai_enabled
                FROM Resources r
                WHERE 1=1`;
     const params = [];
@@ -141,6 +157,10 @@ app.get('/api/search', async (req, res) => {
     if (cost && cost !== 'all') {
       sql += ' AND r.cost = ?';
       params.push(cost);
+    }
+
+    if (aiOnly) {
+      sql += ' AND r.is_ai_enabled = 1';
     }
 
     sql += ' ORDER BY r.title';

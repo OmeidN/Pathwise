@@ -40,16 +40,17 @@ router.post('/register', async (req, res) => {
     const passwordHash = await bcrypt.hash(pw, BCRYPT_ROUNDS);
 
     const [result] = await pool.query(
-      'INSERT INTO Users (email, username, password_hash) VALUES (?, ?, ?)',
-      [em, un, passwordHash]
+      'INSERT INTO Users (email, username, password_hash, role) VALUES (?, ?, ?, ?)',
+      [em, un, passwordHash, 'student']
     );
 
     const userId = result.insertId;
     req.session.userId = userId;
+    req.session.userRole = 'student';
 
     res.status(201).json({
       success: true,
-      user: { user_id: userId, username: un, email: em }
+      user: { user_id: userId, username: un, email: em, role: 'student' }
     });
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {
@@ -70,7 +71,7 @@ router.post('/login', async (req, res) => {
 
     const pool = db.getPool();
     const [rows] = await pool.query(
-      'SELECT user_id, email, username, password_hash FROM Users WHERE email = ? LIMIT 1',
+      'SELECT user_id, email, username, password_hash, role FROM Users WHERE email = ? LIMIT 1',
       [em]
     );
 
@@ -85,12 +86,14 @@ router.post('/login', async (req, res) => {
     }
 
     req.session.userId = user.user_id;
+    req.session.userRole = user.role || 'student';
     res.json({
       success: true,
       user: {
         user_id: user.user_id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        role: user.role || 'student'
       }
     });
   } catch (err) {
@@ -132,7 +135,7 @@ router.get('/me', async (req, res) => {
 
     const pool = db.getPool();
     const [rows] = await pool.query(
-      'SELECT user_id, username, email, created_at FROM Users WHERE user_id = ? LIMIT 1',
+      'SELECT user_id, username, email, role, created_at FROM Users WHERE user_id = ? LIMIT 1',
       [req.session.userId]
     );
 
@@ -142,12 +145,14 @@ router.get('/me', async (req, res) => {
     }
 
     const u = rows[0];
+    req.session.userRole = u.role || 'student';
     res.json({
       success: true,
       user: {
         user_id: u.user_id,
         username: u.username,
         email: u.email,
+        role: u.role || 'student',
         created_at: u.created_at
       }
     });

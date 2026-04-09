@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('../db/connection');
 const { requireAuth } = require('../middleware/requireAuth');
+const { logActivity } = require('../services/activityLog');
 
 const router = express.Router();
 
@@ -59,6 +60,14 @@ router.patch('/milestones/:id/completion', requireAuth, async (req, res) => {
       [isCompleted ? 1 : 0, isCompleted ? 1 : 0, milestoneId, req.session.userId]
     );
     if (!result.affectedRows) return res.status(404).json({ success: false, error: 'Milestone not found' });
+    if (isCompleted) {
+      await logActivity({
+        userId: req.session.userId,
+        actionType: 'milestone_completed',
+        entityType: 'milestone',
+        entityId: milestoneId
+      });
+    }
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

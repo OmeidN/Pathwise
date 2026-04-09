@@ -239,6 +239,22 @@
   margin-bottom: var(--space-lg);
 }
 
+#recommended-section {
+  margin-bottom: var(--space-xl);
+}
+
+#recommended-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-md);
+}
+
+#recommended-results > p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  grid-column: 1 / -1;
+}
+
 #results {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -280,6 +296,18 @@
 .result-card h3 a:hover {
   color: var(--color-primary-hover);
   text-decoration: underline;
+}
+
+.result-card-badge {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  margin-top: var(--space-xs);
 }
 
 .result-card p {

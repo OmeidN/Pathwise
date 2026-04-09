@@ -5,6 +5,9 @@ Run these in order from the `application/db/migrations` directory on EC2:
 1. `001_m3_users_bookmarks.sql`
 2. `002_m3_goals_projects_milestones.sql`
 3. `003_m3_seed_demo.sql` (optional demo data)
+4. `004_m4_roles_userprofiles.sql` (user `role`, `UserProfiles`)
+5. `005_reflections_activity.sql` (`Reflections`, `ActivityLogs`)
+6. `006_ratings_messages.sql` (`ResourceRatings`, `Messages`)
 
 Example:
 

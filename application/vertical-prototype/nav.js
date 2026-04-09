@@ -10,9 +10,11 @@ function guestNavMarkup() {
 
 function authedNavMarkup(username) {
   return `
-  <a href="dashboard.html" class="nav-link${currentPage === 'dashboard' ? ' nav-link--active' : ''}">Dashboard</a>
-  <a href="bookmarks.html" class="nav-link${currentPage === 'bookmarks' ? ' nav-link--active' : ''}">Bookmarks</a>
-    <a href="profile.html"   class="nav-link${currentPage === 'profile'   ? ' nav-link--active' : ''}">Profile</a>
+    <a href="goals.html" class="nav-link${currentPage === 'goals' || currentPage === 'goal-detail' ? ' nav-link--active' : ''}">Goals</a>
+    <a href="bookmarks.html" class="nav-link${currentPage === 'bookmarks' ? ' nav-link--active' : ''}">Bookmarks</a>
+    <a href="reflections.html" class="nav-link${currentPage === 'reflections' ? ' nav-link--active' : ''}">Reflections</a>
+    <a href="messages.html" class="nav-link${currentPage === 'messages' ? ' nav-link--active' : ''}">Messages</a>
+    <a href="profile.html" class="nav-link${currentPage === 'profile' ? ' nav-link--active' : ''}">Profile</a>
     <span class="nav-user">${username}</span>
     <button type="button" class="nav-link nav-logout" id="logoutBtn">Logout</button>
   `;
