@@ -121,16 +121,26 @@ router.get('/resources/:id', async (req, res) => {
     }
 
     const pool = db.getPool();
-    const [rows] = await pool.query(
-      `SELECT r.resource_id, r.title, r.description, r.url, r.image_path, r.category_id,
-              r.submitted_by, r.cost, r.is_ai_enabled, r.visibility, r.created_at,
-              c.category_name
-       FROM Resources r
-       LEFT JOIN Categories c ON c.category_id = r.category_id
-       WHERE r.resource_id = ?
-       LIMIT 1`,
-      [id]
-    );
+
+    // private resource should not be readable to randomg guests
+    const userId = req.session?.userId ?? null;
+    const params = [id];
+    let visibilityClause = 'r.visibility = "public"';
+    if (userId != null) {
+      visibilityClause += ' OR r.submitted_by = ?';
+      params.push(userId);
+    }
+    const sql = `
+      SELECT r.resource_id, r.title, r.description, r.url, r.image_path, r.category_id,
+            r.submitted_by, r.cost, r.is_ai_enabled, r.visibility, r.created_at,
+            c.category_name
+      FROM Resources r
+      LEFT JOIN Categories c ON c.category_id = r.category_id
+      WHERE r.resource_id = ?
+        AND (${visibilityClause})
+      LIMIT 1
+    `;
+    const [rows] = await pool.query(sql, params);
 
     if (!rows.length) {
       return res.status(404).json({ success: false, error: 'Resource not found' });

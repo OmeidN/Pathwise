@@ -90,11 +90,18 @@ app.get('/api/search', async (req, res) => {
     const cost = (req.query.cost || '').trim();
     const aiRaw = (req.query.ai ?? req.query.is_ai_enabled ?? '').toString().trim().toLowerCase();
     const aiOnly = aiRaw === '1' || aiRaw === 'true' || aiRaw === 'yes';
+    const userId = req.session && req.session.userId != null ? req.session.userId : null;
 
-    let sql = `SELECT resource_id, title, description, url, category_id, image_path, cost, is_ai_enabled
-               FROM Resources r
-               WHERE 1=1`;
+    let sql = `SELECT r.resource_id, r.title, r.description, r.url, r.category_id, r.image_path, r.cost, r.is_ai_enabled
+                FROM Resources r
+                WHERE (r.visibility = 'public'`;
     const params = [];
+
+    if (userId != null) {
+      sql += ' OR r.submitted_by = ?';
+      params.push(userId);
+    }
+    sql += ')';
 
     if (q && !/^[a-z0-9 ]{1,40}$/i.test(q)) {
       return res.status(400).json({

@@ -3,24 +3,671 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Goals - Pathwise</title>
-  <meta http-equiv="refresh" content="0; url=goals.html" />
+  <title>Dashboard - Pathwise</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/variables.css" />
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/layout.css" />
-  <link rel="stylesheet" href="css/pages/goals.css" />
+
+  <style>
+    body[data-page="dashboard"] {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(74, 124, 111, 0.08), transparent 22%),
+        linear-gradient(180deg, #f9fbfa 0%, var(--color-background) 100%);
+    }
+
+    .dashboard-main {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .dashboard-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.9fr);
+      gap: var(--space-lg);
+      align-items: stretch;
+    }
+
+    .dashboard-hero__welcome {
+      background:
+        linear-gradient(135deg, rgba(74, 124, 111, 0.12), rgba(74, 124, 111, 0.04)),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-card);
+      padding: var(--space-xl);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 148px;
+    }
+
+    .dashboard-eyebrow {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-subtle);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-sm);
+    }
+
+    .dashboard-title {
+      font-size: clamp(1.7rem, 3vw, 2.4rem);
+      line-height: 1.12;
+      color: var(--color-text);
+      margin-bottom: var(--space-sm);
+    }
+
+    .dashboard-subtitle {
+      font-size: var(--font-size-base);
+      color: var(--color-text-muted);
+      max-width: 72ch;
+    }
+
+    .dashboard-hero__actions {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-card);
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 148px;
+    }
+
+    .dashboard-action-title {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-sm);
+    }
+
+    .dashboard-action-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+
+    .dashboard-action-stack .btn {
+      min-width: 138px;
+    }
+
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 290px minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .dashboard-sidebar {
+      display: grid;
+      gap: var(--space-lg);
+      align-self: start;
+      position: sticky;
+      top: calc(var(--banner-height) + 88px);
+    }
+
+    .dashboard-panel {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+
+    .dashboard-panel__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-lg) var(--space-lg) var(--space-md);
+      border-bottom: 1px solid rgba(226, 232, 228, 0.7);
+    }
+
+    .dashboard-panel__title {
+      font-size: 1rem;
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .dashboard-panel__body {
+      padding: var(--space-lg);
+    }
+
+    .dashboard-tip-list {
+      list-style: none;
+      display: grid;
+      gap: var(--space-md);
+    }
+
+    .dashboard-tip-list li {
+      padding-left: var(--space-md);
+      position: relative;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+    }
+
+    .dashboard-tip-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.56rem;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--color-primary);
+    }
+
+    .dashboard-mini-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid rgba(226, 232, 228, 0.7);
+    }
+
+    .dashboard-mini-stat:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .dashboard-mini-stat__label {
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+    }
+
+    .dashboard-mini-stat__value {
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .dashboard-content-shell {
+      min-width: 0;
+    }
+
+    #dashboard-content {
+      display: grid;
+      gap: var(--space-lg);
+    }
+
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+
+    .dash-grid .card {
+      border-radius: var(--radius-xl);
+      padding: var(--space-lg);
+      min-height: 118px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        linear-gradient(180deg, rgba(74, 124, 111, 0.04), transparent 60%),
+        var(--color-surface);
+    }
+
+    .dash-grid .card h3 {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .dash-grid .card p {
+      font-size: 2rem;
+      line-height: 1;
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .dash-progress-card.card {
+      padding: var(--space-lg);
+      border-radius: var(--radius-xl);
+      display: grid;
+      grid-template-columns: 220px 1fr auto;
+      align-items: center;
+      gap: var(--space-lg);
+      min-height: 116px;
+      background:
+        linear-gradient(90deg, rgba(74, 124, 111, 0.08), transparent 38%),
+        var(--color-surface);
+    }
+
+    .dash-progress-card h3 {
+      font-size: 1.05rem;
+      color: var(--color-text);
+      margin: 0;
+    }
+
+    .dash-progress-card p {
+      margin: 0;
+      color: var(--color-text-muted);
+      font-weight: var(--font-weight-medium);
+      white-space: nowrap;
+    }
+
+    .progress {
+      width: 100%;
+      height: 12px;
+      background: #edf2ef;
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(74, 124, 111, 0.05);
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+      transition: width 0.25s ease;
+    }
+
+    .dash-section.card {
+      border-radius: var(--radius-xl);
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .dash-section__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-lg);
+      border-bottom: 1px solid rgba(226, 232, 228, 0.75);
+      flex-wrap: wrap;
+    }
+
+    .dash-section h2 {
+      font-size: 1rem;
+      color: var(--color-text);
+      margin: 0;
+    }
+
+    .table-wrap {
+      overflow: auto;
+    }
+
+    .dash-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--font-size-sm);
+      min-width: 0;
+    }
+
+    .dash-table thead th {
+      background: #f8fbf9;
+      color: var(--color-text-muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-weight: var(--font-weight-medium);
+      border-bottom: 1px solid var(--color-border);
+      padding: 12px 16px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .dash-table tbody td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(226, 232, 228, 0.65);
+      color: var(--color-text);
+      vertical-align: middle;
+      background: var(--color-surface);
+    }
+
+    .dash-table tbody tr:hover td {
+      background: #fafcfb;
+    }
+
+    .dash-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .dash-table a {
+      color: var(--color-primary);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .dash-table a:hover {
+      text-decoration: underline;
+    }
+
+    .profile-muted {
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+    }
+
+    .dashboard-table-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .dashboard-table-grid .dash-section.card {
+      min-height: 280px;
+    }
+
+    .dashboard-table-grid .dash-section.card--wide {
+      grid-column: 1 / -1;
+    }
+
+    .rec-list li:last-child {
+      border-bottom: none !important;
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
+    }
+
+    .dashboard-loading {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-md);
+    }
+
+    .dashboard-loading-card {
+      height: 112px;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(90deg, #eef2ef 25%, #f7faf8 37%, #eef2ef 63%);
+      background-size: 400% 100%;
+      animation: dashboardShimmer 1.4s ease infinite;
+      border: 1px solid var(--color-border);
+    }
+
+    @keyframes dashboardShimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: 0 0; }
+    }
+
+    @media (max-width: 1180px) {
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-sidebar {
+        position: static;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .dash-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .dashboard-table-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-table-grid .dash-section.card--wide {
+        grid-column: auto;
+      }
+
+      .dash-progress-card.card {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .dashboard-main {
+        padding: var(--space-md);
+      }
+
+      .dashboard-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-sidebar {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .dash-grid,
+      .dashboard-loading {
+        grid-template-columns: 1fr;
+      }
+
+      .dash-table {
+        min-width: 560px;
+      }
+    }
+  </style>
 </head>
+
 <body data-page="dashboard">
-  <main class="goals-main">
-    <section class="card">
-      <h1>Redirecting to Goals...</h1>
-      <p>If you are not redirected, <a href="goals.html">open Goals</a>.</p>
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="landing.html" class="site-title">Pathwise</a>
+
+      <nav id="main-nav">
+        <a href="landing.html" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link">Browse</a>
+        <a href="submit.html" class="nav-link">Submit Resource</a>
+        <div id="nav-auth"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="dashboard-main">
+    <section class="dashboard-hero">
+      <div class="dashboard-hero__welcome">
+        <p class="dashboard-eyebrow">Student workspace</p>
+        <h1 class="dashboard-title">Your Pathwise dashboard</h1>
+        <p class="dashboard-subtitle">
+          Review your planning progress, monitor milestones, revisit saved resources, and move between your main student workflows without bouncing across pages.
+        </p>
+      </div>
+
+      <aside class="dashboard-hero__actions">
+        <div>
+          <p class="dashboard-action-title">Quick actions</p>
+          <div class="dashboard-action-stack">
+            <a href="goals.html" class="btn btn-primary">Manage Goals</a>
+            <a href="submit.html" class="btn btn-secondary">Submit Resource</a>
+            <a href="bookmarks.html" class="btn btn-secondary">Bookmarks</a>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="dashboard-layout">
+      <aside class="dashboard-sidebar">
+        <section class="dashboard-panel">
+          <div class="dashboard-panel__head">
+            <h2 class="dashboard-panel__title">How to use this page</h2>
+          </div>
+          <div class="dashboard-panel__body">
+            <ul class="dashboard-tip-list">
+              <li>Start with the top summary cards to understand your overall workload.</li>
+              <li>Use the progress panel to check milestone completion at a glance.</li>
+              <li>Open Goals when you need to manage projects and milestones in detail.</li>
+              <li>Use Saved Resources as your quick-access support library.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="dashboard-panel">
+          <div class="dashboard-panel__head">
+            <h2 class="dashboard-panel__title">Tracking model</h2>
+          </div>
+          <div class="dashboard-panel__body">
+            <div class="dashboard-mini-stat">
+              <span class="dashboard-mini-stat__label">Planning</span>
+              <span class="dashboard-mini-stat__value">Goals</span>
+            </div>
+            <div class="dashboard-mini-stat">
+              <span class="dashboard-mini-stat__label">Execution</span>
+              <span class="dashboard-mini-stat__value">Projects</span>
+            </div>
+            <div class="dashboard-mini-stat">
+              <span class="dashboard-mini-stat__label">Checkpoints</span>
+              <span class="dashboard-mini-stat__value">Milestones</span>
+            </div>
+            <div class="dashboard-mini-stat">
+              <span class="dashboard-mini-stat__label">Support</span>
+              <span class="dashboard-mini-stat__value">Resources</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="dashboard-panel">
+          <div class="dashboard-panel__head">
+            <h2 class="dashboard-panel__title">Planning focus</h2>
+          </div>
+          <div class="dashboard-panel__body">
+            <p class="profile-muted" style="margin-bottom: 12px;">
+              This dashboard is meant to reduce cognitive overload by bringing together planning, progress, and resource discovery in one workspace.
+            </p>
+            <ul class="dashboard-tip-list">
+              <li>Goals define what you want to achieve this semester.</li>
+              <li>Projects break each goal into manageable efforts.</li>
+              <li>Milestones show the next concrete checkpoints.</li>
+              <li>Saved resources keep helpful links attached to your work.</li>
+            </ul>
+          </div>
+        </section>
+      </aside>
+
+      <section class="dashboard-content-shell">
+        <div id="dashboard-content" aria-live="polite">
+          <section class="dash-grid">
+            <article class="card">
+              <h3>Active Goals</h3>
+              <p id="active-goals-count">--</p>
+            </article>
+            <article class="card">
+              <h3>Projects</h3>
+              <p id="projects-count">--</p>
+            </article>
+            <article class="card">
+              <h3>Milestones Completed</h3>
+              <p id="milestones-count">--</p>
+            </article>
+            <article class="card">
+              <h3>Saved Resources</h3>
+              <p id="saved-count">--</p>
+            </article>
+          </section>
+
+          <section class="dash-progress-card card">
+            <h3>Overall progress</h3>
+            <div class="progress"><div id="dashboard-progress-bar" class="progress-bar" style="width: 0%"></div></div>
+            <p id="dashboard-progress-text">Loading dashboard...</p>
+          </section>
+
+          <div class="dashboard-table-grid">
+            <section class="dash-section card">
+              <div class="dash-section__head">
+                <h2>Goals</h2>
+                <a href="goals.html" class="btn btn-secondary">Manage goals</a>
+              </div>
+              <div class="table-wrap">
+                <table class="dash-table">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Category</th>
+                      <th>Status</th>
+                      <th>Target</th>
+                    </tr>
+                  </thead>
+                  <tbody id="goals-table-body">
+                    <tr>
+                      <td colspan="4">Loading goals...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="dash-section card">
+              <div class="dash-section__head">
+                <h2>Projects</h2>
+              </div>
+              <div class="table-wrap">
+                <table class="dash-table">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Goal</th>
+                      <th>Updated</th>
+                    </tr>
+                  </thead>
+                  <tbody id="projects-table-body">
+                    <tr>
+                      <td colspan="3">Loading projects...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="dash-section card">
+              <div class="dash-section__head">
+                <h2>Milestones</h2>
+              </div>
+              <div class="table-wrap">
+                <table class="dash-table">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Project</th>
+                      <th>State</th>
+                      <th>Target</th>
+                    </tr>
+                  </thead>
+                  <tbody id="milestones-table-body">
+                    <tr>
+                      <td colspan="4">Loading milestones...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="dash-section card card--wide">
+              <div class="dash-section__head">
+                <h2>Saved resources</h2>
+                <a href="bookmarks.html" class="btn btn-secondary">All bookmarks</a>
+              </div>
+              <div class="table-wrap">
+                <table class="dash-table">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Saved</th>
+                    </tr>
+                  </thead>
+                  <tbody id="saved-resources-table-body">
+                    <tr>
+                      <td colspan="2">Loading saved resources...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
     </section>
   </main>
-  <script>
-    window.location.replace('goals.html');
-  </script>
+
+  <script src="nav.js"></script>
+  <script src="js/dashboard.js"></script>
 </body>
 </html>

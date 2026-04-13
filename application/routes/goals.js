@@ -265,7 +265,17 @@ router.post('/goals/:id/resources', requireAuth, async (req, res) => {
   try {
     const goalId = Number(req.params.id);
     const resourceId = Number((req.body || {}).resource_id);
+
     if (!goalId || !resourceId) return res.status(400).json({ success: false, error: 'goal id and resource_id required' });
+
+    // We should not tru the posted resource_id outright but to check it first
+    const [resources] = await db.getPool().query(
+      'SELECT resource_id FROM Resources WHERE resource_id = ? LIMIT 1',
+      [resourceId]
+    );
+    if (!resources.length) {
+      return res.status(404).json({ success: false, error: 'Resource not found' });
+    }
 
     const [goals] = await db.getPool().query('SELECT goal_id FROM Goals WHERE goal_id = ? AND user_id = ?', [
       goalId,

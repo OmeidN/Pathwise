@@ -81,14 +81,47 @@ router.post('/projects/:id/resources', requireAuth, async (req, res) => {
   try {
     const projectId = Number(req.params.id);
     const resourceId = Number((req.body || {}).resource_id);
-    if (!projectId || !resourceId) return res.status(400).json({ success: false, error: 'project id and resource_id required' });
+
+    if (!projectId || !resourceId) {
+      return res.status(400).json(
+        { 
+          success: false, 
+          error: 'project id and resource_id required' 
+        }
+      );
+    }
+
+    // We should not tru the posted resource_id outright but to check it first
+    const [resources] = await db.getPool().query(
+      'SELECT resource_id FROM Resources WHERE resource_id = ? LIMIT 1',
+      [resourceId]
+    );
+
+    if (!resources.length) {
+      return res.status(404).json(
+        { 
+          success: false, 
+          error: 'Resource not found' 
+        }
+      );
+    }
+
     const [projects] = await db.getPool().query(
       `SELECT p.project_id
        FROM Projects p JOIN Goals g ON g.goal_id = p.goal_id
        WHERE p.project_id = ? AND g.user_id = ?`,
       [projectId, req.session.userId]
     );
-    if (!projects.length) return res.status(404).json({ success: false, error: 'Project not found' });
+
+    if (!projects.length) {
+      return res.status(404).json(
+        { 
+          success: false, 
+          error: 'Project not found' 
+        }
+      );
+    }
+
     await db.getPool().query('INSERT IGNORE INTO ProjectResources (project_id, resource_id) VALUES (?, ?)', [projectId, resourceId]);
     res.status(201).json({ success: true });
   } catch (err) {

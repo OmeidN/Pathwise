@@ -7,6 +7,9 @@ const aiOnlyInput = document.getElementById("filter-ai-only");
 const recommendedSection = document.getElementById("recommended-section");
 const recommendedResults = document.getElementById("recommended-results");
 const queryRegex = /^[a-z0-9 ]{1,40}$/i;
+// -----
+const applyFiltersBtn = document.querySelector(".btn-apply-filters");
+const clearFiltersBtn = document.querySelector(".btn-clear-filters");
 
 function resourceCardMarkup(resource) {
   return `
@@ -111,25 +114,28 @@ searchForm.addEventListener("submit", async (e) => {
   }
 });
 
+// Commented the auto submit listeners, becuase it would be much 
+// cleaner with one apply filter button
+
 // ADDED 3/26 — wire cost dropdown and tag checkboxes to re-submit the form
-if (costInput) {
-  costInput.addEventListener("change", () => {
-    searchForm.dispatchEvent(new Event("submit"));
-  });
-}
+// if (costInput) {
+//   costInput.addEventListener("change", () => {
+//     searchForm.dispatchEvent(new Event("submit"));
+//   });
+// }
 
-document.querySelectorAll('input[type="checkbox"][data-tag]')
-  .forEach(cb => {
-    cb.addEventListener("change", () => {
-      searchForm.dispatchEvent(new Event("submit"));
-    });
-  });
+// document.querySelectorAll('input[type="checkbox"][data-tag]')
+//   .forEach(cb => {
+//     cb.addEventListener("change", () => {
+//       searchForm.dispatchEvent(new Event("submit"));
+//     });
+//   });
 
-if (aiOnlyInput) {
-  aiOnlyInput.addEventListener("change", () => {
-    searchForm.dispatchEvent(new Event("submit"));
-  });
-}
+// if (aiOnlyInput) {
+//   aiOnlyInput.addEventListener("change", () => {
+//     searchForm.dispatchEvent(new Event("submit"));
+//   });
+// }
 
 const pageParams = new URLSearchParams(window.location.search);
 if (pageParams.get("q")) searchInput.value = pageParams.get("q");
@@ -146,5 +152,33 @@ if (pageParams.get("tags")) {
 if ([...pageParams.keys()].length > 0) {
   searchForm.dispatchEvent(new Event("submit"));
 }
+
+
+// These buttons existed visually but were not functional
+
+// The one apply filter button  
+if (applyFiltersBtn) {
+  applyFiltersBtn.addEventListener("click", () => {
+    searchForm.dispatchEvent(new Event("submit"));
+  });
+}
+
+// The clear filter buttong
+if (clearFiltersBtn) {
+  clearFiltersBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    categoryInput.value = "";
+    if (costInput) costInput.value = "";
+    if (aiOnlyInput) aiOnlyInput.checked = false;
+
+    document.querySelectorAll('input[type="checkbox"][data-tag]').forEach((cb) => {
+      cb.checked = false;
+    });
+
+    history.replaceState(null, "", "index.html");
+    document.getElementById("results").innerHTML = "<p>Waiting for input...</p>";
+  });
+}
+// 
 
 loadRecommendations();

@@ -126,16 +126,26 @@ router.get('/recommendations', requireAuth, async (req, res) => {
 
       const scoreExpr = scoreParts.join(' + ');
       const params = [...scoreParams];
-      const sql = `SELECT
-                   r.resource_id, r.title, r.description, r.url, r.category_id, r.image_path, r.cost, r.is_ai_enabled,
-                   (${scoreExpr}) AS score
-                 FROM Resources r
-                 WHERE r.visibility = 'public'
-                 HAVING score > 0
-               ORDER BY score DESC
-               LIMIT 20`;
 
-      const [candidates] = await pool.query(sql, params);
+      // Recommendations should not show already bookmarked resources by the user,
+      // becuase its not new content
+      const sql = `SELECT
+                    r.resource_id, r.title, r.description, r.url, r.category_id, r.image_path, r.cost, r.is_ai_enabled,
+                    (${scoreExpr}) AS score
+                  FROM Resources r
+                  WHERE r.visibility = 'public'
+                    AND NOT EXISTS (
+                      SELECT 1
+                      FROM Bookmarks b
+                      WHERE b.user_id = ?
+                        AND b.resource_id = r.resource_id
+                    )
+                  HAVING score > 0
+                  ORDER BY score DESC
+                  LIMIT 20`;
+
+      const [candidates] = await pool.query(sql, [...params, userId]);
+      
       for (const candidate of candidates) {
         const existing = candidateMap.get(candidate.resource_id);
         if (!existing || Number(candidate.score) > Number(existing.score)) {
