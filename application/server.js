@@ -19,6 +19,8 @@ const messagesRoutes = require('./routes/messages');
 const recommendationsRoutes = require('./routes/recommendations');
 const ratingsRoutes = require('./routes/ratings');
 const usersRoutes = require('./routes/users');
+const reportsRoutes = require('./routes/reports');
+const templatesRoutes = require('./routes/templates');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,6 +63,8 @@ app.use('/api', messagesRoutes);
 app.use('/api', recommendationsRoutes);
 app.use('/api', ratingsRoutes);
 app.use('/api', usersRoutes);
+app.use('/api', reportsRoutes);
+app.use('/api', templatesRoutes);
 
 // GET /api/db-test - simple DB test
 app.get('/api/db-test', async (req, res) => {

@@ -3,15 +3,25 @@ const currentPage = document.body.dataset.page || '';
 
 function guestNavMarkup() {
   return `
+    <a href="templates.html" class="nav-link${currentPage === 'templates' ? ' nav-link--active' : ''}">Templates</a>
     <a href="login.html" class="nav-link"${currentPage === 'login' ? ' aria-current="page"' : ''}>Login</a>
     <a href="register.html" class="nav-btn"${currentPage === 'register' ? ' aria-current="page"' : ''}>Register</a>
   `;
 }
 
-function authedNavMarkup(username) {
+function authedNavMarkup(user) {
+  const username = user.username || user.name || 'Account';
+  const role = user.role || 'student';
+  const publishLink =
+    role === 'faculty' || role === 'staff'
+      ? `<a href="publish.html" class="nav-link${currentPage === 'publish' ? ' nav-link--active' : ''}">Publish</a>`
+      : '';
   return `
     <a href="dashboard.html" class="nav-link${currentPage === 'dashboard' ? ' nav-link--active' : ''}">Dashboard</a>
     <a href="goals.html" class="nav-link${currentPage === 'goals' || currentPage === 'goal-detail' ? ' nav-link--active' : ''}">Goals</a>
+    <a href="templates.html" class="nav-link${currentPage === 'templates' ? ' nav-link--active' : ''}">Templates</a>
+    <a href="reports.html" class="nav-link${currentPage === 'reports' ? ' nav-link--active' : ''}">Reports</a>
+    ${publishLink}
     <a href="bookmarks.html" class="nav-link${currentPage === 'bookmarks' ? ' nav-link--active' : ''}">Bookmarks</a>
     <a href="reflections.html" class="nav-link${currentPage === 'reflections' ? ' nav-link--active' : ''}">Reflections</a>
     <a href="messages.html" class="nav-link${currentPage === 'messages' ? ' nav-link--active' : ''}">Messages</a>
@@ -30,9 +40,8 @@ function renderGuestNav() {
 function renderAuthedNav(user) {
   if (!navAuth) return;
 
-  const username = user.username || user.name || 'Account';
   navAuth.dataset.authState = 'authenticated';
-  navAuth.innerHTML = authedNavMarkup(username);
+  navAuth.innerHTML = authedNavMarkup(user);
 
   const logoutBtn = document.getElementById('logoutBtn');
   if (!logoutBtn) return;

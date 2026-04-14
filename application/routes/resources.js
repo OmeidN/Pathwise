@@ -9,6 +9,7 @@ const express = require('express');
 const db = require('../db/connection');
 const { requireAuth } = require('../middleware/requireAuth');
 const { requireRole } = require('../middleware/requireRole');
+const { logActivity } = require('../services/activityLog');
 
 const router = express.Router();
 
@@ -181,7 +182,8 @@ router.post('/resources', requireAuth, uploadOptional, async (req, res) => {
     category_id: categoryIdRaw,
     cost,
     tags: tagIdsRaw,
-    visibility: visRaw
+    visibility: visRaw,
+    is_ai_enabled: isAiRaw
   } = req.body || {};
 
   if (!title || !description || categoryIdRaw === undefined || categoryIdRaw === null || categoryIdRaw === '') {
@@ -196,11 +198,31 @@ router.post('/resources', requireAuth, uploadOptional, async (req, res) => {
     return res.status(400).json({ success: false, error: 'Invalid category_id' });
   }
 
+  const [[userRow]] = await db.getPool().query('SELECT role FROM Users WHERE user_id = ? LIMIT 1', [
+    req.session.userId
+  ]);
+  const role = userRow?.role || 'student';
+  const canPublishPublic = role === 'faculty' || role === 'staff';
+
   const titleStr = String(title).trim();
   const descStr = String(description).trim();
   const urlStr = url != null && String(url).trim() !== '' ? String(url).trim() : null;
   const costStr = cost != null && String(cost).trim() !== '' ? String(cost).trim().slice(0, 32) : null;
-  const visibility = visRaw === 'private' ? 'private' : 'public';
+
+  let visibility = visRaw === 'private' ? 'private' : 'public';
+  if (!canPublishPublic) {
+    visibility = 'private';
+  }
+
+  let isAiEnabled = 0;
+  if (canPublishPublic) {
+    const on =
+      isAiRaw === true ||
+      isAiRaw === 1 ||
+      isAiRaw === '1' ||
+      String(isAiRaw || '').toLowerCase() === 'true';
+    isAiEnabled = on ? 1 : 0;
+  }
 
   let imagePath = null;
   if (req.file && req.file.filename) {
@@ -227,8 +249,8 @@ router.post('/resources', requireAuth, uploadOptional, async (req, res) => {
     const [insertResult] = await conn.query(
       `INSERT INTO Resources
         (title, description, url, image_path, category_id, submitted_by, cost, is_ai_enabled, visibility)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)`,
-      [titleStr, descStr, urlStr, imagePath, categoryId, req.session.userId, costStr, visibility]
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [titleStr, descStr, urlStr, imagePath, categoryId, req.session.userId, costStr, isAiEnabled, visibility]
     );
 
     const resourceId = insertResult.insertId;
@@ -257,6 +279,16 @@ router.post('/resources', requireAuth, uploadOptional, async (req, res) => {
     resource.tags = tagRows;
     resource.avg_rating = null;
     resource.rating_count = 0;
+
+    if (visibility === 'public') {
+      await logActivity({
+        userId: req.session.userId,
+        actionType: 'resource_published',
+        entityType: 'resource',
+        entityId: resourceId,
+        detail: { title: titleStr }
+      });
+    }
 
     res.status(201).json({ success: true, resource });
   } catch (err) {

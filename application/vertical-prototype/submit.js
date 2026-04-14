@@ -49,6 +49,7 @@ submitForm.addEventListener('submit', async (event) => {
     if (url) formData.append('url', url);
     if (cost) formData.append('cost', cost);
     formData.append('tags', JSON.stringify(tags));
+    formData.append('visibility', 'private');
 
     if (imageInput && imageInput.files && imageInput.files[0]) {
       formData.append('image', imageInput.files[0]);
@@ -70,7 +71,7 @@ submitForm.addEventListener('submit', async (event) => {
       throw new Error(data.error || 'Could not submit resource.');
     }
 
-    showSubmitMessage(submitSuccess, 'Resource submitted successfully.');
+    showSubmitMessage(submitSuccess, 'Saved as a private resource on your account.');
     window.location.href = `resource.html?id=${data.resource.resource_id}`;
   } catch (error) {
     showSubmitMessage(submitError, error.message);

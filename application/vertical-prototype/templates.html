@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Templates - Pathwise</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+</head>
+<body data-page="templates">
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="landing.html" class="site-title">Pathwise</a>
+      <nav id="main-nav">
+        <a href="landing.html" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link">Browse</a>
+        <a href="submit.html" class="nav-link">Submit Resource</a>
+        <div id="nav-auth" data-auth-state="guest"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main style="max-width:980px;margin:0 auto;padding:24px">
+    <h1>Community-shared Goal Templates & Workflows</h1>
+    <p style="color:var(--color-text-muted);margin-bottom:18px">
+      Browse reusable planning templates from the community. Signed-in users can contribute a public template.
+    </p>
+
+    <section class="card" style="padding:16px;margin-bottom:18px">
+      <h2 style="margin-bottom:10px">Share a template</h2>
+      <p id="tpl-form-note" style="color:var(--color-text-muted);margin-bottom:10px">
+        Sign in to share.
+      </p>
+      <div id="tpl-error" class="error" style="margin-bottom:10px"></div>
+      <form id="templateForm">
+        <label>Title
+          <input id="tpl-title" class="input" type="text" maxlength="255" placeholder="e.g., Internship Application Sprint">
+        </label>
+        <label>Description
+          <textarea id="tpl-description" class="input" rows="2" placeholder="What this template helps with"></textarea>
+        </label>
+        <label>Category
+          <input id="tpl-category" class="input" type="text" placeholder="academic, career, wellness...">
+        </label>
+        <label>Workflow steps
+          <textarea id="tpl-steps" class="input" rows="5" placeholder="1. ...&#10;2. ...&#10;3. ..."></textarea>
+        </label>
+        <button id="tpl-submit" class="btn btn-primary" type="submit">Publish template</button>
+      </form>
+    </section>
+
+    <section>
+      <h2 style="margin-bottom:10px">Public templates</h2>
+      <div id="templates-list"></div>
+    </section>
+  </main>
+
+  <script src="nav.js"></script>
+  <script src="js/templates.js"></script>
+</body>
+</html>

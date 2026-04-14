@@ -235,11 +235,29 @@ router.patch('/goals/:id/status', requireAuth, async (req, res) => {
     const { status } = req.body || {};
     if (!goalId) return res.status(400).json({ success: false, error: 'Invalid goal id' });
     if (!validStatus(status)) return res.status(400).json({ success: false, error: 'Invalid status' });
-    const [result] = await db.getPool().query(
+    const pool = db.getPool();
+    const [prevRows] = await pool.query(
+      `SELECT status FROM Goals WHERE goal_id = ? AND user_id = ? LIMIT 1`,
+      [goalId, req.session.userId]
+    );
+    if (!prevRows.length) return res.status(404).json({ success: false, error: 'Goal not found' });
+    const prevStatus = prevRows[0].status;
+
+    const [result] = await pool.query(
       `UPDATE Goals SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE goal_id = ? AND user_id = ?`,
       [status, goalId, req.session.userId]
     );
     if (!result.affectedRows) return res.status(404).json({ success: false, error: 'Goal not found' });
+
+    if (status === 'completed' && prevStatus !== 'completed') {
+      await logActivity({
+        userId: req.session.userId,
+        actionType: 'goal_completed',
+        entityType: 'goal',
+        entityId: goalId
+      });
+    }
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
