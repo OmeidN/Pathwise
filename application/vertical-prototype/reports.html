@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Activity reports — Pathwise</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/pages/reports.css" />
+</head>
+<body data-page="reports">
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="landing.html" class="site-title">Pathwise</a>
+      <nav id="main-nav">
+        <a href="landing.html" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link">Browse</a>
+        <a href="submit.html" class="nav-link">Submit Resource</a>
+        <div id="nav-auth"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="reports-main">
+    <div class="reports-header">
+      <h1>Activity reports</h1>
+      <p class="reports-muted">
+        Summaries for completed goals, milestone completions, reflections, bookmarks, and logged activity.
+        Windows use UTC dates; week = 7 days, month = 30 days, semester = 120 days ending on the anchor date.
+      </p>
+    </div>
+
+    <div id="reports-error" class="reports-error" hidden></div>
+
+    <div class="reports-controls card" style="padding: var(--space-lg)">
+      <label>
+        View
+        <select id="report-period" class="input">
+          <option value="week">Past week</option>
+          <option value="month">Past month (30 days)</option>
+          <option value="semester">Past semester (120 days)</option>
+          <option value="custom">Custom range</option>
+        </select>
+      </label>
+      <label id="anchor-wrap">
+        End date (anchor)
+        <input type="date" id="report-anchor" class="input" />
+      </label>
+      <label id="custom-start-wrap" hidden>
+        Start
+        <input type="date" id="report-start" class="input" />
+      </label>
+      <label id="custom-end-wrap" hidden>
+        End
+        <input type="date" id="report-end" class="input" />
+      </label>
+      <button type="button" class="btn btn-primary" id="report-refresh">Update report</button>
+    </div>
+
+    <section class="reports-section">
+      <h2>Totals in this period</h2>
+      <div id="reports-summary" class="reports-grid"></div>
+    </section>
+
+    <section class="reports-section">
+      <h2>Current snapshot</h2>
+      <div id="reports-snapshot" class="reports-grid"></div>
+    </section>
+
+    <section class="reports-section">
+      <h2>Activity log breakdown</h2>
+      <ul id="reports-activity" class="reports-activity card" style="padding: var(--space-md)"></ul>
+    </section>
+  </main>
+
+  <script src="nav.js"></script>
+  <script src="js/reports.js"></script>
+</body>
+</html>

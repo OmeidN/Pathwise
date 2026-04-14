@@ -1,0 +1,43 @@
+{
+  "success": true,
+  "count": 2,
+  "results": [
+    {
+      "id": 101,
+      "title": "Internship Search",
+      "description": "How to find and apply for internships",
+      "type": "resource",
+      "category": "career",
+      "tags": ["internship", "career", "jobs"],
+      "url": "https://testsite.com",
+      "imagePath": "[insert image path here]",
+      "isAiEnabled": false,
+      "createdAt": "3-2-2026"
+    },
+    {
+      "id": 205,
+      "title": "Resume writing",
+      "description": "resume template for studnets",
+      "type": "template",
+      "category": "career",
+      "tags": ["resume", "career", "template"],
+      "createdBy": "Career Center",
+      "imagePath": null,
+      "isAiEnabled": true,
+      "createdAt": "3-1-2026"
+    }
+  ]
+}
+
+// {
+//   "success": true,
+//   "count": 0,
+//   "results": []
+// }
+
+
+// {
+//   "success": false,
+//   "error": "DB error",
+//   "message": "Unable to process search request"
+// }
