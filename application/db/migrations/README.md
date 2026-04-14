@@ -8,6 +8,7 @@ Run these in order from the `application/db/migrations` directory on EC2:
 4. `004_m4_roles_userprofiles.sql` (user `role`, `UserProfiles`)
 5. `005_reflections_activity.sql` (`Reflections`, `ActivityLogs`)
 6. `006_ratings_messages.sql` (`ResourceRatings`, `Messages`)
+7. `007_community_templates.sql` (`CommunityTemplates` for public goal template/workflow browsing)
 
 Example:
 

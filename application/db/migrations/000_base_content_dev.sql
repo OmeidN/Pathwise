@@ -59,8 +59,4 @@ INSERT IGNORE INTO Tags (tag_name) VALUES
   ('internship'),
   ('study-skills');
 
--- How to use it - for a completely new developer machine:
----------
--- run 000_base_content_dev.sql
--- then run 001_m3_users_bookmarks.sql
--- then 002, 003, 004, 005, 006
+-- How to use (new machine): run this file, then 001_m3_users_bookmarks.sql, then 002 through 006 in order.
