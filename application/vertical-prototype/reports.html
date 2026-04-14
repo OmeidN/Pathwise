@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports - Pathwise</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+</head>
+<body data-page="reports">
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="landing.html" class="site-title">Pathwise</a>
+      <nav id="main-nav">
+        <a href="landing.html" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link">Browse</a>
+        <a href="submit.html" class="nav-link">Submit Resource</a>
+        <div id="nav-auth"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main style="max-width:900px;margin:0 auto;padding:24px">
+    <h1>Summary Reports</h1>
+    <p style="color:var(--color-text-muted)">View progress over weekly, monthly, or semester windows.</p>
+
+    <div class="card" style="padding:14px;margin:14px 0">
+      <label for="period">Time period</label>
+      <select id="period" class="input" style="max-width:260px">
+        <option value="week">Weekly (7 days)</option>
+        <option value="month">Monthly (30 days)</option>
+        <option value="semester">Semester (120 days)</option>
+      </select>
+      <button id="reload" class="btn btn-primary" type="button" style="margin-top:10px">Load report</button>
+    </div>
+
+    <div id="report-error" class="error" style="margin-bottom:10px"></div>
+    <div id="report-summary"></div>
+    <div id="report-activity" style="margin-top:16px"></div>
+  </main>
+
+  <script src="nav.js"></script>
+  <script src="js/reports.js"></script>
+</body>
+</html>
