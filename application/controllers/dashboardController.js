@@ -5,14 +5,16 @@ async function loadDashboardData(userId) {
 
   const [goals] = await pool.query(
     `SELECT goal_id, title, description, category, target_date, status, updated_at
-     FROM Goals WHERE user_id = ? ORDER BY updated_at DESC`,
+     FROM Goals
+     WHERE user_id = ? AND template_kind = 'none'
+     ORDER BY updated_at DESC`,
     [userId]
   );
   const [projects] = await pool.query(
     `SELECT p.project_id, p.goal_id, p.title, p.description, p.updated_at
      FROM Projects p
      JOIN Goals g ON g.goal_id = p.goal_id
-     WHERE g.user_id = ?
+     WHERE g.user_id = ? AND g.template_kind = 'none'
      ORDER BY p.updated_at DESC`,
     [userId]
   );
@@ -21,7 +23,7 @@ async function loadDashboardData(userId) {
      FROM Milestones m
      JOIN Projects p ON p.project_id = m.project_id
      JOIN Goals g ON g.goal_id = p.goal_id
-     WHERE g.user_id = ?
+     WHERE g.user_id = ? AND g.template_kind = 'none'
      ORDER BY m.target_date IS NULL, m.target_date ASC`,
     [userId]
   );

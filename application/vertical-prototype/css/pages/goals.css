@@ -305,6 +305,12 @@
   font-size: var(--font-size-sm);
 }
 
+.goal-card--highlight {
+  outline: 2px solid var(--color-primary, #2563eb);
+  outline-offset: 4px;
+  transition: outline-color 0.3s ease;
+}
+
 @media (max-width: 600px) {
   .goals-toolbar {
     grid-template-columns: 1fr;

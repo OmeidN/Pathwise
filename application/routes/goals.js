@@ -14,9 +14,9 @@ router.get('/goals-overview', requireAuth, async (req, res) => {
     const pool = db.getPool();
     const userId = req.session.userId;
     const [goals] = await pool.query(
-      `SELECT goal_id, user_id, title, description, category, target_date, status, created_at, updated_at
+      `SELECT goal_id, user_id, title, description, category, target_date, status, template_kind, template_copied_count, created_at, updated_at
        FROM Goals
-       WHERE user_id = ?
+       WHERE user_id = ? AND template_kind = 'none'
        ORDER BY updated_at DESC`,
       [userId]
     );
@@ -74,9 +74,9 @@ router.get('/goals-overview', requireAuth, async (req, res) => {
 router.get('/goals', requireAuth, async (req, res) => {
   try {
     const [rows] = await db.getPool().query(
-      `SELECT goal_id, user_id, title, description, category, target_date, status, created_at, updated_at
+      `SELECT goal_id, user_id, title, description, category, target_date, status, template_kind, template_copied_count, created_at, updated_at
        FROM Goals
-       WHERE user_id = ?
+       WHERE user_id = ? AND template_kind = 'none'
        ORDER BY updated_at DESC`,
       [req.session.userId]
     );
@@ -91,7 +91,7 @@ router.get('/goals/:id', requireAuth, async (req, res) => {
     const goalId = Number(req.params.id);
     if (!goalId) return res.status(400).json({ success: false, error: 'Invalid goal id' });
     const [rows] = await db.getPool().query(
-      `SELECT goal_id, user_id, title, description, category, target_date, status, created_at, updated_at
+      `SELECT goal_id, user_id, title, description, category, target_date, status, template_kind, template_copied_count, created_at, updated_at
        FROM Goals
        WHERE goal_id = ? AND user_id = ?
        LIMIT 1`,
@@ -112,7 +112,7 @@ router.get('/goals/:id/hub', requireAuth, async (req, res) => {
     const pool = db.getPool();
 
     const [goalRows] = await pool.query(
-      `SELECT goal_id, user_id, title, description, category, target_date, status, created_at, updated_at
+      `SELECT goal_id, user_id, title, description, category, target_date, status, template_kind, template_copied_count, created_at, updated_at
        FROM Goals
        WHERE goal_id = ? AND user_id = ?
        LIMIT 1`,
@@ -190,8 +190,8 @@ router.post('/goals', requireAuth, async (req, res) => {
       return res.status(400).json({ success: false, error: 'title is required (min 2 chars)' });
     }
     const [result] = await db.getPool().query(
-      `INSERT INTO Goals (user_id, title, description, category, target_date, status)
-       VALUES (?, ?, ?, ?, ?, 'active')`,
+      `INSERT INTO Goals (user_id, title, description, category, target_date, status, template_kind, template_copied_count)
+       VALUES (?, ?, ?, ?, ?, 'active', 'none', 0)`,
       [req.session.userId, String(title).trim(), description || null, category || null, target_date || null]
     );
     const goalId = result.insertId;
@@ -286,13 +286,14 @@ router.post('/goals/:id/resources', requireAuth, async (req, res) => {
 
     if (!goalId || !resourceId) return res.status(400).json({ success: false, error: 'goal id and resource_id required' });
 
-    // We should not tru the posted resource_id outright but to check it first
     const [resources] = await db.getPool().query(
-      'SELECT resource_id FROM Resources WHERE resource_id = ? LIMIT 1',
-      [resourceId]
+      `SELECT resource_id FROM Resources
+       WHERE resource_id = ? AND (visibility = 'public' OR submitted_by = ?)
+       LIMIT 1`,
+      [resourceId, req.session.userId]
     );
     if (!resources.length) {
-      return res.status(404).json({ success: false, error: 'Resource not found' });
+      return res.status(404).json({ success: false, error: 'Resource not found or not attachable' });
     }
 
     const [goals] = await db.getPool().query('SELECT goal_id FROM Goals WHERE goal_id = ? AND user_id = ?', [
@@ -305,6 +306,141 @@ router.post('/goals/:id/resources', requireAuth, async (req, res) => {
     res.status(201).json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.delete('/goals/:goalId/resources/:resourceId', requireAuth, async (req, res) => {
+  try {
+    const goalId = Number(req.params.goalId);
+    const resourceId = Number(req.params.resourceId);
+    if (!goalId || !resourceId) {
+      return res.status(400).json({ success: false, error: 'goal id and resource_id required' });
+    }
+    const pool = db.getPool();
+    const [result] = await pool.query(
+      `DELETE gr FROM GoalResources gr
+       JOIN Goals g ON g.goal_id = gr.goal_id
+       WHERE gr.goal_id = ? AND gr.resource_id = ? AND g.user_id = ?`,
+      [goalId, resourceId, req.session.userId]
+    );
+    if (!result.affectedRows) return res.status(404).json({ success: false, error: 'Attachment not found' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post('/goals/:id/templates', requireAuth, async (req, res) => {
+  try {
+    const goalId = Number(req.params.id);
+    const templateId = Number((req.body || {}).template_id);
+    if (!goalId || !templateId) {
+      return res.status(400).json({ error: 'Validation failed', details: ['goal id and template_id required'] });
+    }
+    const pool = db.getPool();
+    const [[goal]] = await pool.query('SELECT goal_id FROM Goals WHERE goal_id = ? AND user_id = ? LIMIT 1', [
+      goalId,
+      req.session.userId
+    ]);
+    if (!goal) return res.status(404).json({ error: 'Goal not found' });
+    const [[template]] = await pool.query(
+      'SELECT template_id FROM CommunityTemplates WHERE template_id = ? AND is_public = 1 LIMIT 1',
+      [templateId]
+    );
+    if (!template) return res.status(404).json({ error: 'Template not found' });
+    await pool.query(`INSERT IGNORE INTO GoalTemplateLinks (goal_id, template_id) VALUES (?, ?)`, [goalId, templateId]);
+    res.status(201).json({ success: true });
+  } catch (_err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/goals/:id/workflows', requireAuth, async (req, res) => {
+  try {
+    const goalId = Number(req.params.id);
+    const workflowId = Number((req.body || {}).workflow_id);
+    if (!goalId || !workflowId) {
+      return res.status(400).json({ error: 'Validation failed', details: ['goal id and workflow_id required'] });
+    }
+    const pool = db.getPool();
+    const [[goal]] = await pool.query('SELECT goal_id FROM Goals WHERE goal_id = ? AND user_id = ? LIMIT 1', [
+      goalId,
+      req.session.userId
+    ]);
+    if (!goal) return res.status(404).json({ error: 'Goal not found' });
+    const [[workflow]] = await pool.query(
+      'SELECT workflow_id FROM Workflows WHERE workflow_id = ? AND (is_public = 1 OR created_by = ?) LIMIT 1',
+      [workflowId, req.session.userId]
+    );
+    if (!workflow) return res.status(404).json({ error: 'Workflow not found' });
+    await pool.query(`INSERT IGNORE INTO GoalWorkflowLinks (goal_id, workflow_id) VALUES (?, ?)`, [goalId, workflowId]);
+    res.status(201).json({ success: true });
+  } catch (_err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/goals/:goalId/attachments', requireAuth, async (req, res) => {
+  try {
+    const goalId = Number(req.params.goalId);
+    if (!goalId) return res.status(400).json({ error: 'Validation failed', details: ['Invalid goal id'] });
+    const pool = db.getPool();
+    const [[goal]] = await pool.query('SELECT goal_id FROM Goals WHERE goal_id = ? AND user_id = ? LIMIT 1', [
+      goalId,
+      req.session.userId
+    ]);
+    if (!goal) return res.status(404).json({ error: 'Goal not found' });
+
+    const [resources] = await pool.query(
+      `SELECT r.resource_id AS id, 'resource' AS type, r.title, r.description, c.category_name AS category,
+              r.is_ai_enabled AS ai_enabled, r.image_path AS image, r.url, gr.created_at AS attachedAt
+       FROM GoalResources gr
+       JOIN Resources r ON r.resource_id = gr.resource_id
+       LEFT JOIN Categories c ON c.category_id = r.category_id
+       WHERE gr.goal_id = ?`,
+      [goalId]
+    );
+    const [resourceTags] = await pool.query(
+      `SELECT gr.resource_id, t.tag_name
+       FROM GoalResources gr
+       JOIN ResourceTags rt ON rt.resource_id = gr.resource_id
+       JOIN Tags t ON t.tag_id = rt.tag_id
+       WHERE gr.goal_id = ?`,
+      [goalId]
+    );
+    const tagsByResource = new Map();
+    for (const row of resourceTags) {
+      const list = tagsByResource.get(row.resource_id) || [];
+      list.push(row.tag_name);
+      tagsByResource.set(row.resource_id, list);
+    }
+    for (const item of resources) {
+      item.tags = tagsByResource.get(item.id) || [];
+    }
+
+    const [templates] = await pool.query(
+      `SELECT t.template_id AS id, 'template' AS type, t.title, t.description, t.category,
+              0 AS ai_enabled, NULL AS image, NULL AS url, gl.created_at AS attachedAt
+       FROM GoalTemplateLinks gl
+       JOIN CommunityTemplates t ON t.template_id = gl.template_id
+       WHERE gl.goal_id = ?`,
+      [goalId]
+    );
+    for (const item of templates) item.tags = [];
+
+    const [workflows] = await pool.query(
+      `SELECT w.workflow_id AS id, 'workflow' AS type, w.title, w.description, w.category,
+              w.is_ai_enabled AS ai_enabled, NULL AS image, NULL AS url, gw.created_at AS attachedAt
+       FROM GoalWorkflowLinks gw
+       JOIN Workflows w ON w.workflow_id = gw.workflow_id
+       WHERE gw.goal_id = ?`,
+      [goalId]
+    );
+    for (const item of workflows) item.tags = [];
+
+    res.json({ success: true, results: [...resources, ...templates, ...workflows] });
+  } catch (_err) {
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

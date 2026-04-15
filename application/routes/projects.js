@@ -91,19 +91,18 @@ router.post('/projects/:id/resources', requireAuth, async (req, res) => {
       );
     }
 
-    // We should not tru the posted resource_id outright but to check it first
     const [resources] = await db.getPool().query(
-      'SELECT resource_id FROM Resources WHERE resource_id = ? LIMIT 1',
-      [resourceId]
+      `SELECT resource_id FROM Resources
+       WHERE resource_id = ? AND (visibility = 'public' OR submitted_by = ?)
+       LIMIT 1`,
+      [resourceId, req.session.userId]
     );
 
     if (!resources.length) {
-      return res.status(404).json(
-        { 
-          success: false, 
-          error: 'Resource not found' 
-        }
-      );
+      return res.status(404).json({
+        success: false,
+        error: 'Resource not found or not attachable'
+      });
     }
 
     const [projects] = await db.getPool().query(
@@ -126,6 +125,80 @@ router.post('/projects/:id/resources', requireAuth, async (req, res) => {
     res.status(201).json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.post('/projects/:id/workflows', requireAuth, async (req, res) => {
+  try {
+    const projectId = Number(req.params.id);
+    const workflowId = Number((req.body || {}).workflow_id);
+    if (!projectId || !workflowId) {
+      return res.status(400).json({ error: 'Validation failed', details: ['project id and workflow_id required'] });
+    }
+    const pool = db.getPool();
+    const [[project]] = await pool.query(
+      `SELECT p.project_id
+       FROM Projects p
+       JOIN Goals g ON g.goal_id = p.goal_id
+       WHERE p.project_id = ? AND g.user_id = ?
+       LIMIT 1`,
+      [projectId, req.session.userId]
+    );
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+    const [[workflow]] = await pool.query(
+      `SELECT workflow_id
+       FROM Workflows
+       WHERE workflow_id = ? AND (is_public = 1 OR created_by = ?)
+       LIMIT 1`,
+      [workflowId, req.session.userId]
+    );
+    if (!workflow) return res.status(404).json({ error: 'Workflow not found' });
+    await pool.query('INSERT IGNORE INTO ProjectWorkflowLinks (project_id, workflow_id) VALUES (?, ?)', [projectId, workflowId]);
+    res.status(201).json({ success: true });
+  } catch (_err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/projects/:projectId/attachments', requireAuth, async (req, res) => {
+  try {
+    const projectId = Number(req.params.projectId);
+    if (!projectId) return res.status(400).json({ error: 'Validation failed', details: ['Invalid project id'] });
+    const pool = db.getPool();
+    const [[project]] = await pool.query(
+      `SELECT p.project_id
+       FROM Projects p
+       JOIN Goals g ON g.goal_id = p.goal_id
+       WHERE p.project_id = ? AND g.user_id = ?
+       LIMIT 1`,
+      [projectId, req.session.userId]
+    );
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+
+    const [resources] = await pool.query(
+      `SELECT r.resource_id AS id, 'resource' AS type, r.title, r.description, c.category_name AS category,
+              r.is_ai_enabled AS ai_enabled, r.image_path AS image, r.url, pr.created_at AS attachedAt
+       FROM ProjectResources pr
+       JOIN Resources r ON r.resource_id = pr.resource_id
+       LEFT JOIN Categories c ON c.category_id = r.category_id
+       WHERE pr.project_id = ?`,
+      [projectId]
+    );
+    for (const r of resources) r.tags = [];
+
+    const [workflows] = await pool.query(
+      `SELECT w.workflow_id AS id, 'workflow' AS type, w.title, w.description, w.category,
+              w.is_ai_enabled AS ai_enabled, NULL AS image, NULL AS url, pw.created_at AS attachedAt
+       FROM ProjectWorkflowLinks pw
+       JOIN Workflows w ON w.workflow_id = pw.workflow_id
+       WHERE pw.project_id = ?`,
+      [projectId]
+    );
+    for (const w of workflows) w.tags = [];
+
+    res.json({ success: true, results: [...resources, ...workflows] });
+  } catch (_err) {
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

@@ -255,6 +255,22 @@
   grid-column: 1 / -1;
 }
 
+#template-recommended-section {
+  margin-top: var(--space-2xl);
+}
+
+#template-recommended-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-md);
+}
+
+#template-recommended-results > p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  grid-column: 1 / -1;
+}
+
 #results {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

@@ -243,5 +243,19 @@
     await loadGoals();
   });
 
-  loadGoals();
+  const opened = new URLSearchParams(window.location.search).get('opened');
+  loadGoals().then(() => {
+    if (!opened) return;
+    const id = Number(opened);
+    if (!Number.isFinite(id)) return;
+    const card = listEl.querySelector(`[data-id="${id}"]`);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('goal-card--highlight');
+      setTimeout(() => card.classList.remove('goal-card--highlight'), 4000);
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.delete('opened');
+    window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
+  });
 })();

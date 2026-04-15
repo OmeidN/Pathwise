@@ -65,7 +65,7 @@ router.get('/recommendations', requireAuth, async (req, res) => {
     const [goalRows] = await pool.query(
       `SELECT goal_id, title, description
        FROM Goals
-       WHERE user_id = ? AND status IN ('active', 'paused')
+       WHERE user_id = ? AND status IN ('active', 'paused') AND template_kind = 'none'
        ORDER BY updated_at DESC`,
       [userId]
     );
@@ -74,7 +74,7 @@ router.get('/recommendations', requireAuth, async (req, res) => {
       `SELECT p.goal_id, p.title, p.description
        FROM Projects p
        JOIN Goals g ON g.goal_id = p.goal_id
-       WHERE g.user_id = ? AND g.status IN ('active', 'paused')`,
+       WHERE g.user_id = ? AND g.status IN ('active', 'paused') AND g.template_kind = 'none'`,
       [userId]
     );
 
@@ -222,6 +222,98 @@ router.get('/recommendations', requireAuth, async (req, res) => {
     res.json({ success: true, results: selected, strategy: 'goal_project_matches_plus_random_fill' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.get('/template-recommendations', requireAuth, async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 4, 24);
+    const pool = db.getPool();
+    const userId = req.session.userId;
+
+    const [goalRows] = await pool.query(
+      `SELECT title, description FROM Goals WHERE user_id = ? AND status IN ('active', 'paused') AND template_kind = 'none'`,
+      [userId]
+    );
+    const [projectRows] = await pool.query(
+      `SELECT p.title, p.description
+       FROM Projects p
+       JOIN Goals g ON g.goal_id = p.goal_id
+       WHERE g.user_id = ? AND g.status IN ('active', 'paused') AND g.template_kind = 'none'`,
+      [userId]
+    );
+    const [savedRows] = await pool.query(
+      `SELECT r.title, r.description
+       FROM Bookmarks b
+       JOIN Resources r ON r.resource_id = b.resource_id
+       WHERE b.user_id = ?`,
+      [userId]
+    );
+
+    const savedTerms = tokenize(savedRows.flatMap((r) => [r.title, r.description]), 18);
+    const goalTerms = tokenize(goalRows.flatMap((r) => [r.title, r.description]), 12);
+    const projectTerms = tokenize(projectRows.flatMap((r) => [r.title, r.description]), 8);
+
+    const weightedGroups = [
+      { terms: savedTerms, titleWeight: 1200, bodyWeight: 800 },
+      { terms: goalTerms, titleWeight: 180, bodyWeight: 90 },
+      { terms: projectTerms, titleWeight: 20, bodyWeight: 10 }
+    ];
+
+    const scoreParts = [];
+    const params = [];
+    for (const group of weightedGroups) {
+      for (const term of group.terms) {
+        const like = `%${term}%`;
+        scoreParts.push(
+          `(CASE WHEN g.title LIKE ? THEN ${group.titleWeight} ELSE 0 END +
+            CASE WHEN g.description LIKE ? THEN ${group.bodyWeight} ELSE 0 END +
+            CASE WHEN (SELECT GROUP_CONCAT(p.title SEPARATOR ' ') FROM Projects p WHERE p.goal_id = g.goal_id) LIKE ? THEN ${group.bodyWeight} ELSE 0 END)`
+        );
+        params.push(like, like, like);
+      }
+    }
+
+    if (!scoreParts.length) {
+      const [fallback] = await pool.query(
+        `SELECT g.goal_id AS template_id, g.goal_id, g.title, g.description, g.category,
+                '' AS workflow_steps, g.template_copied_count AS copied_count, g.created_at
+         FROM Goals g
+         WHERE g.template_kind = 'published'
+         ORDER BY RAND()
+         LIMIT ?`,
+        [limit]
+      );
+      return res.json({ success: true, results: fallback, strategy: 'random_public_templates' });
+    }
+
+    const scoreExpr = scoreParts.join(' + ');
+    const [rows] = await pool.query(
+      `SELECT g.goal_id AS template_id, g.goal_id, g.title, g.description, g.category,
+              '' AS workflow_steps, g.template_copied_count AS copied_count, g.created_at,
+              (${scoreExpr}) AS score
+       FROM Goals g
+       WHERE g.template_kind = 'published'
+       HAVING score > 0
+       ORDER BY score DESC, g.template_copied_count DESC, g.created_at DESC
+       LIMIT ?`,
+      [...params, limit]
+    );
+    if (!rows.length) {
+      const [fallback] = await pool.query(
+        `SELECT g.goal_id AS template_id, g.goal_id, g.title, g.description, g.category,
+                '' AS workflow_steps, g.template_copied_count AS copied_count, g.created_at
+         FROM Goals g
+         WHERE g.template_kind = 'published'
+         ORDER BY RAND()
+         LIMIT ?`,
+        [limit]
+      );
+      return res.json({ success: true, results: fallback, strategy: 'random_public_templates_no_match' });
+    }
+    res.json({ success: true, results: rows, strategy: 'saved_goal_project_weighted' });
+  } catch (_err) {
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

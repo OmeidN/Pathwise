@@ -19,11 +19,56 @@ const messagesRoutes = require('./routes/messages');
 const recommendationsRoutes = require('./routes/recommendations');
 const ratingsRoutes = require('./routes/ratings');
 const usersRoutes = require('./routes/users');
-const reportsRoutes = require('./routes/reports');
 const templatesRoutes = require('./routes/templates');
+const workflowsRoutes = require('./routes/workflows');
+const sharesRoutes = require('./routes/shares');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+/** Cached flags so /api/search does not 500 when incremental migrations are missing. */
+const searchSchemaCache = {
+  checkedAt: 0,
+  ttlMs: 60_000,
+  goalTemplateSearch: false,
+  resourcesSkillArea: false,
+  communityTemplateSkillArea: false,
+  workflowsSkillArea: false
+};
+
+async function refreshSearchSchemaFlags(pool) {
+  const now = Date.now();
+  if (searchSchemaCache.checkedAt > 0 && now - searchSchemaCache.checkedAt < searchSchemaCache.ttlMs) {
+    return;
+  }
+  searchSchemaCache.checkedAt = now;
+  try {
+    const [[row]] = await pool.query(
+      `SELECT
+        (SELECT COUNT(*) FROM information_schema.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Goals' AND COLUMN_NAME = 'template_kind') AS goals_tpl,
+        (SELECT COUNT(*) FROM information_schema.TABLES
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'GoalTemplateRatings') AS gtr_tbl,
+        (SELECT COUNT(*) FROM information_schema.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Resources' AND COLUMN_NAME = 'skill_area') AS res_skill,
+        (SELECT COUNT(*) FROM information_schema.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'CommunityTemplates' AND COLUMN_NAME = 'skill_area') AS ct_skill,
+        (SELECT COUNT(*) FROM information_schema.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Workflows' AND COLUMN_NAME = 'skill_area') AS wf_skill`
+    );
+    searchSchemaCache.goalTemplateSearch =
+      Number(row.goals_tpl) > 0 && Number(row.gtr_tbl) > 0;
+    searchSchemaCache.resourcesSkillArea = Number(row.res_skill) > 0;
+    searchSchemaCache.communityTemplateSkillArea = Number(row.ct_skill) > 0;
+    searchSchemaCache.workflowsSkillArea = Number(row.wf_skill) > 0;
+  } catch (e) {
+    console.warn('[search] schema probe failed:', e.message);
+    searchSchemaCache.goalTemplateSearch = false;
+    searchSchemaCache.resourcesSkillArea = false;
+    searchSchemaCache.communityTemplateSkillArea = false;
+    searchSchemaCache.workflowsSkillArea = false;
+  }
+}
 
 app.set('trust proxy', 1);
 
@@ -63,8 +108,9 @@ app.use('/api', messagesRoutes);
 app.use('/api', recommendationsRoutes);
 app.use('/api', ratingsRoutes);
 app.use('/api', usersRoutes);
-app.use('/api', reportsRoutes);
 app.use('/api', templatesRoutes);
+app.use('/api', workflowsRoutes);
+app.use('/api', sharesRoutes);
 
 // GET /api/db-test - simple DB test
 app.get('/api/db-test', async (req, res) => {
@@ -84,28 +130,31 @@ app.get('/api/db-test', async (req, res) => {
   }
 });
 
-// GET /api/search?q=...&category=...&tags=1,2&cost=free|paid
+// GET /api/search?q=...&category=...&tags=1,2&cost=free|paid&type=resource|template|workflow
 app.get('/api/search', async (req, res) => {
   try {
     const pool = db.getPool();
+    await refreshSearchSchemaFlags(pool);
     const q        = (req.query.q        || '').trim();
     const category = (req.query.category || '').trim();
+    const skillArea = (req.query.skill_area || '').trim();
+    const contentType = (req.query.type || req.query.content_type || '').trim().toLowerCase();
     const tagsParam = (req.query.tags || '').trim();
     const cost = (req.query.cost || '').trim();
     const aiRaw = (req.query.ai ?? req.query.is_ai_enabled ?? '').toString().trim().toLowerCase();
     const aiOnly = aiRaw === '1' || aiRaw === 'true' || aiRaw === 'yes';
     const userId = req.session && req.session.userId != null ? req.session.userId : null;
 
-    let sql = `SELECT r.resource_id, r.title, r.description, r.url, r.category_id, r.image_path, r.cost, r.is_ai_enabled
-                FROM Resources r
-                WHERE (r.visibility = 'public'`;
     const params = [];
 
+    const wherePieces = [];
+    const resourceVisibility = [];
+    resourceVisibility.push(`r.visibility = 'public'`);
     if (userId != null) {
-      sql += ' OR r.submitted_by = ?';
+      resourceVisibility.push('r.submitted_by = ?');
       params.push(userId);
     }
-    sql += ')';
+    wherePieces.push(`(${resourceVisibility.join(' OR ')})`);
 
     if (q && !/^[a-z0-9 ]{1,40}$/i.test(q)) {
       return res.status(400).json({
@@ -115,13 +164,17 @@ app.get('/api/search', async (req, res) => {
     }
 
     if (q) {
-      sql += ' AND (r.title LIKE ? OR r.description LIKE ?)';
+      wherePieces.push('(r.title LIKE ? OR r.description LIKE ?)');
       const term = `%${q}%`;
       params.push(term, term);
     }
     if (category) {
-      sql += ' AND r.category_id = ?';
+      wherePieces.push('r.category_id = ?');
       params.push(category);
+    }
+    if (skillArea && searchSchemaCache.resourcesSkillArea) {
+      wherePieces.push('r.skill_area = ?');
+      params.push(skillArea.toLowerCase());
     }
 
     if (tagsParam) {
@@ -153,7 +206,7 @@ app.get('/api/search', async (req, res) => {
           params.push(...tagSlugs);
         }
 
-        sql += ` AND r.resource_id IN (
+        wherePieces.push(`r.resource_id IN (
           SELECT resource_id
           FROM ResourceTags
           WHERE tag_id IN (
@@ -161,45 +214,182 @@ app.get('/api/search', async (req, res) => {
             FROM Tags
             WHERE ${tagFilters.join(' OR ')}
           )
-        )`;
+        )`);
       }
     }
 
     if (cost && cost !== 'all') {
-      sql += ' AND r.cost = ?';
+      wherePieces.push('r.cost = ?');
       params.push(cost);
     }
 
     if (aiOnly) {
-      sql += ' AND r.is_ai_enabled = 1';
+      wherePieces.push('r.is_ai_enabled = 1');
     }
 
-    sql += ' ORDER BY r.title';
+    const includeResources = !contentType || contentType === 'resource';
+    const includeLegacyTemplates = !contentType || contentType === 'template';
+    const includeGoalTemplates =
+      searchSchemaCache.goalTemplateSearch &&
+      (!contentType || contentType === 'template' || contentType === 'goal_template');
+    const includeWorkflows = !contentType || contentType === 'workflow';
 
-    const [rows] = await pool.query(sql, params);
+    const unions = [];
+    const unionParams = [];
+
+    if (includeResources) {
+      // Align string collations with other UNION branches (Goals/Templates/Workflows use unicode_ci).
+      const rc = 'utf8mb4_unicode_ci';
+      unions.push(`SELECT
+          r.resource_id AS id,
+          'resource' AS content_type,
+          r.title COLLATE ${rc} AS title,
+          r.description COLLATE ${rc} AS description,
+          r.url COLLATE ${rc} AS url,
+          r.category_id,
+          r.image_path COLLATE ${rc} AS image_path,
+          r.cost COLLATE ${rc} AS cost,
+          r.is_ai_enabled,
+          COALESCE(AVG(rr.stars), 0) AS avg_rating
+        FROM Resources r
+        LEFT JOIN ResourceRatings rr ON rr.resource_id = r.resource_id
+        WHERE ${wherePieces.join(' AND ')}
+        GROUP BY r.resource_id`);
+      unionParams.push(...params);
+    }
+
+    const templateWhere = [`t.is_public = 1`];
+    const templateParams = [];
+    if (q) {
+      templateWhere.push('(t.title LIKE ? OR t.description LIKE ? OR t.workflow_steps LIKE ?)');
+      const term = `%${q}%`;
+      templateParams.push(term, term, term);
+    }
+    if (category) {
+      templateWhere.push('t.category = ?');
+      templateParams.push(category.toLowerCase());
+    }
+    if (skillArea && searchSchemaCache.communityTemplateSkillArea) {
+      templateWhere.push('t.skill_area = ?');
+      templateParams.push(skillArea.toLowerCase());
+    }
+    if (includeLegacyTemplates) {
+      unions.push(`SELECT
+          t.template_id AS id,
+          'template' AS content_type,
+          t.title, t.description, NULL AS url, NULL AS category_id, NULL AS image_path,
+          NULL AS cost, 0 AS is_ai_enabled, 0 AS avg_rating
+        FROM CommunityTemplates t
+        WHERE ${templateWhere.join(' AND ')}`);
+      unionParams.push(...templateParams);
+    }
+
+    if (includeGoalTemplates) {
+      const goalTplWhere = [`g.template_kind = 'published'`];
+      const goalTplParams = [];
+      if (q) {
+        goalTplWhere.push('(g.title LIKE ? OR g.description LIKE ?)');
+        const term = `%${q}%`;
+        goalTplParams.push(term, term);
+      }
+      if (category) {
+        goalTplWhere.push('LOWER(g.category) = ?');
+        goalTplParams.push(category.toLowerCase());
+      }
+      if (skillArea) {
+        goalTplWhere.push('LOWER(g.category) = ?');
+        goalTplParams.push(skillArea.toLowerCase());
+      }
+      unions.push(`SELECT
+          g.goal_id AS id,
+          'goal_template' AS content_type,
+          g.title, g.description, NULL AS url, NULL AS category_id, NULL AS image_path,
+          NULL AS cost, 0 AS is_ai_enabled,
+          COALESCE(tr.avg_stars, 0) AS avg_rating
+        FROM Goals g
+        LEFT JOIN (
+          SELECT template_goal_id, AVG(stars) AS avg_stars
+          FROM GoalTemplateRatings
+          GROUP BY template_goal_id
+        ) tr ON tr.template_goal_id = g.goal_id
+        WHERE ${goalTplWhere.join(' AND ')}`);
+      unionParams.push(...goalTplParams);
+    }
+
+    const workflowWhere = [`w.is_public = 1`, `w.is_published = 1`];
+    const workflowParams = [];
+    if (q) {
+      workflowWhere.push('(w.title LIKE ? OR w.description LIKE ? OR w.steps LIKE ?)');
+      const term = `%${q}%`;
+      workflowParams.push(term, term, term);
+    }
+    if (category) {
+      workflowWhere.push('w.category = ?');
+      workflowParams.push(category.toLowerCase());
+    }
+    if (skillArea && searchSchemaCache.workflowsSkillArea) {
+      workflowWhere.push('w.skill_area = ?');
+      workflowParams.push(skillArea.toLowerCase());
+    }
+    if (aiOnly) {
+      workflowWhere.push('w.is_ai_enabled = 1');
+    }
+    if (includeWorkflows) {
+      unions.push(`SELECT
+          w.workflow_id AS id,
+          'workflow' AS content_type,
+          w.title, w.description, NULL AS url, NULL AS category_id, NULL AS image_path,
+          NULL AS cost, w.is_ai_enabled, 0 AS avg_rating
+        FROM Workflows w
+        WHERE ${workflowWhere.join(' AND ')}`);
+      unionParams.push(...workflowParams);
+    }
+
+    if (unions.length === 0) return res.json({ success: true, results: [] });
+
+    const sql = `${unions.join(' UNION ALL ')} ORDER BY title`;
+    const [rows] = await pool.query(sql, unionParams);
     res.json({ success: true, results: rows });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error('[search]', err.code || '', err.message);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // Static files (HTML, CSS, etc.) from application directory
 app.use(express.static(path.join(__dirname)));
 
-// Start server and run startup DB check (errors logged, server does not crash)
-app.listen(PORT, async () => {
-  console.log(`Pathwise server listening on port ${PORT}`);
-
-  try {
-    const connectionTest = await db.testConnection();
-    if (connectionTest.ok) {
-      console.log('[startup]', connectionTest.message);
-      const sample = await db.getResourcesSample();
-      console.log('[startup] Resources sample count:', sample.length);
-    } else {
-      console.error('[startup] DB connection failed:', connectionTest.error || connectionTest.message);
-    }
-  } catch (e) {
-    console.error('[startup] Could not read Resources:', e.message);
+// Centralized error payload for async/validation middleware.
+app.use((err, _req, res, _next) => {
+  if (!err) return res.status(500).json({ error: 'Internal server error' });
+  const status = err.statusCode || err.status || 500;
+  const payload = {
+    error: err.message || 'Internal server error'
+  };
+  if (Array.isArray(err.details) && err.details.length > 0) {
+    payload.details = err.details;
   }
+  if (status >= 500) return res.status(status).json({ error: 'Internal server error' });
+  return res.status(status).json(payload);
 });
+
+// Start server and run startup DB check (errors logged, server does not crash)
+if (require.main === module) {
+  app.listen(PORT, async () => {
+    console.log(`Pathwise server listening on port ${PORT}`);
+    try {
+      const connectionTest = await db.testConnection();
+      if (connectionTest.ok) {
+        console.log('[startup]', connectionTest.message);
+        const sample = await db.getResourcesSample();
+        console.log('[startup] Resources sample count:', sample.length);
+      } else {
+        console.error('[startup] DB connection failed:', connectionTest.error || connectionTest.message);
+      }
+    } catch (e) {
+      console.error('[startup] Could not read Resources:', e.message);
+    }
+  });
+}
+
+module.exports = app;

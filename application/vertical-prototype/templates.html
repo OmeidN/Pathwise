@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Community Templates - Pathwise</title>
+  <title>Goal templates - Pathwise</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/base.css">
@@ -24,37 +24,57 @@
   </header>
 
   <main style="max-width:980px;margin:0 auto;padding:24px">
-    <h1>Community-shared Goal Templates & Workflows</h1>
+    <h1>Community goal templates</h1>
     <p style="color:var(--color-text-muted);margin-bottom:18px">
-      Browse reusable planning templates from the community. Signed-in users can contribute a public template.
+      Goal templates use the same structure as your goals: projects, milestones, and resources. Publish a draft to share it. Import a published template to copy it into your goals.
     </p>
 
     <section class="card" style="padding:16px;margin-bottom:18px">
-      <h2 style="margin-bottom:10px">Share a template</h2>
-      <p id="tpl-form-note" style="color:var(--color-text-muted);margin-bottom:10px">
-        Sign in to share.
-      </p>
+      <h2 style="margin-bottom:10px">Create a goal template</h2>
+      <p id="tpl-form-note" style="color:var(--color-text-muted);margin-bottom:10px">Sign in to create a template.</p>
       <div id="tpl-error" class="error" style="margin-bottom:10px"></div>
-      <form id="templateForm">
-        <label>Title
-          <input id="tpl-title" class="input" type="text" maxlength="255" placeholder="e.g., Internship Application Sprint">
-        </label>
-        <label>Description
-          <textarea id="tpl-description" class="input" rows="2" placeholder="What this template helps with"></textarea>
-        </label>
-        <label>Category
-          <input id="tpl-category" class="input" type="text" placeholder="academic, career, wellness...">
-        </label>
-        <label>Workflow steps
-          <textarea id="tpl-steps" class="input" rows="5" placeholder="1. ...&#10;2. ...&#10;3. ..."></textarea>
-        </label>
-        <button id="tpl-submit" class="btn btn-primary" type="submit">Publish template</button>
+      <form id="templateCreateForm" class="inline-form" style="flex-wrap:wrap;gap:8px">
+        <input id="tpl-new-title" class="input" type="text" maxlength="255" placeholder="Template title (e.g. Internship prep)" required />
+        <input id="tpl-new-desc" class="input" type="text" placeholder="Short description (optional)" />
+        <input id="tpl-new-cat" class="input" type="text" placeholder="Category (optional)" />
+        <button id="tpl-create-btn" class="btn btn-primary" type="submit" disabled>Create &amp; open in goal hub</button>
       </form>
     </section>
 
-    <section>
-      <h2 style="margin-bottom:10px">Public templates</h2>
-      <div id="templates-list"></div>
+    <section style="margin-bottom:22px">
+      <h2 style="margin-bottom:10px">My template drafts</h2>
+      <div id="my-drafts-list"><p style="color:var(--color-text-muted)">Sign in to see drafts.</p></div>
+    </section>
+
+    <section style="margin-bottom:22px">
+      <h2 style="margin-bottom:10px">Published templates</h2>
+      <div id="templates-list"><p>Loading…</p></div>
+    </section>
+
+    <section id="template-detail" class="card" style="padding:16px;margin-top:20px;display:none">
+      <h2 id="detail-title" style="margin-top:0">Template detail</h2>
+      <p id="detail-meta" style="color:var(--color-text-muted)"></p>
+      <p id="detail-desc"></p>
+      <div id="detail-tree" style="margin:14px 0"></div>
+      <p style="font-size:var(--font-size-sm);color:var(--color-text-muted);margin:0 0 8px">
+        Import creates a <strong>new</strong> goal on your Goals page (your published template stays here for others).
+      </p>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px">
+        <button type="button" class="btn btn-primary" id="importTemplateBtn">Import into my goals</button>
+        <label style="display:flex;align-items:center;gap:8px;font-size:var(--font-size-sm)">
+          Rate (1–5)
+          <select id="templateRatingStars" class="input" style="width:auto">
+            <option value="">—</option>
+            <option value="5">5</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+          </select>
+          <button type="button" class="btn btn-secondary" id="submitTemplateRating">Save rating</button>
+        </label>
+        <span id="template-rating-summary" style="color:var(--color-text-muted)"></span>
+      </div>
     </section>
   </main>
 

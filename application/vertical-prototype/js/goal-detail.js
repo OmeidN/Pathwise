@@ -246,6 +246,25 @@
     const goal = hubData.goal;
     const projects = hubData.projects || [];
     const stats = hubData.stats || { project_count: 0, milestone_total: 0, milestone_done: 0, completion_pct: 0 };
+    const tk = goal.template_kind || 'none';
+
+    let templateBanner = '';
+    if (tk === 'draft') {
+      templateBanner = `
+      <section class="card" style="margin-bottom:var(--space-lg);border:1px solid var(--color-border);background:var(--color-surface-muted)">
+        <h2 style="margin-top:0">Goal template (draft)</h2>
+        <p style="color:var(--color-text-muted);margin-bottom:12px">
+          Build this like any goal: add projects, milestones, and resources below. When ready, publish so other students can import a copy into their goals.
+        </p>
+        <button type="button" class="btn btn-primary" id="publishTemplateBtn">Publish template</button>
+      </section>`;
+    } else if (tk === 'published') {
+      templateBanner = `
+      <section class="card" style="margin-bottom:var(--space-lg)">
+        <h2 style="margin-top:0">Published community template</h2>
+        <p style="color:var(--color-text-muted)">Imported ${esc(String(goal.template_copied_count ?? 0))} times · Listed on Templates for other students.</p>
+      </section>`;
+    }
 
     let html = `
       <div class="goal-detail-head">
@@ -253,8 +272,9 @@
         <h1>${esc(goal.title)}</h1>
         <p style="color:var(--color-text-muted)">${esc(goal.category || '')}${goal.target_date ? ` · Target ${esc(goal.target_date)}` : ''}</p>
         ${goal.description ? `<p>${esc(goal.description)}</p>` : ''}
-        <p><span class="status-badge">${esc(goal.status)}</span></p>
+        <p><span class="status-badge">${esc(goal.status)}</span>${tk !== 'none' ? ` <span class="status-badge">${esc(tk)}</span>` : ''}</p>
       </div>
+      ${templateBanner}
       <section class="card goal-summary">
         <h2>Goal summary</h2>
         <div class="goal-card__stats">
@@ -266,6 +286,17 @@
           <label>Overall completion</label>
           <div class="progress"><div class="progress-bar" style="width:${stats.completion_pct || 0}%"></div></div>
         </div>
+      </section>
+      <section class="card" id="goal-resources-section" style="margin-bottom:var(--space-lg)">
+        <h2 style="margin-top:0">Attached resources</h2>
+        <div id="goal-resource-list" style="margin-bottom:12px">Loading…</div>
+        <div class="inline-form" style="flex-wrap:wrap;gap:8px">
+          <select id="bookmarkResourcePick" class="input" style="min-width:220px">
+            <option value="">Select a saved resource…</option>
+          </select>
+          <button type="button" class="btn btn-primary" id="attachResourceBtn">Attach to goal</button>
+        </div>
+        <p style="font-size:var(--font-size-sm);color:var(--color-text-muted);margin-top:8px">Only public resources or ones you submitted can be attached.</p>
       </section>
       <section class="card" style="margin-bottom:var(--space-lg)">
         <h2 style="margin-top:0">Add project</h2>
@@ -287,6 +318,94 @@
     }
 
     root.innerHTML = html;
+
+    async function refreshGoalResources() {
+      const listEl = document.getElementById('goal-resource-list');
+      const pick = document.getElementById('bookmarkResourcePick');
+      if (!listEl || !pick) return;
+      const { res, data } = await api('GET', `/api/goals/${goalId}/attachments`);
+      if (!data.success) {
+        listEl.innerHTML = '<p class="error">Could not load attachments.</p>';
+        return;
+      }
+      const resources = (data.results || []).filter((x) => x.type === 'resource');
+      listEl.innerHTML =
+        resources.length === 0
+          ? '<p style="color:var(--color-text-muted)">No resources attached yet.</p>'
+          : `<ul class="milestone-list">${resources
+              .map(
+                (r) => `
+          <li class="milestone-item">
+            <strong>${esc(r.title)}</strong>
+            <span style="color:var(--color-text-muted);font-size:var(--font-size-sm)">#${r.id}</span>
+            <button type="button" class="btn btn-secondary btn-sm goal-res-detach" data-rid="${r.id}">Remove</button>
+          </li>`
+              )
+              .join('')}</ul>`;
+      listEl.querySelectorAll('.goal-res-detach').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const rid = btn.getAttribute('data-rid');
+          const r2 = await fetch(`/api/goals/${goalId}/resources/${rid}`, { method: 'DELETE', credentials: 'include' });
+          const d2 = await r2.json().catch(() => ({}));
+          if (!r2.ok || !d2.success) {
+            showErr(d2.error || 'Could not remove resource');
+            return;
+          }
+          await refreshGoalResources();
+        });
+      });
+
+      const bm = await fetch('/api/bookmarks', { credentials: 'include' });
+      const bmData = await bm.json().catch(() => ({}));
+      const attached = new Set(resources.map((r) => String(r.id)));
+      pick.innerHTML = '<option value="">Select a saved resource…</option>';
+      if (bm.ok && bmData.success && Array.isArray(bmData.results)) {
+        for (const r of bmData.results) {
+          const id = String(r.resource_id);
+          if (attached.has(id)) continue;
+          const opt = document.createElement('option');
+          opt.value = id;
+          opt.textContent = `${r.title || 'Resource'} (#${id})`;
+          pick.appendChild(opt);
+        }
+      }
+    }
+
+    await refreshGoalResources();
+
+    document.getElementById('attachResourceBtn')?.addEventListener('click', async () => {
+      const pick = document.getElementById('bookmarkResourcePick');
+      const rid = Number(pick?.value);
+      if (!rid) {
+        showErr('Pick a saved resource to attach.');
+        return;
+      }
+      const { res, data } = await api('POST', `/api/goals/${goalId}/resources`, { resource_id: rid });
+      if (res.status === 401) {
+        window.location.href = 'login.html';
+        return;
+      }
+      if (!data.success) {
+        showErr(data.error || 'Attach failed');
+        return;
+      }
+      pick.value = '';
+      await refreshGoalResources();
+    });
+
+    document.getElementById('publishTemplateBtn')?.addEventListener('click', async () => {
+      if (!confirm('Publish this goal as a community template? Other students can import a copy.')) return;
+      const { res, data } = await api('POST', `/api/goal-templates/${goalId}/publish`, {});
+      if (res.status === 401) {
+        window.location.href = 'login.html';
+        return;
+      }
+      if (!data.success) {
+        showErr(data.error || 'Publish failed');
+        return;
+      }
+      await loadAll();
+    });
 
     document.getElementById('addProjectBtn')?.addEventListener('click', async () => {
       const t = document.getElementById('newProjectTitle').value.trim();

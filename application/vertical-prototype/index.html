@@ -50,6 +50,20 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="contentType">Type:</label>
+                    <select id="contentType" name="type">
+                        <option value="">All Types</option>
+                        <option value="resource">Resource</option>
+                        <option value="template">Template</option>
+                        <option value="goal_template">Goal template</option>
+                        <option value="workflow">Workflow</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="skillArea">Skill Area:</label>
+                    <input type="text" id="skillArea" name="skill_area" placeholder="e.g., career" autocomplete="off">
+                </div>
+                <div class="form-group">
                     <button type="submit" id="searchBtn">Search</button>
                 </div>
             </form>
@@ -101,6 +115,10 @@
             <div id="results">
                 <p>Waiting for input...</p>
             </div>
+            <section id="template-recommended-section" hidden>
+                <h2>Goal template recommendations</h2>
+                <div id="template-recommended-results"></div>
+            </section>
         </section>
 
     </main>

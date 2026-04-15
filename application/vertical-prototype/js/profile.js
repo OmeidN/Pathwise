@@ -20,7 +20,7 @@
       fetch('/api/profile', { credentials: 'include' }),
       fetch('/api/me/submissions', { credentials: 'include' }),
       fetch('/api/bookmarks', { credentials: 'include' }),
-      fetch('/api/activity?limit=20', { credentials: 'include' })
+      fetch('/api/activity?limit=10', { credentials: 'include' })
     ]);
     if (profRes.status === 401 || subRes.status === 401 || savedRes.status === 401) {
       window.location.href = 'login.html';
@@ -46,7 +46,7 @@
       activityEl.innerHTML =
         actData.results.length === 0
           ? '<p class="profile-muted">No recent activity.</p>'
-          : `<ul class="activity-list">${actData.results
+          : `<ul class="activity-list">${actData.results.slice(0, 10)
               .map(
                 (a) => `
             <li class="activity-item">
