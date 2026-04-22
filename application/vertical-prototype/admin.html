@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard - Pathwise</title>
+  <title>Admin Panel – Pathwise</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/variables.css" />
@@ -14,384 +14,236 @@
   <style>
     body[data-page="admin"] {
       min-height: 100vh;
-      background:
-        radial-gradient(circle at top right, rgba(74, 124, 111, 0.08), transparent 22%),
-        linear-gradient(180deg, #f9fbfa 0%, var(--color-background) 100%);
+      background: var(--color-background);
     }
 
     .admin-main {
-      max-width: 1380px;
+      max-width: 1100px;
       margin: 0 auto;
-      padding: var(--space-xl);
+      padding: var(--space-xl) var(--space-xl) var(--space-3xl);
       display: flex;
       flex-direction: column;
-      gap: var(--space-lg);
+      gap: var(--space-xl);
     }
 
-    .admin-hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.9fr);
-      gap: var(--space-lg);
-      align-items: stretch;
+    /* ── Plain page header ── */
+    .admin-page-header {
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--color-border);
     }
 
-    .admin-hero__welcome {
-      background:
-        linear-gradient(135deg, rgba(74, 124, 111, 0.12), rgba(74, 124, 111, 0.04)),
-        var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-card);
-      padding: var(--space-xl);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-height: 148px;
-    }
-
-    .admin-eyebrow {
-      font-size: var(--font-size-sm);
-      color: var(--color-text-subtle);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      margin-bottom: var(--space-sm);
-    }
-
-    .admin-title {
-      font-size: clamp(1.7rem, 3vw, 2.4rem);
-      line-height: 1.12;
+    .admin-page-header h1 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: var(--font-weight-bold);
       color: var(--color-text);
-      margin-bottom: var(--space-sm);
+      margin: 0 0 var(--space-xs);
+      line-height: 1.2;
     }
 
-    .admin-subtitle {
-      font-size: var(--font-size-base);
-      color: var(--color-text-muted);
-      max-width: 72ch;
-    }
-
-    .admin-hero__actions {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-card);
-      padding: var(--space-lg);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-height: 148px;
-    }
-
-    .admin-action-title {
+    .admin-page-header p {
+      margin: 0;
       font-size: var(--font-size-sm);
-      color: var(--color-text-subtle);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: var(--space-sm);
+      color: var(--color-text-muted);
     }
 
-    .admin-action-stack {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-sm);
-    }
-
-    .admin-layout {
-      display: grid;
-      grid-template-columns: 290px minmax(0, 1fr);
-      gap: var(--space-lg);
-      align-items: start;
-    }
-
-    .admin-sidebar {
-      display: grid;
-      gap: var(--space-lg);
-      align-self: start;
-      position: sticky;
-      top: calc(var(--banner-height) + 88px);
-    }
-
-    .admin-panel {
+    /* ── Section cards ── */
+    .admin-section {
       background: var(--color-surface);
       border: 1px solid var(--color-border);
-      border-radius: var(--radius-xl);
+      border-radius: var(--radius-lg);
       box-shadow: var(--shadow-card);
       overflow: hidden;
     }
 
-    .admin-panel__head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: var(--space-md);
+    .admin-section--stats  { border-left: 4px solid #64748b; }
+    .admin-section--queue  { border-left: 4px solid #d97706; }
+    .admin-section--users  { border-left: 4px solid #6366f1; }
+
+    .admin-section__head {
       padding: var(--space-lg) var(--space-lg) var(--space-md);
-      border-bottom: 1px solid rgba(226, 232, 228, 0.7);
+      border-bottom: 1px solid var(--color-border);
     }
 
-    .admin-panel__title {
+    .admin-section__head h2 {
       font-size: 1rem;
       font-weight: var(--font-weight-bold);
       color: var(--color-text);
+      margin: 0;
     }
 
-    .admin-panel__body {
-      padding: var(--space-lg);
-    }
-
-    .admin-tip-list {
-      list-style: none;
-      display: grid;
-      gap: var(--space-md);
-    }
-
-    .admin-tip-list li {
-      padding-left: var(--space-md);
-      position: relative;
-      color: var(--color-text-muted);
-      font-size: var(--font-size-sm);
-    }
-
-    .admin-tip-list li::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0.56rem;
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: var(--color-primary);
-    }
-
-    .admin-mini-stat {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: var(--space-sm) 0;
-      border-bottom: 1px solid rgba(226, 232, 228, 0.7);
-    }
-
-    .admin-mini-stat:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    .admin-mini-stat__label {
-      color: var(--color-text-muted);
-      font-size: var(--font-size-sm);
-    }
-
-    .admin-mini-stat__value {
-      font-weight: var(--font-weight-bold);
-      color: var(--color-text);
-    }
-
-    .admin-content-shell {
-      min-width: 0;
-    }
-
-    #admin-content {
-      display: grid;
-      gap: var(--space-lg);
-    }
-
+    /* ── Stat cards ── */
     .admin-stats-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: var(--space-md);
+      padding: var(--space-lg);
     }
 
-    .admin-stats-grid .card {
-      border-radius: var(--radius-xl);
+    .admin-stat-card {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-md);
       padding: var(--space-lg);
-      min-height: 118px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      background:
-        linear-gradient(180deg, rgba(74, 124, 111, 0.04), transparent 60%),
-        var(--color-surface);
-    }
-
-    .admin-stats-grid .card h3 {
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-medium);
-      color: var(--color-text-muted);
-      margin-bottom: var(--space-sm);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .admin-stats-grid .card p {
-      font-size: 2rem;
-      line-height: 1;
-      font-weight: var(--font-weight-bold);
-      color: var(--color-text);
-    }
-
-    .admin-note-card.card {
-      padding: var(--space-lg);
-      border-radius: var(--radius-xl);
-      display: grid;
       gap: var(--space-sm);
-      background:
-        linear-gradient(90deg, rgba(74, 124, 111, 0.08), transparent 38%),
-        var(--color-surface);
     }
 
-    .admin-note-card h3 {
-      font-size: 1.05rem;
-      color: var(--color-text);
-      margin: 0;
-    }
-
-    .admin-note-card p {
-      margin: 0;
-      color: var(--color-text-muted);
+    .admin-stat-card__label {
+      font-size: 0.78rem;
       font-weight: var(--font-weight-medium);
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
-    .admin-section.card {
-      border-radius: var(--radius-xl);
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      min-width: 0;
+    .admin-stat-card__value {
+      font-size: 2rem;
+      font-weight: var(--font-weight-bold);
+      line-height: 1;
+      color: #1e293b;
     }
 
-    .admin-section__head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: var(--space-md);
-      padding: var(--space-lg);
-      border-bottom: 1px solid rgba(226, 232, 228, 0.75);
-      flex-wrap: wrap;
+    .admin-stat-card__note {
+      font-size: var(--font-size-xs);
+      color: #94a3b8;
+      margin-top: var(--space-xs);
     }
 
-    .admin-section h2 {
-      font-size: 1rem;
-      color: var(--color-text);
-      margin: 0;
-    }
-
-    .admin-section__meta {
-      color: var(--color-text-muted);
-      font-size: var(--font-size-sm);
-      margin: 6px 0 0;
-    }
-
+    /* ── Tables ── */
     .table-wrap {
-      overflow: auto;
+      overflow-x: auto;
     }
 
     .admin-table {
       width: 100%;
       border-collapse: collapse;
       font-size: var(--font-size-sm);
-      min-width: 0;
     }
 
     .admin-table thead th {
-      background: #f8fbf9;
+      background: #f8fafc;
       color: var(--color-text-muted);
-      font-size: 0.78rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      font-size: 0.75rem;
       font-weight: var(--font-weight-medium);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 10px 16px;
       border-bottom: 1px solid var(--color-border);
-    }
-
-    .admin-table th,
-    .admin-table td {
-      border-bottom: 1px solid var(--color-border);
-      padding: 12px 16px;
       text-align: left;
       white-space: nowrap;
     }
 
-    .admin-table tbody td {
+    .admin-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--color-border);
       color: var(--color-text);
       vertical-align: middle;
       background: var(--color-surface);
-    }
-
-    .admin-table tbody tr:hover td {
-      background: #fafcfb;
     }
 
     .admin-table tbody tr:last-child td {
       border-bottom: none;
     }
 
+    .admin-table tbody tr:hover td {
+      background: #fafbfa;
+    }
+
     .admin-table__actions {
       display: flex;
-      gap: 8px;
+      align-items: center;
+      gap: var(--space-sm);
       flex-wrap: wrap;
     }
 
-    .btn-danger {
-      background-color: #fff3f1;
-      color: var(--color-danger);
-      border: 1px solid rgba(207, 89, 66, 0.28);
-    }
-
-    .btn-danger:hover {
-      background-color: #ffe7e2;
-    }
-
-    .empty-row {
+    /* ── Empty state row ── */
+    .empty-row td {
       color: var(--color-text-muted);
+      font-style: italic;
       white-space: normal;
+      text-align: center;
+      padding: var(--space-xl) var(--space-lg);
     }
 
-    .admin-inline-note {
-      color: var(--color-text-muted);
-      font-size: var(--font-size-sm);
-    }
-
-    .admin-badge {
+    /* ── Status badges ── */
+    .badge {
       display: inline-flex;
       align-items: center;
-      padding: 0.25rem 0.5rem;
+      padding: 2px 10px;
       border-radius: var(--radius-full);
-      background: rgba(74, 124, 111, 0.12);
-      color: var(--color-primary);
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: var(--font-weight-medium);
       letter-spacing: 0.02em;
+      white-space: nowrap;
     }
 
-    @media (max-width: 1180px) {
-      .admin-layout {
-        grid-template-columns: 1fr;
-      }
+    .badge--pending  { background: #fef3c7; color: #92400e; }
+    .badge--approved { background: #d1fae5; color: #065f46; }
+    .badge--rejected { background: #fee2e2; color: #991b1b; }
 
-      .admin-sidebar {
-        position: static;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+    .badge--admin   { background: #f1f5f9; color: #334155; }
+    .badge--faculty { background: #dbeafe; color: #1e40af; }
+    .badge--staff   { background: #ccfbf1; color: #0f766e; }
+    .badge--student { background: #f3f4f6; color: #374151; }
+
+    /* ── Buttons ── */
+    .btn-approve {
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid #6ee7b7;
+      background: #ecfdf5;
+      color: #065f46;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-approve:hover { background: #d1fae5; }
+
+    .btn-reject {
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid #fca5a5;
+      background: #fff1f2;
+      color: #991b1b;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-reject:hover { background: #fee2e2; }
+
+    .btn-remove {
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid #fca5a5;
+      background: #fff1f2;
+      color: #991b1b;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-remove:hover { background: #fee2e2; }
+
+    .role-select {
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text);
+      cursor: pointer;
     }
 
     @media (max-width: 860px) {
-      .admin-main {
-        padding: var(--space-md);
-      }
-
-      .admin-hero {
-        grid-template-columns: 1fr;
-      }
-
-      .admin-sidebar,
-      .admin-stats-grid {
-        grid-template-columns: 1fr;
-      }
+      .admin-main { padding: var(--space-md); }
+      .admin-stats-grid { grid-template-columns: 1fr; }
     }
 
-    @media (max-width: 760px) {
-      .admin-table {
-        min-width: 620px;
-      }
+    @media (max-width: 640px) {
+      .admin-table { min-width: 560px; }
     }
   </style>
 </head>
@@ -400,7 +252,6 @@
   <header id="site-header">
     <div class="header-inner">
       <a href="landing.html" class="site-title">Pathwise</a>
-
       <nav id="main-nav">
         <a href="landing.html" class="nav-link">Home</a>
         <a href="index.html" class="nav-link">Browse</a>
@@ -410,240 +261,277 @@
     </div>
   </header>
 
-  <main class="admin-main">
-    <section class="admin-hero">
-      <div class="admin-hero__welcome">
-        <p class="admin-eyebrow">Staff workspace</p>
-        <h1 class="admin-title">Pathwise admin dashboard</h1>
-        <p class="admin-subtitle">
-          Review moderation queues, monitor basic site-level signals, and check who has access to the platform using the same dashboard patterns used elsewhere in Pathwise.
-        </p>
-      </div>
+  <main class="admin-main" id="admin-main" style="display:none">
+    <div class="admin-page-header">
+      <h1>Admin Panel</h1>
+      <p id="admin-subtitle">Loading…</p>
+    </div>
 
-      <aside class="admin-hero__actions">
-        <div>
-          <p class="admin-action-title">Quick actions</p>
-          <div class="admin-action-stack">
-            <a href="submit.html" class="btn btn-primary">Submit resource</a>
-            <a href="dashboard.html" class="btn btn-secondary">User dashboard</a>
-            <a href="templates.html" class="btn btn-secondary">Templates</a>
-          </div>
+    <!-- Section 1: Site Stats (admin only) -->
+    <section class="admin-section admin-section--stats" id="section-stats" style="display:none" aria-label="Site stats">
+      <div class="admin-section__head">
+        <h2>Site Stats</h2>
+      </div>
+      <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+          <div class="admin-stat-card__label">Total Users</div>
+          <div class="admin-stat-card__value" id="stat-users">0</div>
+          <div class="admin-stat-card__note">(live data coming soon)</div>
         </div>
-      </aside>
+        <div class="admin-stat-card">
+          <div class="admin-stat-card__label">Total Resources</div>
+          <div class="admin-stat-card__value" id="stat-resources">0</div>
+          <div class="admin-stat-card__note">(live data coming soon)</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-card__label">Pending Approvals</div>
+          <div class="admin-stat-card__value" id="stat-pending">0</div>
+          <div class="admin-stat-card__note">(live data coming soon)</div>
+        </div>
+      </div>
     </section>
 
-    <section class="admin-layout">
-      <aside class="admin-sidebar">
-        <section class="admin-panel">
-          <div class="admin-panel__head">
-            <h2 class="admin-panel__title">Access policy</h2>
-          </div>
-          <div class="admin-panel__body">
-            <ul class="admin-tip-list">
-              <li>This page is limited to admin, faculty, and staff accounts.</li>
-              <li>Role access is checked through the existing session-based `/api/me` endpoint.</li>
-              <li>If moderation or reporting APIs are not mounted yet, this page shows empty states instead of placeholder records.</li>
-            </ul>
-          </div>
-        </section>
+    <!-- Section 2: Pending Submissions (admin + faculty/staff) -->
+    <section class="admin-section admin-section--queue" id="section-queue" aria-label="Pending resource submissions">
+      <div class="admin-section__head">
+        <h2>Pending Resource Submissions</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Submitted By</th>
+              <th>Category</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="queue-body">
+            <tr class="empty-row"><td colspan="6">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-        <section class="admin-panel">
-          <div class="admin-panel__head">
-            <h2 class="admin-panel__title">Current capabilities</h2>
-          </div>
-          <div class="admin-panel__body">
-            <div class="admin-mini-stat">
-              <span class="admin-mini-stat__label">Moderation queue</span>
-              <span class="admin-mini-stat__value" id="capability-moderation">Unavailable</span>
-            </div>
-            <div class="admin-mini-stat">
-              <span class="admin-mini-stat__label">User management</span>
-              <span class="admin-mini-stat__value" id="capability-users">Unavailable</span>
-            </div>
-            <div class="admin-mini-stat">
-              <span class="admin-mini-stat__label">Site stats</span>
-              <span class="admin-mini-stat__value" id="capability-stats">Unavailable</span>
-            </div>
-          </div>
-        </section>
-      </aside>
-
-      <section class="admin-content-shell">
-        <div id="admin-content" aria-live="polite">
-          <section class="admin-stats-grid">
-            <article class="card">
-              <h3>Total Users</h3>
-              <p id="total-users-count">0</p>
-            </article>
-            <article class="card">
-              <h3>Total Resources</h3>
-              <p id="total-resources-count">0</p>
-            </article>
-            <article class="card">
-              <h3>Approved Resources</h3>
-              <p id="approved-resources-count">0</p>
-            </article>
-          </section>
-
-          <section class="admin-note-card card">
-            <h3>Site stats status</h3>
-            <p id="stats-note">Checking whether a site-wide stats endpoint is available.</p>
-          </section>
-
-          <section class="admin-section card">
-            <div class="admin-section__head">
-              <div>
-                <h2>Pending resource submissions</h2>
-                <p class="admin-section__meta">Submitted resources waiting for approval or rejection.</p>
-              </div>
-              <span class="admin-badge" id="pending-count-badge">0 pending</span>
-            </div>
-            <div class="table-wrap">
-              <table class="admin-table">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Submitted By</th>
-                    <th>Visibility</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="pending-submissions-body">
-                  <tr>
-                    <td colspan="5" class="empty-row">Loading submission tools...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section class="admin-section card">
-            <div class="admin-section__head">
-              <div>
-                <h2>User list</h2>
-                <p class="admin-section__meta">Registered users and roles, if a management endpoint is available.</p>
-              </div>
-              <span class="admin-inline-note" id="users-note">Checking whether a user list endpoint is available.</span>
-            </div>
-            <div class="table-wrap">
-              <table class="admin-table">
-                <thead>
-                  <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                  </tr>
-                </thead>
-                <tbody id="user-list-body">
-                  <tr>
-                    <td colspan="3" class="empty-row">Loading user tools...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </div>
-      </section>
+    <!-- Section 3: User Management (admin only) -->
+    <section class="admin-section admin-section--users" id="section-users" style="display:none" aria-label="User management">
+      <div class="admin-section__head">
+        <h2>User Management</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-body">
+            <tr class="empty-row"><td colspan="5">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
   </main>
 
   <script src="nav.js"></script>
   <script>
     (function () {
-      // Local-only preview toggle. Set back to false before merging/pushing.
-      const DEV_BYPASS_ADMIN_AUTH = true;
-      const allowedRoles = new Set(['admin', 'faculty', 'staff']);
-      const statsNote = document.getElementById('stats-note');
-      const usersNote = document.getElementById('users-note');
-      const pendingBadge = document.getElementById('pending-count-badge');
-      const moderationCapability = document.getElementById('capability-moderation');
-      const usersCapability = document.getElementById('capability-users');
-      const statsCapability = document.getElementById('capability-stats');
-      const pendingBody = document.getElementById('pending-submissions-body');
-      const userBody = document.getElementById('user-list-body');
-      const totalUsersCount = document.getElementById('total-users-count');
-      const totalResourcesCount = document.getElementById('total-resources-count');
-      const approvedResourcesCount = document.getElementById('approved-resources-count');
+      const ROLES = ['admin', 'faculty', 'staff', 'student'];
 
-      function redirectToLogin() {
-        window.location.href = '/vertical-prototype/login.html';
+      function esc(v) {
+        return String(v ?? '')
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       }
 
-      function esc(value) {
-        return String(value ?? '')
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#39;');
+      function emptyRow(cols, msg) {
+        return `<tr class="empty-row"><td colspan="${cols}">${esc(msg)}</td></tr>`;
       }
 
-      function emptyRow(colspan, message) {
-        return `<tr><td colspan="${colspan}" class="empty-row">${esc(message)}</td></tr>`;
+      function statusBadge(status) {
+        const s = String(status || 'pending').toLowerCase();
+        const cls = s === 'approved' ? 'approved' : s === 'rejected' ? 'rejected' : 'pending';
+        const label = cls.charAt(0).toUpperCase() + cls.slice(1);
+        return `<span class="badge badge--${cls}">${label}</span>`;
       }
 
-      function setCounts(users, resources, approved) {
-        totalUsersCount.textContent = String(users);
-        totalResourcesCount.textContent = String(resources);
-        approvedResourcesCount.textContent = String(approved);
+      function roleBadge(role) {
+        const r = String(role || 'student').toLowerCase();
+        const label = r.charAt(0).toUpperCase() + r.slice(1);
+        return `<span class="badge badge--${r}">${label}</span>`;
+      }
+
+      function formatDate(iso) {
+        if (!iso) return '—';
+        try { return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }); }
+        catch { return iso; }
+      }
+
+      function notConnected() {
+        alert('Admin actions not yet connected to backend');
       }
 
       async function fetchMe() {
-        if (DEV_BYPASS_ADMIN_AUTH) {
-          return { username: 'Local Preview', role: 'staff' };
-        }
-        const response = await fetch('/api/me', { credentials: 'include' });
-        if (response.status === 401 || response.status === 404) {
-          redirectToLogin();
-          return null;
-        }
-        if (!response.ok) {
-          redirectToLogin();
-          return null;
-        }
-        const data = await response.json();
-        const user = data.user || data;
-        if (!user || !allowedRoles.has(user.role)) {
-          redirectToLogin();
-          return null;
-        }
-        return user;
+        const res = await fetch('/api/me', { credentials: 'include' });
+        if (res.status === 401 || res.status === 403 || res.status === 404) return null;
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data.user || data;
       }
 
-      function renderPendingEmptyState(message) {
-        pendingBadge.textContent = '0 pending';
-        pendingBody.innerHTML = emptyRow(5, message);
-      }
+      async function loadQueue() {
+        const body = document.getElementById('queue-body');
+        let rows;
+        try {
+          const res = await fetch('/api/resources?status=pending', { credentials: 'include' });
+          if (!res.ok) throw new Error('not available');
+          const data = await res.json();
+          rows = data.resources || data.data || data;
+          if (!Array.isArray(rows) || rows.length === 0) throw new Error('empty');
+        } catch {
+          body.innerHTML = emptyRow(6, 'No pending submissions');
+          return;
+        }
 
-      function renderUsersEmptyState(message) {
-        userBody.innerHTML = emptyRow(3, message);
-      }
+        body.innerHTML = rows.map(r => `
+          <tr>
+            <td>${esc(r.title)}</td>
+            <td>${esc(r.submitted_by_name || r.submitted_by || '—')}</td>
+            <td>${esc(r.category_name || r.category || '—')}</td>
+            <td>${formatDate(r.created_at)}</td>
+            <td>${statusBadge(r.status || 'pending')}</td>
+            <td>
+              <div class="admin-table__actions">
+                <button class="btn-approve" data-id="${esc(r.resource_id)}" data-action="approve">Approve</button>
+                <button class="btn-reject"  data-id="${esc(r.resource_id)}" data-action="reject">Reject</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
 
-      async function loadStats() {
-        setCounts(0, 0, 0);
-        statsCapability.textContent = 'Unavailable';
-        statsNote.textContent = 'No mounted site-wide stats endpoint was found, so these values default to 0.';
-      }
-
-      async function loadPendingSubmissions() {
-        moderationCapability.textContent = 'Unavailable';
-        renderPendingEmptyState('No pending submissions. No moderation endpoint is available in the current backend.');
+        body.addEventListener('click', async (e) => {
+          const btn = e.target.closest('[data-action]');
+          if (!btn) return;
+          const { id, action } = btn.dataset;
+          const endpoint = action === 'approve'
+            ? `/api/resources/${id}/approve`
+            : `/api/resources/${id}/reject`;
+          try {
+            const res = await fetch(endpoint, { method: 'POST', credentials: 'include' });
+            if (!res.ok) throw new Error();
+            btn.closest('tr').remove();
+          } catch {
+            notConnected();
+          }
+        });
       }
 
       async function loadUsers() {
-        usersCapability.textContent = 'Unavailable';
-        usersNote.textContent = 'No full user management endpoint is available in the current backend.';
-        renderUsersEmptyState('No user list available. The current backend only exposes user search, not a full management list.');
+        const body = document.getElementById('users-body');
+        let rows;
+        try {
+          const res = await fetch('/api/admin/users', { credentials: 'include' });
+          if (!res.ok) throw new Error('not available');
+          const data = await res.json();
+          rows = data.users || data.data || data;
+          if (!Array.isArray(rows) || rows.length === 0) throw new Error('empty');
+        } catch {
+          body.innerHTML = emptyRow(5, 'No users found');
+          return;
+        }
+
+        body.innerHTML = rows.map(u => {
+          const roleOptions = ROLES.map(r =>
+            `<option value="${r}"${r === u.role ? ' selected' : ''}>${r.charAt(0).toUpperCase() + r.slice(1)}</option>`
+          ).join('');
+          return `
+            <tr>
+              <td>${esc(u.name || u.username || '—')}</td>
+              <td>${esc(u.email || '—')}</td>
+              <td>${roleBadge(u.role)}</td>
+              <td>${formatDate(u.created_at || u.joined_at)}</td>
+              <td>
+                <div class="admin-table__actions">
+                  <select class="role-select" data-uid="${esc(u.user_id)}" data-action="change-role">${roleOptions}</select>
+                  <button class="btn-remove" data-uid="${esc(u.user_id)}" data-action="remove">Remove</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        body.addEventListener('change', async (e) => {
+          const sel = e.target.closest('[data-action="change-role"]');
+          if (!sel) return;
+          try {
+            const res = await fetch(`/api/admin/users/${sel.dataset.uid}/role`, {
+              method: 'PATCH',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ role: sel.value })
+            });
+            if (!res.ok) throw new Error();
+          } catch {
+            notConnected();
+          }
+        });
+
+        body.addEventListener('click', async (e) => {
+          const btn = e.target.closest('[data-action="remove"]');
+          if (!btn) return;
+          if (!confirm('Remove this user? This cannot be undone.')) return;
+          try {
+            const res = await fetch(`/api/admin/users/${btn.dataset.uid}`, {
+              method: 'DELETE', credentials: 'include'
+            });
+            if (!res.ok) throw new Error();
+            btn.closest('tr').remove();
+          } catch {
+            notConnected();
+          }
+        });
       }
 
       async function init() {
-        const user = await fetchMe();
-        if (!user) return;
+        let user;
+        try { user = await fetchMe(); } catch { user = null; }
+
+        if (!user) {
+          window.location.href = '/vertical-prototype/login.html';
+          return;
+        }
+
+        const role = (user.role || '').toLowerCase();
+
+        if (role === 'student') {
+          window.location.href = '/vertical-prototype/dashboard.html';
+          return;
+        }
+
+        if (!['admin', 'faculty', 'staff'].includes(role)) {
+          window.location.href = '/vertical-prototype/login.html';
+          return;
+        }
+
+        const name = user.name || user.username || 'User';
+        const roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
+        document.getElementById('admin-subtitle').textContent = `Welcome, ${name} · ${roleLabel}`;
+        document.getElementById('admin-main').style.display = '';
+
+        if (role === 'admin') {
+          document.getElementById('section-stats').style.display = '';
+          document.getElementById('section-users').style.display = '';
+        }
+
         await Promise.all([
-          loadStats(),
-          loadPendingSubmissions(),
-          loadUsers()
+          loadQueue(),
+          role === 'admin' ? loadUsers() : Promise.resolve()
         ]);
       }
 
