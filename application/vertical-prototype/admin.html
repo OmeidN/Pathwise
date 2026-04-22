@@ -551,6 +551,8 @@
   <script src="nav.js"></script>
   <script>
     (function () {
+      // Local-only preview toggle. Set back to false before merging/pushing.
+      const DEV_BYPASS_ADMIN_AUTH = true;
       const allowedRoles = new Set(['admin', 'faculty', 'staff']);
       const statsNote = document.getElementById('stats-note');
       const usersNote = document.getElementById('users-note');
@@ -588,6 +590,9 @@
       }
 
       async function fetchMe() {
+        if (DEV_BYPASS_ADMIN_AUTH) {
+          return { username: 'Local Preview', role: 'staff' };
+        }
         const response = await fetch('/api/me', { credentials: 'include' });
         if (response.status === 401 || response.status === 404) {
           redirectToLogin();

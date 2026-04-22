@@ -1,7 +1,6 @@
 const navAuth = document.getElementById('nav-auth');
 const currentPage = document.body.dataset.page || '';
 const siteTitle = document.querySelector('.site-title');
-const submitLink = document.querySelector('#main-nav a[href="submit.html"]');
 
 if (siteTitle) {
   siteTitle.setAttribute('href', 'landing.html');
@@ -42,14 +41,12 @@ function authedNavMarkup(user) {
 
 function renderGuestNav() {
   if (!navAuth) return;
-  if (submitLink) submitLink.hidden = true;
   navAuth.dataset.authState = 'guest';
   navAuth.innerHTML = guestNavMarkup();
 }
 
 function renderAuthedNav(user) {
   if (!navAuth) return;
-  if (submitLink) submitLink.hidden = false;
 
   navAuth.dataset.authState = 'authenticated';
   navAuth.innerHTML = authedNavMarkup(user);
