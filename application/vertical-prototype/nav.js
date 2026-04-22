@@ -1,5 +1,10 @@
 const navAuth = document.getElementById('nav-auth');
 const currentPage = document.body.dataset.page || '';
+const siteTitle = document.querySelector('.site-title');
+
+if (siteTitle) {
+  siteTitle.setAttribute('href', 'landing.html');
+}
 
 function guestNavMarkup() {
   return `

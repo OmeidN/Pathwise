@@ -358,7 +358,7 @@ app.get('/api/search', async (req, res) => {
 
 // Explicit entry points before the broader static file handler.
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'vertical-prototype', 'landing.html'));
+  res.redirect('/vertical-prototype/landing.html');
 });
 
 app.get('/about', (req, res) => {

@@ -9,6 +9,129 @@
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/layout.css">
+  <style>
+    .templates-main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .templates-lead {
+      color: var(--color-text-muted);
+      margin-bottom: 18px;
+      max-width: 70ch;
+    }
+
+    .templates-card {
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    .templates-card h2 {
+      margin-bottom: 10px;
+    }
+
+    .templates-note {
+      color: var(--color-text-muted);
+      margin-bottom: 10px;
+    }
+
+    .templates-form {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .templates-section {
+      margin-bottom: 22px;
+    }
+
+    .templates-section h2 {
+      margin-bottom: 10px;
+    }
+
+    #templates-list,
+    #my-drafts-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    #templates-list .card,
+    #my-drafts-list .card {
+      padding: 14px;
+      margin-bottom: 0 !important;
+    }
+
+    #templates-list h3,
+    #my-drafts-list h3 {
+      margin-bottom: 6px;
+    }
+
+    #template-detail {
+      padding: 16px;
+      margin-top: 20px;
+    }
+
+    #detail-tree ul {
+      padding-left: 18px;
+    }
+
+    .template-detail-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 14px;
+    }
+
+    .template-rating-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-size: var(--font-size-sm);
+    }
+
+    .template-rating-controls .input {
+      width: auto;
+      min-width: 72px;
+    }
+
+    @media (max-width: 900px) {
+      .templates-form {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .templates-form .btn {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .templates-main {
+        padding: 16px;
+      }
+
+      .templates-form {
+        grid-template-columns: 1fr;
+      }
+
+      .template-detail-actions,
+      .template-rating-controls {
+        align-items: stretch;
+      }
+
+      .template-detail-actions > * ,
+      .template-rating-controls > * {
+        width: 100%;
+      }
+
+      .template-rating-controls .input {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body data-page="templates">
   <header id="site-header">
@@ -23,17 +146,17 @@
     </div>
   </header>
 
-  <main style="max-width:980px;margin:0 auto;padding:24px">
+  <main class="templates-main">
     <h1>Community goal templates</h1>
-    <p style="color:var(--color-text-muted);margin-bottom:18px">
+    <p class="templates-lead">
       Goal templates use the same structure as your goals: projects, milestones, and resources. Publish a draft to share it. Import a published template to copy it into your goals.
     </p>
 
-    <section class="card" style="padding:16px;margin-bottom:18px">
-      <h2 style="margin-bottom:10px">Create a goal template</h2>
-      <p id="tpl-form-note" style="color:var(--color-text-muted);margin-bottom:10px">Sign in to create a template.</p>
+    <section class="card templates-card">
+      <h2>Create a goal template</h2>
+      <p id="tpl-form-note" class="templates-note">Sign in to create a template.</p>
       <div id="tpl-error" class="error" style="margin-bottom:10px"></div>
-      <form id="templateCreateForm" class="inline-form" style="flex-wrap:wrap;gap:8px">
+      <form id="templateCreateForm" class="templates-form">
         <input id="tpl-new-title" class="input" type="text" maxlength="255" placeholder="Template title (e.g. Internship prep)" required />
         <input id="tpl-new-desc" class="input" type="text" placeholder="Short description (optional)" />
         <input id="tpl-new-cat" class="input" type="text" placeholder="Category (optional)" />
@@ -41,17 +164,17 @@
       </form>
     </section>
 
-    <section style="margin-bottom:22px">
-      <h2 style="margin-bottom:10px">My template drafts</h2>
+    <section class="templates-section">
+      <h2>My template drafts</h2>
       <div id="my-drafts-list"><p style="color:var(--color-text-muted)">Sign in to see drafts.</p></div>
     </section>
 
-    <section style="margin-bottom:22px">
-      <h2 style="margin-bottom:10px">Published templates</h2>
+    <section class="templates-section">
+      <h2>Published templates</h2>
       <div id="templates-list"><p>Loading…</p></div>
     </section>
 
-    <section id="template-detail" class="card" style="padding:16px;margin-top:20px;display:none">
+    <section id="template-detail" class="card" style="display:none">
       <h2 id="detail-title" style="margin-top:0">Template detail</h2>
       <p id="detail-meta" style="color:var(--color-text-muted)"></p>
       <p id="detail-desc"></p>
@@ -59,11 +182,11 @@
       <p style="font-size:var(--font-size-sm);color:var(--color-text-muted);margin:0 0 8px">
         Import creates a <strong>new</strong> goal on your Goals page (your published template stays here for others).
       </p>
-      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px">
+      <div class="template-detail-actions">
         <button type="button" class="btn btn-primary" id="importTemplateBtn">Import into my goals</button>
-        <label style="display:flex;align-items:center;gap:8px;font-size:var(--font-size-sm)">
+        <label class="template-rating-controls">
           Rate (1–5)
-          <select id="templateRatingStars" class="input" style="width:auto">
+          <select id="templateRatingStars" class="input">
             <option value="">—</option>
             <option value="5">5</option>
             <option value="4">4</option>
