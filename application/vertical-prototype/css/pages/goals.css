@@ -312,6 +312,22 @@
 }
 
 @media (max-width: 600px) {
+  .goals-main,
+  .goal-detail-main {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .goals-header {
+    align-items: stretch;
+  }
+
+  .goals-header .btn,
+  .goal-card__actions .btn,
+  .goal-card__actions .input,
+  .goal-form-grid .form-row--actions .btn {
+    width: 100%;
+  }
+
   .goals-toolbar {
     grid-template-columns: 1fr;
   }
@@ -320,7 +336,44 @@
     flex-direction: column;
   }
 
+  .goal-card__head,
+  .project-block__head,
+  .milestone-item,
+  .goal-row__actions,
+  .goal-form-grid .form-row--actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .goal-card__stats {
     grid-template-columns: 1fr;
+  }
+
+  .milestone-item__title {
+    flex-basis: auto;
+  }
+
+  .inline-form,
+  .compact-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .inline-form .input,
+  .compact-fields .input,
+  .inline-form .btn,
+  .compact-fields .btn {
+    width: 100%;
+  }
+
+  .modal-backdrop {
+    padding: var(--space-md);
+    align-items: flex-end;
+  }
+
+  .modal-card {
+    max-width: none;
+    max-height: 85vh;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 }
