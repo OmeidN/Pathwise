@@ -1,6 +1,7 @@
 const navAuth = document.getElementById('nav-auth');
 const currentPage = document.body.dataset.page || '';
 const siteTitle = document.querySelector('.site-title');
+const submitLink = document.querySelector('#main-nav a[href="submit.html"]');
 
 if (siteTitle) {
   siteTitle.setAttribute('href', 'landing.html');
@@ -8,7 +9,6 @@ if (siteTitle) {
 
 function guestNavMarkup() {
   return `
-    <a href="templates.html" class="nav-link${currentPage === 'templates' ? ' nav-link--active' : ''}">Templates</a>
     <a href="login.html" class="nav-link"${currentPage === 'login' ? ' aria-current="page"' : ''}>Login</a>
     <a href="register.html" class="nav-btn"${currentPage === 'register' ? ' aria-current="page"' : ''}>Register</a>
   `;
@@ -42,12 +42,14 @@ function authedNavMarkup(user) {
 
 function renderGuestNav() {
   if (!navAuth) return;
+  if (submitLink) submitLink.hidden = true;
   navAuth.dataset.authState = 'guest';
   navAuth.innerHTML = guestNavMarkup();
 }
 
 function renderAuthedNav(user) {
   if (!navAuth) return;
+  if (submitLink) submitLink.hidden = false;
 
   navAuth.dataset.authState = 'authenticated';
   navAuth.innerHTML = authedNavMarkup(user);
