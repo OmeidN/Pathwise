@@ -1,9 +1,13 @@
 const navAuth = document.getElementById('nav-auth');
 const currentPage = document.body.dataset.page || '';
+const siteTitle = document.querySelector('.site-title');
+
+if (siteTitle) {
+  siteTitle.setAttribute('href', 'landing.html');
+}
 
 function guestNavMarkup() {
   return `
-    <a href="templates.html" class="nav-link${currentPage === 'templates' ? ' nav-link--active' : ''}">Templates</a>
     <a href="login.html" class="nav-link"${currentPage === 'login' ? ' aria-current="page"' : ''}>Login</a>
     <a href="register.html" class="nav-btn"${currentPage === 'register' ? ' aria-current="page"' : ''}>Register</a>
   `;
@@ -12,6 +16,10 @@ function guestNavMarkup() {
 function authedNavMarkup(user) {
   const username = user.username || user.name || 'Account';
   const role = user.role || 'student';
+  const adminLink =
+    role === 'admin' || role === 'faculty' || role === 'staff'
+      ? `<a href="admin.html" class="nav-link${currentPage === 'admin' ? ' nav-link--active' : ''}">Admin</a>`
+      : '';
   const publishLink =
     role === 'faculty' || role === 'staff'
       ? `<a href="publish.html" class="nav-link${currentPage === 'publish' ? ' nav-link--active' : ''}">Publish</a>`
@@ -20,6 +28,7 @@ function authedNavMarkup(user) {
     <a href="dashboard.html" class="nav-link${currentPage === 'dashboard' ? ' nav-link--active' : ''}">Dashboard</a>
     <a href="goals.html" class="nav-link${currentPage === 'goals' || currentPage === 'goal-detail' ? ' nav-link--active' : ''}">Goals</a>
     <a href="templates.html" class="nav-link${currentPage === 'templates' ? ' nav-link--active' : ''}">Templates</a>
+    ${adminLink}
     ${publishLink}
     <a href="bookmarks.html" class="nav-link${currentPage === 'bookmarks' ? ' nav-link--active' : ''}">Bookmarks</a>
     <a href="reflections.html" class="nav-link${currentPage === 'reflections' ? ' nav-link--active' : ''}">Reflections</a>

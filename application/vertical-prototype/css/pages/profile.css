@@ -338,4 +338,37 @@
     width: 100%;
     position: static;
   }
+
+  .profile-card,
+  .submitted-row {
+    padding: var(--space-md);
+  }
+
+  .submitted-row {
+    align-items: flex-start;
+  }
+
+  .submitted-row__title {
+    white-space: normal;
+  }
+
+  .activity-item {
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+}
+
+@media (max-width: 520px) {
+  .profile-stats {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .submitted-row {
+    flex-direction: column;
+  }
+
+  .status-badge {
+    align-self: flex-start;
+  }
 }

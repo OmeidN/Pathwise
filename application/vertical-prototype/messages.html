@@ -10,6 +10,41 @@
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/pages/goals.css" />
+  <style>
+    .messages-main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: var(--space-xl) var(--space-lg);
+    }
+
+    .msg-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .thread-view {
+      min-height: 140px;
+      max-height: 420px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .messages-main {
+        padding: var(--space-lg) var(--space-md);
+      }
+
+      .msg-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .thread-view {
+        max-height: none;
+      }
+    }
+  </style>
 </head>
 <body data-page="messages">
   <header id="site-header">
@@ -23,10 +58,10 @@
       </nav>
     </div>
   </header>
-  <main class="goal-detail-main">
+  <main class="goal-detail-main messages-main">
     <h1>Messages</h1>
     <p id="msg-error" class="error" hidden></p>
-    <div class="msg-layout" style="display:grid;grid-template-columns:1fr 1.2fr;gap:var(--space-lg);align-items:start">
+    <div class="msg-layout">
       <section class="card">
         <h2 style="margin-top:0">Inbox</h2>
         <div id="inbox-list">Loading…</div>

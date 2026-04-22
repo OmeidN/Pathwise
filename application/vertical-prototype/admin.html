@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard - Pathwise</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+
+  <style>
+    body[data-page="admin"] {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(74, 124, 111, 0.08), transparent 22%),
+        linear-gradient(180deg, #f9fbfa 0%, var(--color-background) 100%);
+    }
+
+    .admin-main {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .admin-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.9fr);
+      gap: var(--space-lg);
+      align-items: stretch;
+    }
+
+    .admin-hero__welcome {
+      background:
+        linear-gradient(135deg, rgba(74, 124, 111, 0.12), rgba(74, 124, 111, 0.04)),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-card);
+      padding: var(--space-xl);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 148px;
+    }
+
+    .admin-eyebrow {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-subtle);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-sm);
+    }
+
+    .admin-title {
+      font-size: clamp(1.7rem, 3vw, 2.4rem);
+      line-height: 1.12;
+      color: var(--color-text);
+      margin-bottom: var(--space-sm);
+    }
+
+    .admin-subtitle {
+      font-size: var(--font-size-base);
+      color: var(--color-text-muted);
+      max-width: 72ch;
+    }
+
+    .admin-hero__actions {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-card);
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 148px;
+    }
+
+    .admin-action-title {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-sm);
+    }
+
+    .admin-action-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 290px minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .admin-sidebar {
+      display: grid;
+      gap: var(--space-lg);
+      align-self: start;
+      position: sticky;
+      top: calc(var(--banner-height) + 88px);
+    }
+
+    .admin-panel {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+
+    .admin-panel__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-lg) var(--space-lg) var(--space-md);
+      border-bottom: 1px solid rgba(226, 232, 228, 0.7);
+    }
+
+    .admin-panel__title {
+      font-size: 1rem;
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .admin-panel__body {
+      padding: var(--space-lg);
+    }
+
+    .admin-tip-list {
+      list-style: none;
+      display: grid;
+      gap: var(--space-md);
+    }
+
+    .admin-tip-list li {
+      padding-left: var(--space-md);
+      position: relative;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+    }
+
+    .admin-tip-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.56rem;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--color-primary);
+    }
+
+    .admin-mini-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid rgba(226, 232, 228, 0.7);
+    }
+
+    .admin-mini-stat:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .admin-mini-stat__label {
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+    }
+
+    .admin-mini-stat__value {
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .admin-content-shell {
+      min-width: 0;
+    }
+
+    #admin-content {
+      display: grid;
+      gap: var(--space-lg);
+    }
+
+    .admin-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+
+    .admin-stats-grid .card {
+      border-radius: var(--radius-xl);
+      padding: var(--space-lg);
+      min-height: 118px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        linear-gradient(180deg, rgba(74, 124, 111, 0.04), transparent 60%),
+        var(--color-surface);
+    }
+
+    .admin-stats-grid .card h3 {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .admin-stats-grid .card p {
+      font-size: 2rem;
+      line-height: 1;
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .admin-note-card.card {
+      padding: var(--space-lg);
+      border-radius: var(--radius-xl);
+      display: grid;
+      gap: var(--space-sm);
+      background:
+        linear-gradient(90deg, rgba(74, 124, 111, 0.08), transparent 38%),
+        var(--color-surface);
+    }
+
+    .admin-note-card h3 {
+      font-size: 1.05rem;
+      color: var(--color-text);
+      margin: 0;
+    }
+
+    .admin-note-card p {
+      margin: 0;
+      color: var(--color-text-muted);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .admin-section.card {
+      border-radius: var(--radius-xl);
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .admin-section__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-lg);
+      border-bottom: 1px solid rgba(226, 232, 228, 0.75);
+      flex-wrap: wrap;
+    }
+
+    .admin-section h2 {
+      font-size: 1rem;
+      color: var(--color-text);
+      margin: 0;
+    }
+
+    .admin-section__meta {
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+      margin: 6px 0 0;
+    }
+
+    .table-wrap {
+      overflow: auto;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--font-size-sm);
+      min-width: 0;
+    }
+
+    .admin-table thead th {
+      background: #f8fbf9;
+      color: var(--color-text-muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-weight: var(--font-weight-medium);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .admin-table th,
+    .admin-table td {
+      border-bottom: 1px solid var(--color-border);
+      padding: 12px 16px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .admin-table tbody td {
+      color: var(--color-text);
+      vertical-align: middle;
+      background: var(--color-surface);
+    }
+
+    .admin-table tbody tr:hover td {
+      background: #fafcfb;
+    }
+
+    .admin-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .admin-table__actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-danger {
+      background-color: #fff3f1;
+      color: var(--color-danger);
+      border: 1px solid rgba(207, 89, 66, 0.28);
+    }
+
+    .btn-danger:hover {
+      background-color: #ffe7e2;
+    }
+
+    .empty-row {
+      color: var(--color-text-muted);
+      white-space: normal;
+    }
+
+    .admin-inline-note {
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+    }
+
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-full);
+      background: rgba(74, 124, 111, 0.12);
+      color: var(--color-primary);
+      font-size: 0.8rem;
+      font-weight: var(--font-weight-medium);
+      letter-spacing: 0.02em;
+    }
+
+    @media (max-width: 1180px) {
+      .admin-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-sidebar {
+        position: static;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 860px) {
+      .admin-main {
+        padding: var(--space-md);
+      }
+
+      .admin-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-sidebar,
+      .admin-stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .admin-table {
+        min-width: 620px;
+      }
+    }
+  </style>
+</head>
+
+<body data-page="admin">
+  <header id="site-header">
+    <div class="header-inner">
+      <a href="landing.html" class="site-title">Pathwise</a>
+
+      <nav id="main-nav">
+        <a href="landing.html" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link">Browse</a>
+        <a href="submit.html" class="nav-link">Submit Resource</a>
+        <div id="nav-auth"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <section class="admin-hero">
+      <div class="admin-hero__welcome">
+        <p class="admin-eyebrow">Staff workspace</p>
+        <h1 class="admin-title">Pathwise admin dashboard</h1>
+        <p class="admin-subtitle">
+          Review moderation queues, monitor basic site-level signals, and check who has access to the platform using the same dashboard patterns used elsewhere in Pathwise.
+        </p>
+      </div>
+
+      <aside class="admin-hero__actions">
+        <div>
+          <p class="admin-action-title">Quick actions</p>
+          <div class="admin-action-stack">
+            <a href="submit.html" class="btn btn-primary">Submit resource</a>
+            <a href="dashboard.html" class="btn btn-secondary">User dashboard</a>
+            <a href="templates.html" class="btn btn-secondary">Templates</a>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="admin-layout">
+      <aside class="admin-sidebar">
+        <section class="admin-panel">
+          <div class="admin-panel__head">
+            <h2 class="admin-panel__title">Access policy</h2>
+          </div>
+          <div class="admin-panel__body">
+            <ul class="admin-tip-list">
+              <li>This page is limited to admin, faculty, and staff accounts.</li>
+              <li>Role access is checked through the existing session-based `/api/me` endpoint.</li>
+              <li>If moderation or reporting APIs are not mounted yet, this page shows empty states instead of placeholder records.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="admin-panel">
+          <div class="admin-panel__head">
+            <h2 class="admin-panel__title">Current capabilities</h2>
+          </div>
+          <div class="admin-panel__body">
+            <div class="admin-mini-stat">
+              <span class="admin-mini-stat__label">Moderation queue</span>
+              <span class="admin-mini-stat__value" id="capability-moderation">Unavailable</span>
+            </div>
+            <div class="admin-mini-stat">
+              <span class="admin-mini-stat__label">User management</span>
+              <span class="admin-mini-stat__value" id="capability-users">Unavailable</span>
+            </div>
+            <div class="admin-mini-stat">
+              <span class="admin-mini-stat__label">Site stats</span>
+              <span class="admin-mini-stat__value" id="capability-stats">Unavailable</span>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <section class="admin-content-shell">
+        <div id="admin-content" aria-live="polite">
+          <section class="admin-stats-grid">
+            <article class="card">
+              <h3>Total Users</h3>
+              <p id="total-users-count">0</p>
+            </article>
+            <article class="card">
+              <h3>Total Resources</h3>
+              <p id="total-resources-count">0</p>
+            </article>
+            <article class="card">
+              <h3>Approved Resources</h3>
+              <p id="approved-resources-count">0</p>
+            </article>
+          </section>
+
+          <section class="admin-note-card card">
+            <h3>Site stats status</h3>
+            <p id="stats-note">Checking whether a site-wide stats endpoint is available.</p>
+          </section>
+
+          <section class="admin-section card">
+            <div class="admin-section__head">
+              <div>
+                <h2>Pending resource submissions</h2>
+                <p class="admin-section__meta">Submitted resources waiting for approval or rejection.</p>
+              </div>
+              <span class="admin-badge" id="pending-count-badge">0 pending</span>
+            </div>
+            <div class="table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Submitted By</th>
+                    <th>Visibility</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="pending-submissions-body">
+                  <tr>
+                    <td colspan="5" class="empty-row">Loading submission tools...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="admin-section card">
+            <div class="admin-section__head">
+              <div>
+                <h2>User list</h2>
+                <p class="admin-section__meta">Registered users and roles, if a management endpoint is available.</p>
+              </div>
+              <span class="admin-inline-note" id="users-note">Checking whether a user list endpoint is available.</span>
+            </div>
+            <div class="table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                  </tr>
+                </thead>
+                <tbody id="user-list-body">
+                  <tr>
+                    <td colspan="3" class="empty-row">Loading user tools...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="nav.js"></script>
+  <script>
+    (function () {
+      // Local-only preview toggle. Set back to false before merging/pushing.
+      const DEV_BYPASS_ADMIN_AUTH = true;
+      const allowedRoles = new Set(['admin', 'faculty', 'staff']);
+      const statsNote = document.getElementById('stats-note');
+      const usersNote = document.getElementById('users-note');
+      const pendingBadge = document.getElementById('pending-count-badge');
+      const moderationCapability = document.getElementById('capability-moderation');
+      const usersCapability = document.getElementById('capability-users');
+      const statsCapability = document.getElementById('capability-stats');
+      const pendingBody = document.getElementById('pending-submissions-body');
+      const userBody = document.getElementById('user-list-body');
+      const totalUsersCount = document.getElementById('total-users-count');
+      const totalResourcesCount = document.getElementById('total-resources-count');
+      const approvedResourcesCount = document.getElementById('approved-resources-count');
+
+      function redirectToLogin() {
+        window.location.href = '/vertical-prototype/login.html';
+      }
+
+      function esc(value) {
+        return String(value ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function emptyRow(colspan, message) {
+        return `<tr><td colspan="${colspan}" class="empty-row">${esc(message)}</td></tr>`;
+      }
+
+      function setCounts(users, resources, approved) {
+        totalUsersCount.textContent = String(users);
+        totalResourcesCount.textContent = String(resources);
+        approvedResourcesCount.textContent = String(approved);
+      }
+
+      async function fetchMe() {
+        if (DEV_BYPASS_ADMIN_AUTH) {
+          return { username: 'Local Preview', role: 'staff' };
+        }
+        const response = await fetch('/api/me', { credentials: 'include' });
+        if (response.status === 401 || response.status === 404) {
+          redirectToLogin();
+          return null;
+        }
+        if (!response.ok) {
+          redirectToLogin();
+          return null;
+        }
+        const data = await response.json();
+        const user = data.user || data;
+        if (!user || !allowedRoles.has(user.role)) {
+          redirectToLogin();
+          return null;
+        }
+        return user;
+      }
+
+      function renderPendingEmptyState(message) {
+        pendingBadge.textContent = '0 pending';
+        pendingBody.innerHTML = emptyRow(5, message);
+      }
+
+      function renderUsersEmptyState(message) {
+        userBody.innerHTML = emptyRow(3, message);
+      }
+
+      async function loadStats() {
+        setCounts(0, 0, 0);
+        statsCapability.textContent = 'Unavailable';
+        statsNote.textContent = 'No mounted site-wide stats endpoint was found, so these values default to 0.';
+      }
+
+      async function loadPendingSubmissions() {
+        moderationCapability.textContent = 'Unavailable';
+        renderPendingEmptyState('No pending submissions. No moderation endpoint is available in the current backend.');
+      }
+
+      async function loadUsers() {
+        usersCapability.textContent = 'Unavailable';
+        usersNote.textContent = 'No full user management endpoint is available in the current backend.';
+        renderUsersEmptyState('No user list available. The current backend only exposes user search, not a full management list.');
+      }
+
+      async function init() {
+        const user = await fetchMe();
+        if (!user) return;
+        await Promise.all([
+          loadStats(),
+          loadPendingSubmissions(),
+          loadUsers()
+        ]);
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
