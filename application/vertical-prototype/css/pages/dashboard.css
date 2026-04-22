@@ -81,3 +81,24 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+@media (max-width: 640px) {
+  .dashboard-main {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-section__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dash-table th,
+  .dash-table td {
+    padding: var(--space-sm);
+    font-size: var(--font-size-xs);
+  }
+}
