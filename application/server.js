@@ -356,6 +356,15 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
+// Explicit entry points before the broader static file handler.
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'vertical-prototype', 'landing.html'));
+});
+
+app.get('/about', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Static files (HTML, CSS, etc.) from application directory
 app.use(express.static(path.join(__dirname)));
 
