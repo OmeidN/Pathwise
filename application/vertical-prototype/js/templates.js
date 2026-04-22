@@ -39,19 +39,22 @@
   async function loadAuth() {
     try {
       const res = await fetch('/api/me', { credentials: 'include' });
-      if (!res.ok) return;
+      if (!res.ok) {
+        window.location.replace('login.html');
+        return;
+      }
       canPost = true;
       noteEl.textContent =
         'Creates a draft goal template. You will open the goal hub to add projects, milestones, and resources, then publish.';
     } catch (_) {
-      // guest
+      window.location.replace('login.html');
+      return;
     }
     createBtn.disabled = !canPost;
   }
 
   async function loadDrafts() {
     if (!canPost) {
-      draftsEl.innerHTML = '<p style="color:var(--color-text-muted)">Sign in to manage drafts.</p>';
       return;
     }
     const res = await fetch('/api/goal-templates/mine?state=draft', { credentials: 'include' });
@@ -81,8 +84,7 @@
     listEl.innerHTML = '<p>Loading templates…</p>';
     const res = await fetch('/api/goal-templates', { credentials: 'include' });
     if (res.status === 401) {
-      listEl.innerHTML =
-        '<p style="color:var(--color-text-muted)">Sign in to browse published goal templates.</p>';
+      window.location.replace('login.html');
       return;
     }
     const data = await res.json().catch(() => ({}));
