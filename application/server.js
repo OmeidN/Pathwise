@@ -370,7 +370,7 @@ app.use(express.static(path.join(__dirname)));
 
 // 404 catch-all — must come after static middleware and all routes.
 app.use((_req, res) => {
-  res.status(404).sendFile(path.join(__dirname, 'vertical-prototype', '404.html'));
+  res.redirect('/vertical-prototype/404.html');
 });
 
 // Centralized error payload for async/validation middleware.
