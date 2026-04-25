@@ -10,14 +10,55 @@
   align-items: flex-start;
 }
 
+/* This card treatment makes the filter panel feel intentional on desktop and mobile. */
 #search-section {
   width: 280px;
   flex-shrink: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-lg);
 }
 
+/* The results column uses a simple vertical rhythm for helper text, headings, and cards. */
 #results-section {
   flex: 1;
   min-width: 0;
+  display: grid;
+  gap: var(--space-lg);
+}
+
+/* This intro block gives the filter area a stronger starting point before the form begins. */
+.search-panel-intro {
+  margin-bottom: var(--space-lg);
+}
+
+.search-panel-intro__eyebrow {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-xs);
+}
+
+.search-panel-intro__title {
+  font-size: var(--font-size-md);
+  line-height: 1.25;
+  margin-bottom: var(--space-sm);
+}
+
+.search-panel-intro__body,
+.results-helper {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+/* This helper copy gives the results side a better first impression before any search runs. */
+.results-helper {
+  margin: 0;
 }
 
 /* --- Search form --- */
@@ -68,7 +109,10 @@
   box-shadow: var(--shadow-focus);
 }
 
-#category {
+/* Keep the main search controls visually consistent even though they use different elements. */
+#category,
+#contentType,
+#skillArea {
   padding: 10px var(--space-md);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -81,7 +125,9 @@
   min-width: 170px;
 }
 
-#category:focus {
+#category:focus,
+#contentType:focus,
+#skillArea:focus {
   border-color: var(--color-primary);
   box-shadow: var(--shadow-focus);
 }
@@ -168,6 +214,12 @@
   cursor: pointer;
 }
 
+/* Keep the filter buttons aligned together instead of floating separately. */
+.filter-actions {
+  display: grid;
+  gap: var(--space-sm);
+}
+
 .btn-apply-filters {
   width: 100%;
   padding: 10px;
@@ -181,7 +233,6 @@
   text-transform: uppercase;
   cursor: pointer;
   margin-top: var(--space-md);
-  margin-bottom: var(--space-sm);
   transition: background-color 0.15s;
 }
 
@@ -267,6 +318,7 @@
 
   #search-section {
     width: 100%;
+    padding: var(--space-lg);
   }
 }
 
@@ -288,6 +340,8 @@
   }
 
   #category,
+  #contentType,
+  #skillArea,
   #searchBtn {
     width: 100%;
   }
@@ -295,6 +349,10 @@
   .btn-apply-filters,
   .btn-clear-filters {
     min-height: 44px;
+  }
+
+  .search-panel-intro__title {
+    font-size: var(--font-size-base);
   }
 
   #results-section h2 {
@@ -345,6 +403,10 @@
   transform: translateY(-2px);
 }
 
+.result-card--skeleton {
+  pointer-events: none;
+}
+
 .result-card h3 {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
@@ -390,6 +452,62 @@
   width: 100%;
 }
 
+.results-empty {
+  grid-column: 1 / -1;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  text-align: center;
+  box-shadow: var(--shadow-card);
+}
+
+.results-empty__title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-sm);
+}
+
+.results-empty__body {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  max-width: 34ch;
+  margin: 0 auto;
+}
+
+.skeleton-block {
+  background: linear-gradient(
+    90deg,
+    var(--color-border) 25%,
+    var(--color-skeleton-mid) 50%,
+    var(--color-border) 75%
+  );
+  background-size: 300% 100%;
+  border-radius: var(--radius-sm);
+  animation: search-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-title {
+  height: 18px;
+  width: 70%;
+  margin-bottom: var(--space-sm);
+}
+
+.skeleton-line {
+  height: 12px;
+  margin-bottom: 8px;
+}
+
+.skeleton-line--short {
+  width: 56%;
+}
+
+@keyframes search-skeleton-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
 .error {
   grid-column: 1 / -1;
 }
@@ -404,8 +522,7 @@
 
   #search-section {
     width: 100%;
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: var(--space-lg);
+    padding: var(--space-lg);
   }
 
   #searchForm {

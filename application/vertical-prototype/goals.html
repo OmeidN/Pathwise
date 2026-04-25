@@ -52,7 +52,24 @@
       </div>
     </section>
     <p id="goals-error" class="error" hidden></p>
-    <div id="goals-list" class="goal-grid">Loading…</div>
+    <!-- These starter skeleton cards make the page feel loaded even before the API finishes. -->
+    <div id="goals-list" class="goal-grid">
+      <article class="goal-card goal-card--skeleton">
+        <div class="goal-skeleton-block goal-skeleton-title"></div>
+        <div class="goal-skeleton-block goal-skeleton-meta"></div>
+        <div class="goal-skeleton-block goal-skeleton-line"></div>
+      </article>
+      <article class="goal-card goal-card--skeleton">
+        <div class="goal-skeleton-block goal-skeleton-title"></div>
+        <div class="goal-skeleton-block goal-skeleton-meta"></div>
+        <div class="goal-skeleton-block goal-skeleton-line"></div>
+      </article>
+      <article class="goal-card goal-card--skeleton">
+        <div class="goal-skeleton-block goal-skeleton-title"></div>
+        <div class="goal-skeleton-block goal-skeleton-meta"></div>
+        <div class="goal-skeleton-block goal-skeleton-line"></div>
+      </article>
+    </div>
   </main>
 
   <div class="modal-backdrop" id="goalModal" hidden>

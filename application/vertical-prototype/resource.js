@@ -7,9 +7,10 @@ let currentResource = null;
 let isSaved = false;
 let currentUserRole = null;
 
+// Hide the banner when there is no error so the page does not keep stale feedback around.
 function showResourceError(message) {
-  errorEl.textContent = message;
-  errorEl.hidden = false;
+  errorEl.textContent = message || '';
+  errorEl.hidden = !message;
 }
 
 function escapeHtml(value) {
@@ -28,6 +29,7 @@ function formatCost(cost) {
   return cost.charAt(0).toUpperCase() + cost.slice(1);
 }
 
+// Build one complete detail view so the resource page stays easy to refresh after actions.
 function renderResource(resource) {
   const tags = resource.tags || [];
   const tagMarkup =
@@ -47,9 +49,10 @@ function renderResource(resource) {
 
   const rateBlock =
     currentUserRole != null
-      ? `<div class="resource-rate card" style="margin-top:16px;padding:16px">
-          <label>Your rating (1–5)
-            <select id="rate-stars" class="input" style="max-width:120px;margin-top:8px">
+      ? `<div class="resource-support-panel">
+          <h2 class="resource-support-panel__title">Rate this resource</h2>
+          <label class="resource-support-panel__label">Your rating (1-5)
+            <select id="rate-stars" class="input">
               <option value="">—</option>
               <option value="5">5</option>
               <option value="4">4</option>
@@ -58,16 +61,23 @@ function renderResource(resource) {
               <option value="1">1</option>
             </select>
           </label>
-          <button type="button" class="btn btn-primary" id="rateBtn" style="margin-top:8px">Submit rating</button>
+          <div class="resource-support-panel__actions">
+            <button type="button" class="btn btn-primary" id="rateBtn">Submit rating</button>
+          </div>
         </div>`
-      : `<p class="profile-muted" style="margin-top:12px"><a href="login.html">Sign in</a> to rate this resource.</p>`;
+      : `<p class="resource-signin-note"><a href="login.html">Sign in</a> to rate this resource.</p>`;
 
   const facultyBlock =
     currentUserRole === 'faculty' || currentUserRole === 'staff'
-      ? `<div class="resource-faculty card" style="margin-top:16px;padding:16px">
-          <h3 style="margin-top:0;font-size:1rem">Faculty: AI-enabled label</h3>
-          <label><input type="checkbox" id="ai-enabled-cb" ${Number(resource.is_ai_enabled) ? 'checked' : ''} /> Mark as AI-enabled</label>
-          <button type="button" class="btn btn-secondary" id="ai-save-btn" style="margin-top:8px">Update flag</button>
+      ? `<div class="resource-support-panel">
+          <h2 class="resource-support-panel__title">Faculty tools</h2>
+          <label class="resource-support-panel__label">
+            <span>Catalog label</span>
+            <span><input type="checkbox" id="ai-enabled-cb" ${Number(resource.is_ai_enabled) ? 'checked' : ''} /> Mark as AI-enabled</span>
+          </label>
+          <div class="resource-support-panel__actions">
+            <button type="button" class="btn btn-secondary" id="ai-save-btn">Update flag</button>
+          </div>
         </div>`
       : '';
 

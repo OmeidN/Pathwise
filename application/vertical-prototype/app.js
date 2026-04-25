@@ -15,17 +15,53 @@ const clearFiltersBtn = document.querySelector(".btn-clear-filters");
 const tagCheckboxes = document.querySelectorAll('input[type="checkbox"][data-tag]');
 const queryRegex = /^[a-z0-9 ]{1,40}$/i;
 
+// Escape text before inserting it into cards so search results render safely.
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Reuse the same loading cards so searching feels responsive.
+function loadingCardsMarkup(count = 6) {
+  return Array.from({ length: count }).map(() => `
+    <div class="result-card result-card--skeleton">
+      <div class="skeleton-block skeleton-title"></div>
+      <div class="skeleton-block skeleton-line"></div>
+      <div class="skeleton-block skeleton-line skeleton-line--short"></div>
+    </div>
+  `).join("");
+}
+
+// Use one shared empty-state pattern instead of plain paragraphs.
+function emptyStateMarkup(title, body) {
+  return `
+    <div class="results-empty">
+      <p class="results-empty__title">${escapeHtml(title)}</p>
+      <p class="results-empty__body">${escapeHtml(body)}</p>
+    </div>
+  `;
+}
+
+// This helper keeps the result cards readable even when values come from the API.
 function resourceCardMarkup(resource) {
   const id = resource.resource_id || resource.id;
   const type = resource.content_type || "resource";
   let detailsHref = type === "resource" ? `resource.html?id=${id}` : "templates.html";
   if (type === "goal_template") detailsHref = `templates.html?id=${id}`;
   else if (type === "template" || type === "workflow") detailsHref = "templates.html";
-  const badge = type !== "resource" ? `<p class="result-card-badge">${type}</p>` : Number(resource.is_ai_enabled) ? '<p class="result-card-badge">AI-enabled</p>' : "";
+  const badge = type !== "resource"
+    ? `<p class="result-card-badge">${escapeHtml(type.replace("_", " "))}</p>`
+    : Number(resource.is_ai_enabled)
+      ? '<p class="result-card-badge">AI-enabled</p>'
+      : "";
   return `
     <div class="result-card">
-      <h3><a href="${detailsHref}">${resource.title}</a></h3>
-      <p>${resource.description || ""}</p>
+      <h3><a href="${detailsHref}">${escapeHtml(resource.title)}</a></h3>
+      <p>${escapeHtml(resource.description || "")}</p>
       ${badge}
       <div class="result-card-actions">
         <a href="${detailsHref}" class="btn btn-secondary result-card-link">View Details</a>
@@ -58,6 +94,7 @@ function resetFilters() {
   });
 }
 
+// Recommendation sections reuse the same state patterns as the main results area.
 async function loadRecommendations() {
   if (!recommendedSection || !recommendedResults) return;
 
@@ -69,7 +106,7 @@ async function loadRecommendations() {
     }
 
     recommendedSection.hidden = false;
-    recommendedResults.innerHTML = "<p>Loading recommendations...</p>";
+    recommendedResults.innerHTML = loadingCardsMarkup(3);
 
     const recResponse = await fetch("/api/recommendations?limit=4", { credentials: "include" });
     const recData = await recResponse.json();
@@ -78,7 +115,10 @@ async function loadRecommendations() {
     }
 
     if (!Array.isArray(recData.results) || recData.results.length === 0) {
-      recommendedResults.innerHTML = '<p class="results-empty">No recommendations yet. Add goals/projects to improve suggestions.</p>';
+      recommendedResults.innerHTML = emptyStateMarkup(
+        "No recommendations yet",
+        "Add goals or projects first so Pathwise has more context for suggestions."
+      );
       return;
     }
 
@@ -88,13 +128,14 @@ async function loadRecommendations() {
   }
 }
 
+// Template cards follow the same safe rendering rules as the rest of browse.
 function templateCardMarkup(template) {
   const tid = template.goal_id || template.template_id;
   const href = tid ? `templates.html?id=${tid}` : "templates.html";
   return `
     <div class="result-card">
-      <h3><a href="${href}">${template.title}</a></h3>
-      <p>${template.description || ""}</p>
+      <h3><a href="${href}">${escapeHtml(template.title)}</a></h3>
+      <p>${escapeHtml(template.description || "")}</p>
       <p class="result-card-badge">goal template</p>
       <div class="result-card-actions">
         <a href="${href}" class="btn btn-secondary result-card-link">View</a>
@@ -103,6 +144,7 @@ function templateCardMarkup(template) {
   `;
 }
 
+// Keep template recommendations visually aligned with search results.
 async function loadTemplateRecommendations() {
   if (!templateRecommendedSection || !templateRecommendedResults) return;
   try {
@@ -112,12 +154,15 @@ async function loadTemplateRecommendations() {
       return;
     }
     templateRecommendedSection.hidden = false;
-    templateRecommendedResults.innerHTML = "<p>Loading template recommendations...</p>";
+    templateRecommendedResults.innerHTML = loadingCardsMarkup(3);
     const response = await fetch("/api/template-recommendations?limit=4", { credentials: "include" });
     const data = await response.json();
     if (!response.ok || !data.success) throw new Error("Could not load template recommendations.");
     if (!Array.isArray(data.results) || data.results.length === 0) {
-      templateRecommendedResults.innerHTML = '<p class="results-empty">No template recommendations yet.</p>';
+      templateRecommendedResults.innerHTML = emptyStateMarkup(
+        "No template recommendations yet",
+        "Once your activity grows, this section will suggest goal templates to explore."
+      );
       return;
     }
     templateRecommendedResults.innerHTML = data.results.map((t) => templateCardMarkup(t)).join("");
@@ -126,6 +171,7 @@ async function loadTemplateRecommendations() {
   }
 }
 
+// The search flow now shares loading and empty states so it feels steadier.
 async function runSearch(event) {
   event.preventDefault();
 
@@ -134,16 +180,13 @@ async function runSearch(event) {
   const contentType = contentTypeInput?.value || "";
   const skillArea = skillAreaInput?.value.trim() || "";
 
-  resultsEl.innerHTML = Array.from({ length: 6 }).map(() => `
-    <div class="result-card result-card--skeleton">
-      <div class="skeleton-block skeleton-title"></div>
-      <div class="skeleton-block skeleton-line"></div>
-      <div class="skeleton-block skeleton-line skeleton-line--short"></div>
-    </div>
-  `).join("");
+  resultsEl.innerHTML = loadingCardsMarkup();
 
   if (q && !queryRegex.test(q)) {
-    resultsEl.innerHTML = `<p class="error">Search must be 1-40 characters with letters, numbers, and spaces only.</p>`;
+    resultsEl.innerHTML = emptyStateMarkup(
+      "Search format not supported",
+      "Use 1 to 40 letters, numbers, and spaces only."
+    );
     return;
   }
 
@@ -166,22 +209,27 @@ async function runSearch(event) {
     const data = await response.json();
 
     if (!data.success) {
-      resultsEl.innerHTML = `<p class="error">Error: ${data.error}</p>`;
+      resultsEl.innerHTML = emptyStateMarkup(
+        "Search could not finish",
+        data.error || "Please try another search."
+      );
       return;
     }
 
     if (data.results.length === 0) {
-      resultsEl.innerHTML = `
-        <div class="results-empty">
-          <p>No resources match your filters. Try adjusting your search.</p>
-        </div>
-      `;
+      resultsEl.innerHTML = emptyStateMarkup(
+        "No matches yet",
+        "Try a broader keyword or remove one of the filters."
+      );
       return;
     }
 
     resultsEl.innerHTML = data.results.map((resource) => resourceCardMarkup(resource)).join("");
   } catch (error) {
-    resultsEl.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+    resultsEl.innerHTML = emptyStateMarkup(
+      "Search could not finish",
+      error.message || "Please try again."
+    );
   }
 }
 
@@ -217,7 +265,10 @@ if (clearFiltersBtn) {
     updateUrl(new URLSearchParams());
 
     // Keep the cleared state obvious so users know the button worked.
-    resultsEl.innerHTML = `<p>Filters cleared. Enter a search or choose filters to see resources.</p>`;
+    resultsEl.innerHTML = emptyStateMarkup(
+      "Filters cleared",
+      "Enter a new search or try one of the categories to start browsing again."
+    );
   });
 }
 
@@ -238,7 +289,10 @@ if (pageParams.get("tags")) {
 if ([...pageParams.keys()].length > 0) {
   searchForm.dispatchEvent(new Event("submit"));
 } else {
-  resultsEl.innerHTML = `<p>Enter a search or choose filters to see resources.</p>`;
+  resultsEl.innerHTML = emptyStateMarkup(
+    "Start a search",
+    "Enter a keyword or use the filters to explore resources, templates, and workflows."
+  );
 }
 
 loadRecommendations();

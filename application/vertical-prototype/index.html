@@ -33,7 +33,16 @@
 
         <!-- Search and Filters -->
         <section id="search-section">
+            <!-- This short intro helps first-time users understand what this page does. -->
+            <div class="search-panel-intro">
+                <p class="search-panel-intro__eyebrow">Browse smarter</p>
+                <h1 class="search-panel-intro__title">Find the right support faster</h1>
+                <p class="search-panel-intro__body">
+                    Search by keyword, narrow by category, and use filters to quickly compare resources, templates, and workflows.
+                </p>
+            </div>
 
+            <!-- The search form stays simple so the demo can move quickly. -->
             <form id="searchForm">
                 <div class="form-group">
                     <label for="searchInput">Search:</label>
@@ -95,8 +104,11 @@
                 </label>
             </div>
 
-            <button type="button" class="btn-apply-filters">Apply Filters</button>
-            <button type="button" class="btn-clear-filters">Clear</button>
+            <!-- Group the filter actions so they stay aligned on desktop and mobile. -->
+            <div class="filter-actions">
+                <button type="button" class="btn-apply-filters">Apply Filters</button>
+                <button type="button" class="btn-clear-filters">Clear</button>
+            </div>
 
             <div class="guest-note">
                 <p class="guest-note-title">Guest Note</p>
@@ -107,6 +119,10 @@
 
         <!-- Results populated by app.js via GET /api/search?q=...&category=... -->
         <section id="results-section">
+            <!-- This helper text gives the results area a stronger starting state before users search. -->
+            <p class="results-helper">
+                Start with a keyword like “resume,” “research,” or “wellness,” then refine the list with filters.
+            </p>
             <section id="recommended-section" hidden>
                 <h2>Recommended for you</h2>
                 <div id="recommended-results"></div>

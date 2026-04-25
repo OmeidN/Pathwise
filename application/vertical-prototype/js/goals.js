@@ -33,6 +33,27 @@
     return '';
   }
 
+  // Reuse one simple empty-state style so the page feels more polished.
+  function emptyGoalsMarkup(title, body) {
+    return `
+      <div class="card goal-empty-state">
+        <p class="goal-empty-state__title">${esc(title)}</p>
+        <p class="goal-empty-state__body">${esc(body)}</p>
+      </div>
+    `;
+  }
+
+  // These loading cards make the page feel less jumpy while data is being fetched.
+  function loadingGoalsMarkup() {
+    return Array.from({ length: 3 }).map(() => `
+      <article class="goal-card goal-card--skeleton">
+        <div class="goal-skeleton-block goal-skeleton-title"></div>
+        <div class="goal-skeleton-block goal-skeleton-meta"></div>
+        <div class="goal-skeleton-block goal-skeleton-line"></div>
+      </article>
+    `).join('');
+  }
+
   async function api(method, path, body) {
     const opts = { method, credentials: 'include', headers: {} };
     if (body !== undefined) {
@@ -71,7 +92,10 @@
 
   function renderList(rows) {
     if (rows.length === 0) {
-      listEl.innerHTML = '<p class="card">No goals match this filter. Try another status.</p>';
+      listEl.innerHTML = emptyGoalsMarkup(
+        'No goals match this filter',
+        'Try another status or create a new goal to keep planning.'
+      );
       return;
     }
     listEl.innerHTML = rows
@@ -156,6 +180,7 @@
 
   async function loadGoals() {
     showErr('');
+    listEl.innerHTML = loadingGoalsMarkup();
     const { res, data } = await api('GET', '/api/goals-overview');
     if (res.status === 401) {
       window.location.href = 'login.html';
@@ -168,7 +193,10 @@
     }
     cachedRows = data.results || [];
     if (cachedRows.length === 0) {
-      listEl.innerHTML = '<p class="card">No goals yet. Create one to get started.</p>';
+      listEl.innerHTML = emptyGoalsMarkup(
+        'No goals yet',
+        'Create your first goal to start tracking projects and milestones.'
+      );
       return;
     }
     renderFromCache();

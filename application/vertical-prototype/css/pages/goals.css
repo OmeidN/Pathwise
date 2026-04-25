@@ -69,6 +69,47 @@
   box-shadow: var(--shadow-card);
 }
 
+/* These skeleton blocks give the goals flow a smoother first paint. */
+.goal-card--skeleton {
+  pointer-events: none;
+}
+
+.goal-skeleton-block {
+  background: linear-gradient(
+    90deg,
+    var(--color-border) 25%,
+    var(--color-skeleton-mid) 50%,
+    var(--color-border) 75%
+  );
+  background-size: 300% 100%;
+  border-radius: var(--radius-sm);
+  animation: goal-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.goal-skeleton-title {
+  height: 18px;
+  width: 68%;
+}
+
+.goal-skeleton-meta {
+  height: 12px;
+  width: 42%;
+}
+
+.goal-skeleton-line {
+  height: 12px;
+  width: 100%;
+}
+
+.goal-skeleton-line--short {
+  width: 58%;
+}
+
+@keyframes goal-skeleton-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
 .goal-card__head {
   display: flex;
   justify-content: space-between;
@@ -116,6 +157,26 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-sm);
+}
+
+.goal-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--space-2xl) var(--space-lg);
+}
+
+.goal-empty-state__title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-sm);
+}
+
+.goal-empty-state__body {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  max-width: 36ch;
+  margin: 0 auto;
 }
 
 .goal-row__meta {
@@ -244,6 +305,17 @@
   margin-bottom: var(--space-md);
 }
 
+.project-block__desc {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.project-block__actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
 .project-block__progress {
   margin-bottom: var(--space-md);
 }
@@ -253,6 +325,45 @@
   color: var(--color-text-muted);
   display: block;
   margin-bottom: var(--space-xs);
+}
+
+.project-progress-copy,
+.goal-detail-meta,
+.goal-resource-note,
+.goal-resource-id {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.project-progress-copy {
+  margin-top: var(--space-xs);
+}
+
+.goal-detail-meta {
+  margin-bottom: var(--space-sm);
+}
+
+.goal-detail-callout {
+  margin-bottom: var(--space-lg);
+}
+
+.goal-detail-callout__title {
+  margin-top: 0;
+}
+
+.goal-detail-callout__body {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+}
+
+.goal-detail-loading__card {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.goal-detail-empty {
+  margin-top: var(--space-md);
+  color: var(--color-text-muted);
 }
 
 .milestone-list {

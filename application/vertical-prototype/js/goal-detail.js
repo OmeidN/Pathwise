@@ -16,6 +16,18 @@
       .replace(/"/g, '&quot;');
   }
 
+  // Reuse one loading shell so refreshes feel smoother after project and milestone edits.
+  function detailLoadingMarkup() {
+    return `
+      <section class="card goal-detail-loading__card">
+        <div class="goal-skeleton-block goal-skeleton-title"></div>
+        <div class="goal-skeleton-block goal-skeleton-meta"></div>
+        <div class="goal-skeleton-block goal-skeleton-line"></div>
+        <div class="goal-skeleton-block goal-skeleton-line goal-skeleton-line--short"></div>
+      </section>
+    `;
+  }
+
   async function api(method, path, body) {
     const opts = { method, credentials: 'include', headers: {} };
     if (body !== undefined) {
@@ -27,6 +39,7 @@
     return { res, data };
   }
 
+  // Render each project milestone area in one place so refreshes stay simple.
   function renderMilestones(projectId, milestones, stats) {
     const pct = stats && typeof stats.completion_pct === 'number' ? stats.completion_pct : 0;
     const items = milestones
@@ -47,7 +60,7 @@
       <div class="project-block__progress compact">
         <label>Milestone progress</label>
         <div class="progress"><div class="progress-bar" style="width:${pct}%"></div></div>
-        <p style="font-size:var(--font-size-sm);color:var(--color-text-muted);margin:4px 0 0">${pct}% complete</p>
+        <p class="project-progress-copy">${pct}% complete</p>
       </div>
       <ul class="milestone-list">${items || '<li class="milestone-item">No milestones yet.</li>'}</ul>
       <div class="compact-fields">
@@ -58,6 +71,7 @@
     `;
   }
 
+  // Keep each project block self-contained so the goal hub is easier to scan.
   function renderProjectBlock(p) {
     const ms = p.milestones || [];
     return `
@@ -65,9 +79,9 @@
         <div class="project-block__head">
           <div>
             <h3>${esc(p.title)}</h3>
-            ${p.description ? `<p style="color:var(--color-text-muted);font-size:var(--font-size-sm)">${esc(p.description)}</p>` : ''}
+            ${p.description ? `<p class="project-block__desc">${esc(p.description)}</p>` : ''}
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div class="project-block__actions">
             <button type="button" class="btn btn-secondary btn-sm proj-edit" data-project-id="${p.project_id}">Edit project</button>
             <button type="button" class="btn btn-secondary btn-sm proj-del" data-project-id="${p.project_id}">Delete project</button>
           </div>
@@ -225,8 +239,10 @@
     });
   }
 
+  // Rebuild the full goal hub after changes so the summary numbers stay correct.
   async function loadAll() {
     showErr('');
+    root.innerHTML = detailLoadingMarkup();
     if (!goalId) {
       root.innerHTML = '';
       showErr('Missing goal id.');
@@ -251,27 +267,28 @@
     let templateBanner = '';
     if (tk === 'draft') {
       templateBanner = `
-      <section class="card" style="margin-bottom:var(--space-lg);border:1px solid var(--color-border);background:var(--color-surface-muted)">
-        <h2 style="margin-top:0">Goal template (draft)</h2>
-        <p style="color:var(--color-text-muted);margin-bottom:12px">
+      <section class="card goal-detail-callout">
+        <h2 class="goal-detail-callout__title">Goal template (draft)</h2>
+        <p class="goal-detail-callout__body">
           Build this like any goal: add projects, milestones, and resources below. When ready, publish so other students can import a copy into their goals.
         </p>
         <button type="button" class="btn btn-primary" id="publishTemplateBtn">Publish template</button>
       </section>`;
     } else if (tk === 'published') {
       templateBanner = `
-      <section class="card" style="margin-bottom:var(--space-lg)">
-        <h2 style="margin-top:0">Published community template</h2>
-        <p style="color:var(--color-text-muted)">Imported ${esc(String(goal.template_copied_count ?? 0))} times · Listed on Templates for other students.</p>
+      <section class="card goal-detail-callout">
+        <h2 class="goal-detail-callout__title">Published community template</h2>
+        <p class="goal-detail-callout__body">Imported ${esc(String(goal.template_copied_count ?? 0))} times · Listed on Templates for other students.</p>
       </section>`;
     }
 
+    // Keep the goal hub sections structured and readable, especially on smaller screens.
     let html = `
       <div class="goal-detail-head">
         <a href="goals.html" class="back-link">← All goals</a>
         <h1>${esc(goal.title)}</h1>
-        <p style="color:var(--color-text-muted)">${esc(goal.category || '')}${goal.target_date ? ` · Target ${esc(goal.target_date)}` : ''}</p>
-        ${goal.description ? `<p>${esc(goal.description)}</p>` : ''}
+        <p class="goal-detail-meta">${esc(goal.category || '')}${goal.target_date ? ` · Target ${esc(goal.target_date)}` : ''}</p>
+        ${goal.description ? `<p class="goal-detail-meta">${esc(goal.description)}</p>` : ''}
         <p><span class="status-badge">${esc(goal.status)}</span>${tk !== 'none' ? ` <span class="status-badge">${esc(tk)}</span>` : ''}</p>
       </div>
       ${templateBanner}
@@ -287,19 +304,19 @@
           <div class="progress"><div class="progress-bar" style="width:${stats.completion_pct || 0}%"></div></div>
         </div>
       </section>
-      <section class="card" id="goal-resources-section" style="margin-bottom:var(--space-lg)">
-        <h2 style="margin-top:0">Attached resources</h2>
-        <div id="goal-resource-list" style="margin-bottom:12px">Loading…</div>
-        <div class="inline-form" style="flex-wrap:wrap;gap:8px">
-          <select id="bookmarkResourcePick" class="input" style="min-width:220px">
+      <section class="card goal-detail-callout" id="goal-resources-section">
+        <h2 class="goal-detail-callout__title">Attached resources</h2>
+        <div id="goal-resource-list" class="goal-detail-empty">Loading…</div>
+        <div class="inline-form">
+          <select id="bookmarkResourcePick" class="input">
             <option value="">Select a saved resource…</option>
           </select>
           <button type="button" class="btn btn-primary" id="attachResourceBtn">Attach to goal</button>
         </div>
-        <p style="font-size:var(--font-size-sm);color:var(--color-text-muted);margin-top:8px">Only public resources or ones you submitted can be attached.</p>
+        <p class="goal-resource-note">Only public resources or ones you submitted can be attached.</p>
       </section>
-      <section class="card" style="margin-bottom:var(--space-lg)">
-        <h2 style="margin-top:0">Add project</h2>
+      <section class="card goal-detail-callout">
+        <h2 class="goal-detail-callout__title">Add project</h2>
         <div class="inline-form">
           <input type="text" id="newProjectTitle" class="input" placeholder="Project title" />
           <input type="text" id="newProjectDesc" class="input" placeholder="Description (optional)" />
@@ -314,7 +331,7 @@
     }
 
     if (projects.length === 0) {
-      html += '<p>No projects yet. Add one above.</p>';
+      html += '<p class="goal-detail-empty">No projects yet. Add one above.</p>';
     }
 
     root.innerHTML = html;
@@ -331,13 +348,13 @@
       const resources = (data.results || []).filter((x) => x.type === 'resource');
       listEl.innerHTML =
         resources.length === 0
-          ? '<p style="color:var(--color-text-muted)">No resources attached yet.</p>'
+          ? '<p class="goal-detail-empty">No resources attached yet.</p>'
           : `<ul class="milestone-list">${resources
               .map(
                 (r) => `
           <li class="milestone-item">
             <strong>${esc(r.title)}</strong>
-            <span style="color:var(--color-text-muted);font-size:var(--font-size-sm)">#${r.id}</span>
+            <span class="goal-resource-id">#${r.id}</span>
             <button type="button" class="btn btn-secondary btn-sm goal-res-detach" data-rid="${r.id}">Remove</button>
           </li>`
               )

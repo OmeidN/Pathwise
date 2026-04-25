@@ -177,6 +177,45 @@
   margin-top: var(--space-md);
 }
 
+/* These support panels replace inline styles so the page stays consistent and easier to maintain. */
+.resource-support-panel {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+}
+
+.resource-support-panel__title {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--font-size-base);
+}
+
+.resource-support-panel__label {
+  display: grid;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.resource-support-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.resource-signin-note {
+  margin-top: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.resource-signin-note a {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+}
+
 @media (max-width: 768px) {
   #resource-main {
     padding: var(--space-lg) var(--space-md);
@@ -196,5 +235,11 @@
 
   .resource-actions .btn {
     width: 100%;
+  }
+
+  .resource-support-panel__actions .btn,
+  .resource-support-panel__label .input {
+    width: 100%;
+    max-width: none;
   }
 }

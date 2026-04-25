@@ -25,7 +25,15 @@
   </header>
   <main class="goal-detail-main">
     <p id="goal-page-error" class="error" hidden></p>
-    <div id="goal-detail-root">Loading…</div>
+    <!-- This simple shell prevents the goal hub from flashing raw loading text on first paint. -->
+    <div id="goal-detail-root" class="goal-detail-loading">
+      <section class="card goal-detail-loading__card">
+        <div class="goal-skeleton-block goal-skeleton-title"></div>
+        <div class="goal-skeleton-block goal-skeleton-meta"></div>
+        <div class="goal-skeleton-block goal-skeleton-line"></div>
+        <div class="goal-skeleton-block goal-skeleton-line goal-skeleton-line--short"></div>
+      </section>
+    </div>
   </main>
   <script src="nav.js"></script>
   <script src="js/goal-detail.js"></script>
