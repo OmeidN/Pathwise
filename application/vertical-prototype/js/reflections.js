@@ -1,3 +1,23 @@
+/**
+ * Why:
+ *   This file is need so we can correctly allow users to write, or delete their journal
+ *   entries that could potentially be tied to their goals. Beside being able to add new
+ *   entries or delete them, they need to be be able to view their previous entries as well
+ *
+ * What:
+ *   This js file will load exisiting reflection history and present them as well as create
+ *   and delete reflection using the reflection form.
+ *
+ * Where used:
+ *   It is loaded/called by vertical-prototype/reflections.html
+ *
+ * Notes:
+ *   - The APIs it calls: 
+ *        /api/reflections
+ *        /api/reflections/:id
+ *   - As usual, we redirect user to the login.html on 401
+ */
+
 (function () {
   const listEl = document.getElementById('refl-list');
   const errEl = document.getElementById('refl-error');

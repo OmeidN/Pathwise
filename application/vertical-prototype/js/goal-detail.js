@@ -1,3 +1,28 @@
+/**
+ * Why:
+ *   This file implements the goal page (aka. Goal Hub page) where a user can manage a goal
+ *   in detail like its projects and milestones. This is needed so we create a clean sepration
+ *   between the main aggregate goals layer and the actual specific goal layer.
+ *
+ * What:
+ *   It fetches goal hub data and renders projects/milestone lists. It also handles create,
+ *   read, update and delete operations for the projects and milestones within each project
+ *   as well as status markers for each of these components.
+ *
+ * Where used:
+ *   It is loaded/called by vertical-prototype/goal.html.
+ *
+ * Notes:
+ *   - The APIs it call: 
+ *        /api/goals/:id/hub, 
+ *        /api/goals/:id/projects,
+ *        /api/projects/:id, 
+ *        /api/projects/:projectId/milestones,
+ *        /api/milestones/:id, 
+ *        /api/milestones/:id/completion.
+ *   - As usual, we redirect user to the login.html on 401
+ */
+
 (function () {
   const params = new URLSearchParams(window.location.search);
   const goalId = Number(params.get('id'));

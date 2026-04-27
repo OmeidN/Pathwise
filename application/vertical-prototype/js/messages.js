@@ -1,3 +1,27 @@
+/**
+ * Why:
+ *   It implements the messages page so users can talk amongst themselves one on one by
+ *   searching to find other users, and opening each one-on-one threads to continue talking.
+ *   Also, read new messages off inbox and send messages.
+ *
+ * What:
+ *   This file loads inbox data, open an already exisitng message threds, as well as 
+ *   handle user search and sending new messages just like a typcial simple messaging
+ *   platforms.
+ *
+ * Where used:
+ *   It is loaded/called by vertical-prototype/messages.html.
+ *
+ * Notes:
+ *   - The APIs it calls: 
+ *        /api/messages/inbox, 
+ *        /api/messages/thread/:otherUserId,
+ *        /api/messages, 
+ *        /api/users/search, 
+ *        /api/me.
+ *   - As usual, we redirect user to the login.html on 401
+ */
+
 (function () {
   const inboxEl = document.getElementById('inbox-list');
   const threadEl = document.getElementById('thread-view');

@@ -1,3 +1,25 @@
+/**
+ * Why:
+ *   This file implements the bookmarks page so users can simply view the resources they 
+ *   previously viewed and can also unsave them as well. Without this file the page would
+ *   draw in useful information nor properly work as intended.
+ *
+ * What:
+ *   This file fetches the saved resources for the current user, and renders each bookmark
+ *   cards and show either empty, error or loading states as well as handle like mentioned
+ *   above removing an alredy saved bookmarks for the user.
+ *
+ * Where used:
+ *   It is loaded/called by vertical-prototype/bookmarks.html.
+ *
+ * Notes:
+ *   - The APIs it calls: 
+ *        /api/bookmarks.
+ *   - As usual, we redirect user to the login.html on 401
+ *   - It expects containers such as #bookmarks-results and #bookmark-count from
+ *     bookmark html page to properly work 
+ */
+
 (async () => {
   const resultsEl = document.getElementById('bookmarks-results');
   const errorBanner = document.getElementById('bookmarks-error');
