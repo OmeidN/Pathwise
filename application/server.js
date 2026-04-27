@@ -1,3 +1,23 @@
+/**
+ * Why:
+ *   This is the starting main entry into our Pathwise application
+ *
+ * What:
+ *   It helps with setting up environment, express middleware/sessions, the API routes, 
+ *   handle database endpoints, search operations, initial file(s) serving and overall other
+ *   important setups.
+ *
+ * Where used:
+ *   Since this is the main backend entry point, this file is called by 'npm start' and
+ *   'node server.js', which headstarts the backend and serve the frontend.
+ *
+ * Notes:
+ *   - This file will mount all the needed route modules under '/api'
+ *   - It will also serve the frontend files we have from 'vertical-prototype/'
+ *   - To make super simple, we use express-session to help with verification/auth
+ *   - Will use db/connection.js to access our database (MySQL)
+ */
+
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 const express = require('express');
