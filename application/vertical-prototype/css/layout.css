@@ -97,6 +97,27 @@
   color: var(--color-header-text);
 }
 
+/* --- Hamburger toggle (hidden on desktop) --- */
+
+.nav-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 6px;
+  cursor: pointer;
+  color: var(--color-text-subtle);
+  transition: color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.nav-hamburger:hover {
+  color: var(--color-header-text);
+  border-color: var(--color-primary);
+}
+
 /* --- Responsive --- */
 
 @media (max-width: 768px) {
@@ -105,39 +126,63 @@
   }
 
   .header-inner {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
     gap: var(--space-sm);
   }
 
   .site-title {
-    display: inline-flex;
-    align-self: flex-start;
+    flex: 1;
+  }
+
+  .nav-hamburger {
+    display: flex;
+    margin-left: auto;
   }
 
   #main-nav {
-    gap: var(--space-sm);
-    margin-left: 0;
+    display: none;
     width: 100%;
-    justify-content: flex-start;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    -webkit-overflow-scrolling: touch;
+    order: 10;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    margin-left: 0;
+    padding: var(--space-sm) 0;
+    border-top: 1px solid var(--color-border);
   }
 
-  #main-nav::-webkit-scrollbar {
-    display: none;
+  #main-nav.nav-open {
+    display: flex;
+  }
+
+  #main-nav .nav-link,
+  #main-nav .nav-btn {
+    width: 100%;
+    padding: 10px var(--space-sm);
+    font-size: var(--font-size-base);
+    border-radius: var(--radius-md);
+  }
+
+  #main-nav .nav-btn {
+    display: inline-flex;
+    width: auto;
+    margin-top: var(--space-xs);
   }
 
   #nav-auth {
+    display: contents;
     margin-left: 0;
     padding-left: 0;
     border-left: none;
-    flex-wrap: nowrap;
   }
 
   .nav-user {
     display: none;
+  }
+
+  .nav-logout {
+    padding: 10px var(--space-sm);
   }
 }

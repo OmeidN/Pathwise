@@ -238,7 +238,7 @@ if (pageParams.get("tags")) {
 if ([...pageParams.keys()].length > 0) {
   searchForm.dispatchEvent(new Event("submit"));
 } else {
-  resultsEl.innerHTML = `<p>Enter a search or choose filters to see resources.</p>`;
+  searchForm.dispatchEvent(new Event("submit"));
 }
 
 loadRecommendations();

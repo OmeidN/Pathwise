@@ -6,6 +6,32 @@ if (siteTitle) {
   siteTitle.setAttribute('href', 'landing.html');
 }
 
+(function setupMobileNav() {
+  const headerInner = document.querySelector('.header-inner');
+  const mainNav = document.getElementById('main-nav');
+  if (!headerInner || !mainNav) return;
+
+  const btn = document.createElement('button');
+  btn.className = 'nav-hamburger';
+  btn.setAttribute('aria-expanded', 'false');
+  btn.setAttribute('aria-controls', 'main-nav');
+  btn.setAttribute('aria-label', 'Toggle navigation');
+  btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`;
+  headerInner.appendChild(btn);
+
+  btn.addEventListener('click', () => {
+    const isOpen = mainNav.classList.toggle('nav-open');
+    btn.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  mainNav.addEventListener('click', (e) => {
+    if (e.target.closest('a, button:not(.nav-hamburger)')) {
+      mainNav.classList.remove('nav-open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+
 function guestNavMarkup() {
   return `
     <a href="login.html" class="nav-link"${currentPage === 'login' ? ' aria-current="page"' : ''}>Login</a>
