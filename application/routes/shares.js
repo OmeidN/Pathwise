@@ -11,7 +11,11 @@ async function itemExists(pool, itemType, itemId, senderUserId) {
     const [rows] = await pool.query(
       `SELECT resource_id AS id
        FROM Resources
-       WHERE resource_id = ? AND (visibility = 'public' OR submitted_by = ?) LIMIT 1`,
+       WHERE resource_id = ?
+         AND (
+           (visibility = 'public' AND moderation_status = 'approved')
+           OR submitted_by = ?
+         ) LIMIT 1`,
       [itemId, senderUserId]
     );
     return rows.length > 0;

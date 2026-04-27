@@ -115,7 +115,7 @@ router.get('/me/submissions', requireAuth, async (req, res) => {
   try {
     const pool = db.getPool();
     const [rows] = await pool.query(
-      `SELECT resource_id, title, description, url, category_id, image_path, cost, visibility, created_at
+      `SELECT resource_id, title, description, url, category_id, image_path, cost, visibility, moderation_status, created_at
        FROM Resources
        WHERE submitted_by = ?
        ORDER BY created_at DESC`,

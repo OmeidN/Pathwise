@@ -84,6 +84,7 @@ router.get('/recommendations', requireAuth, async (req, res) => {
         `SELECT resource_id, title, description, url, category_id, image_path, cost, is_ai_enabled
          FROM Resources r
          WHERE r.visibility = 'public'
+           AND r.moderation_status = 'approved'
            AND NOT EXISTS (
              SELECT 1
              FROM Bookmarks b
@@ -134,6 +135,7 @@ router.get('/recommendations', requireAuth, async (req, res) => {
                     (${scoreExpr}) AS score
                   FROM Resources r
                   WHERE r.visibility = 'public'
+                    AND r.moderation_status = 'approved'
                     AND NOT EXISTS (
                       SELECT 1
                       FROM Bookmarks b
@@ -179,6 +181,7 @@ router.get('/recommendations', requireAuth, async (req, res) => {
         `SELECT resource_id, title, description, url, category_id, image_path, cost, is_ai_enabled
          FROM Resources r
          WHERE r.visibility = 'public'
+           AND r.moderation_status = 'approved'
            AND NOT EXISTS (
              SELECT 1
              FROM Bookmarks b
@@ -198,6 +201,7 @@ router.get('/recommendations', requireAuth, async (req, res) => {
       let sql = `SELECT r.resource_id, r.title, r.description, r.url, r.category_id, r.image_path, r.cost, r.is_ai_enabled
                  FROM Resources r
                  WHERE r.visibility = 'public'
+                   AND r.moderation_status = 'approved'
                    AND NOT EXISTS (
                      SELECT 1
                      FROM Bookmarks b
