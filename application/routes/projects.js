@@ -1,3 +1,26 @@
+/**
+ * Why:
+ *   This file is meant to support the middle layer between Goal and Milestone structure
+ *   that will be used throughout the platform planning workflow
+ *
+ * What:
+ *   It defines the routes for listing the projects for specific goal, creating new 
+ *   projects, updating them, and deleting them. There is also a route for users to be 
+ *   able to attach materials to their projects.
+ *
+ * Where used:
+ *   It is mounted under '/api' in server.js
+ *   It is called by vertical-prototype/js/goal-detail.js
+ *
+ * Notes:
+ *   - It expects an authenticated session
+ *   - Owenership is verified/enforced by joining Projects -> Goals -> user.
+ *   - The table it touches: 
+ *        Projects, 
+ *        Goals, 
+ *        ProjectResources.
+ */
+
 const express = require('express');
 const db = require('../db/connection');
 const { requireAuth } = require('../middleware/requireAuth');

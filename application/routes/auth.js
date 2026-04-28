@@ -1,6 +1,25 @@
 /**
- * Auth routes: register, login, logout, current user, my submissions.
- * Session cookie: frontend should use fetch(..., { credentials: 'include' }).
+ * Why:
+ *   This file is meant to provide simple account registration, logging in, logging out, 
+ *   and user lookup so Pathwise can properly authenticate student on the platform
+ *
+ * What:
+ *   It defines the routes for creating accounts, verifying credentials, as well as creating
+ *   sessions, destorying the sessions and returing the user logged in. Simply put it 
+ *   handles all the routes that allow users to enter and exit the platform safely.
+ *
+ * Where used:
+ *   It is mounted under '/api' in server.js
+ *   It is called by vertical-prototype/login.html, register.html, nav.js,
+ *   profile.js, submit.js, and really any page that checks '/api/me' route.
+ *
+ * Notes:
+ *   - For password hashing, we use bcryptjs here for simple security handling
+ *   - Uses express-session for session-based login.
+ *   - The table it touchess: 
+ *        Users, 
+ *        Resources.
+ *   - Session cookie: frontend should use fetch(..., { credentials: 'include' }).
  */
 
 const express = require('express');

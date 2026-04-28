@@ -1,3 +1,35 @@
+/**
+ * Why:
+ *   This file is needed so students can record their reflective planning in a journal
+ *   style notes that can also connect to their goals, projects and milestone.
+ *
+ * What:
+ *   It defines the essential routes that deal with listing all the previous reflections,
+ *   creating new ones, and deleting them. As well as allowing users to connect them to
+ *   their goals.
+ *
+ * Where used:
+ *   It is mounted under '/api/ in server.js
+ *   It is called by vertical-prototype/js/reflections.js
+ *
+ * Notes:
+ *   - It expects an authenticated session
+ *   - Touches tables: 
+ *        Reflections, 
+ *        Goals, 
+ *        Projects.
+ *   - It validates the goal/project attributed to the reflection belongs to the user
+ *     themselves
+ *   - Log activity occurs here when a new reflection is made
+ * 
+ * TODO:
+ *   - The interface that enables the user to choose which goals or projects to link each
+ *     of their reflection is based on id they have to input, but it should list out all 
+ *     their goals and projects so its easy for them to link it
+ *   - Also add a way to link to their milestone as well in addition to their goals and 
+ *     projects
+ */
+
 const express = require('express');
 const db = require('../db/connection');
 const { requireAuth } = require('../middleware/requireAuth');

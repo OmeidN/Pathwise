@@ -1,7 +1,31 @@
 /**
- * Saved resources for the logged-in user.
- * POST body: { resource_id, action?: 'add' | 'remove' } — default action is add.
- * Aliases: GET/POST /saved-resources (same handlers).
+ * Why:
+ *   This file is meant to support the workflow for saved resources where users can 
+ *   Bookmark useful materials and come later to access them through mainly the bookmarks
+ *   page although they can also do so through their profile and dashbaord.
+ *
+ * What:
+ *   It defines the routes for fetching user's saved resources, adding new ones, or even
+ *   removing them by dropping them. The user needs to be logged in to save resources
+ *   so they can be attached to a user.
+ *
+ * Where used:
+ *   - It is mounted under '/api' in server.js.
+ *   - It is called by vertical-prototype/js/bookmarks.js, 
+ *     resource.js (to bookmark a material), 
+ *     profile.js (so the bookmarked materials can be shown),
+ *     and dashboard.js (same as in profile.js).
+ *
+ * Notes:
+ *   - It expects an authenticated session
+ *   - The table it touches: 
+ *        Bookmarks, 
+ *        Resources.
+ *   - Log activity occurs here when a resource is saved (newly)
+ *   - In POST body: { resource_id, action?: 'add' | 'remove' } the default action is add
+ *     so a material is bookmarked before it can be removed
+ *   - Aliases: GET/POST /saved-resources (They are same thing).
+ *     Bookmarked are those that are saved resources and vice-versa
  */
 
 const express = require('express');

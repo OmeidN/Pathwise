@@ -1,3 +1,28 @@
+/**
+ * Why:
+ *   This file is meant to enable communication between registered users in-site without 
+ *   having to go to a different platform to communicate to one another.
+ *
+ * What:
+ *   It defines routes that allows users to view their inbox, loading a messaging thread
+ *   between them and someone else and as well as sending new messages.
+ *
+ * Where used:
+ *   It is mounted under '/api' in server.js.
+ *   It is called by vertical-prototype/js/messages.js
+ *
+ * Notes:
+ *   - It expects an authenticated session
+ *   - The table it touches: 
+ *        Messages, 
+ *        Users
+ *   - Upon a thread being opened, its marked as read
+ * 
+ * TODO:
+ *   - Maybe we improve the interface, it could be better if we format it as a typcial
+ *     familiar messaging layout 
+ */
+
 const express = require('express');
 const db = require('../db/connection');
 const { requireAuth } = require('../middleware/requireAuth');

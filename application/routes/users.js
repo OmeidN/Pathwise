@@ -1,3 +1,22 @@
+/**
+ * Why:
+ *   This file is meant to help with user lookup in the messaging page so a logged in 
+ *   user can locate another verified user by their username (or through their email).
+ *
+ * What:
+ *   It defines a very simple search route that returns matching user based on the give
+ *   request. Its lightweight and protected.
+ *
+ * Where used:
+ *   It is mounted under '/api' in server.js
+ *   Its called by vertical-prototype/js/messages.js
+ *
+ * Notes:
+ *   - It expects an authenticated session
+ *   - Table it touches: 
+ *       Users
+ */
+
 const express = require('express');
 const db = require('../db/connection');
 const { requireAuth } = require('../middleware/requireAuth');

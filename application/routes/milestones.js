@@ -1,3 +1,28 @@
+/**
+ * Why:
+ *   This file is meant to support the project execution workflow by allowing users to 
+ *   finish each of their projects in chunk which we call milestones that serves as the 
+ *   checkpoints to progress through.
+ *
+ * What:
+ *   It defines the protected routes that fetch to list milestones, create them, update
+ *   them, delete them as well as marking their status as completed for milestones owned
+ *   by the user.
+ *
+ * Where used:
+ *   It is mounted under '/api' in server.js
+ *   It is called by vertical-prototype/js/goal-detail.js
+ *
+ * Notes:
+ *   - It expects an authenticated session
+ *   - Owenership is verified/enforced by joining Milestones -> Projects -> Goals -> user
+ *   - The table it touches: 
+ *        Milestones, 
+ *        Projects, 
+ *        Goals
+ *   - Log activity occurs here
+ */
+
 const express = require('express');
 const db = require('../db/connection');
 const { requireAuth } = require('../middleware/requireAuth');
