@@ -260,6 +260,46 @@
   color: var(--color-primary);
 }
 
+/* These theme shortcuts make it easier to demo broader discovery paths quickly. */
+.theme-shortcuts {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.theme-shortcuts__label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.theme-shortcuts__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.theme-shortcut {
+  border: 1px solid rgba(74, 124, 111, 0.18);
+  background: rgba(74, 124, 111, 0.08);
+  color: var(--color-text);
+  border-radius: var(--radius-full);
+  padding: 7px 12px;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.theme-shortcut:hover,
+.theme-shortcut.is-active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-surface);
+}
+
 .guest-note {
   margin-top: var(--space-lg);
   padding-top: var(--space-md);
@@ -349,6 +389,10 @@
   .btn-apply-filters,
   .btn-clear-filters {
     min-height: 44px;
+  }
+
+  .theme-shortcuts__grid {
+    gap: 10px;
   }
 
   .search-panel-intro__title {

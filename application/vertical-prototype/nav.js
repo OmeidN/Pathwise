@@ -8,6 +8,34 @@ if (siteTitle) {
   siteTitle.setAttribute('href', 'landing.html');
 }
 
+// Grouping secondary pages keeps the signed-in navigation shorter and easier to scan.
+function isWorkspacePage(page) {
+  return ['dashboard', 'goals', 'goal-detail', 'templates', 'bookmarks', 'reflections', 'messages', 'admin', 'publish'].includes(page);
+}
+
+// Keep account-specific pages in their own smaller menu instead of mixing them with every feature link.
+function isAccountPage(page) {
+  return ['profile'].includes(page);
+}
+
+// Closing open popovers after navigation keeps the header from feeling cluttered.
+function closeNavPopovers() {
+  if (!mainNav) return;
+  mainNav.querySelectorAll('.nav-popover[open]').forEach((popover) => {
+    popover.removeAttribute('open');
+  });
+}
+
+// Trimming the top row after login leaves only the most common paths visible.
+function syncPrimaryNav(authenticated) {
+  if (!mainNav) return;
+
+  const submitLink = mainNav.querySelector('a[href="submit.html"]');
+  if (submitLink) {
+    submitLink.hidden = authenticated;
+  }
+}
+
 // This toggle keeps the nav usable on phones without changing every HTML file by hand.
 function setupMobileNav() {
   if (!mainNav || !headerInner) return;
@@ -32,6 +60,7 @@ function setupMobileNav() {
     mainNav.classList.remove('is-open');
     navToggle.classList.remove('is-open');
     navToggle.setAttribute('aria-expanded', 'false');
+    closeNavPopovers();
   };
 
   if (!navToggle.dataset.bound) {
@@ -39,6 +68,9 @@ function setupMobileNav() {
       const isOpen = mainNav.classList.toggle('is-open');
       navToggle.classList.toggle('is-open', isOpen);
       navToggle.setAttribute('aria-expanded', String(isOpen));
+      if (!isOpen) {
+        closeNavPopovers();
+      }
     });
     navToggle.dataset.bound = 'true';
   }
@@ -53,6 +85,11 @@ function setupMobileNav() {
   }
 
   if (!window.__pathwiseMobileNavBound) {
+    document.addEventListener('click', (event) => {
+      if (mainNav && !mainNav.contains(event.target)) {
+        closeNavPopovers();
+      }
+    });
     window.addEventListener('resize', () => {
       if (window.innerWidth > 768) {
         closeMobileNav();
@@ -69,29 +106,42 @@ function guestNavMarkup() {
   `;
 }
 
+// The signed-in nav now highlights only the main actions and tucks the rest into compact menus.
 function authedNavMarkup(user) {
   const username = user.username || user.name || 'Account';
   const role = user.role || 'student';
   const adminLink =
     role === 'admin' || role === 'faculty' || role === 'staff'
-      ? `<a href="admin.html" class="nav-link${currentPage === 'admin' ? ' nav-link--active' : ''}">Admin</a>`
+      ? `<a href="admin.html" class="nav-popover__link${currentPage === 'admin' ? ' nav-popover__link--active' : ''}">Admin</a>`
       : '';
   const publishLink =
     role === 'faculty' || role === 'staff'
-      ? `<a href="publish.html" class="nav-link${currentPage === 'publish' ? ' nav-link--active' : ''}">Publish</a>`
+      ? `<a href="publish.html" class="nav-popover__link${currentPage === 'publish' ? ' nav-popover__link--active' : ''}">Publish</a>`
       : '';
+  const workspaceActive = isWorkspacePage(currentPage) ? ' nav-summary--active' : '';
+  const accountActive = isAccountPage(currentPage) ? ' nav-summary--active' : '';
   return `
-    <a href="dashboard.html" class="nav-link${currentPage === 'dashboard' ? ' nav-link--active' : ''}">Dashboard</a>
-    <a href="goals.html" class="nav-link${currentPage === 'goals' || currentPage === 'goal-detail' ? ' nav-link--active' : ''}">Goals</a>
-    <a href="templates.html" class="nav-link${currentPage === 'templates' ? ' nav-link--active' : ''}">Templates</a>
-    ${adminLink}
-    ${publishLink}
-    <a href="bookmarks.html" class="nav-link${currentPage === 'bookmarks' ? ' nav-link--active' : ''}">Bookmarks</a>
-    <a href="reflections.html" class="nav-link${currentPage === 'reflections' ? ' nav-link--active' : ''}">Reflections</a>
-    <a href="messages.html" class="nav-link${currentPage === 'messages' ? ' nav-link--active' : ''}">Messages</a>
-    <a href="profile.html" class="nav-link${currentPage === 'profile' ? ' nav-link--active' : ''}">Profile</a>
-    <span class="nav-user">${username}</span>
-    <button type="button" class="nav-link nav-logout" id="logoutBtn">Logout</button>
+    <details class="nav-popover">
+      <summary class="nav-link nav-summary${workspaceActive}">Workspace</summary>
+      <div class="nav-popover__panel">
+        <a href="submit.html" class="nav-popover__link${currentPage === 'submit' ? ' nav-popover__link--active' : ''}">Submit Resource</a>
+        <a href="dashboard.html" class="nav-popover__link${currentPage === 'dashboard' ? ' nav-popover__link--active' : ''}">Dashboard</a>
+        <a href="goals.html" class="nav-popover__link${currentPage === 'goals' || currentPage === 'goal-detail' ? ' nav-popover__link--active' : ''}">Goals</a>
+        <a href="templates.html" class="nav-popover__link${currentPage === 'templates' ? ' nav-popover__link--active' : ''}">Templates</a>
+        <a href="bookmarks.html" class="nav-popover__link${currentPage === 'bookmarks' ? ' nav-popover__link--active' : ''}">Bookmarks</a>
+        <a href="reflections.html" class="nav-popover__link${currentPage === 'reflections' ? ' nav-popover__link--active' : ''}">Reflections</a>
+        <a href="messages.html" class="nav-popover__link${currentPage === 'messages' ? ' nav-popover__link--active' : ''}">Messages</a>
+        ${adminLink}
+        ${publishLink}
+      </div>
+    </details>
+    <details class="nav-popover nav-popover--account">
+      <summary class="nav-link nav-summary nav-summary--account${accountActive}">${username}</summary>
+      <div class="nav-popover__panel">
+        <a href="profile.html" class="nav-popover__link${currentPage === 'profile' ? ' nav-popover__link--active' : ''}">Profile</a>
+        <button type="button" class="nav-popover__link nav-popover__button" id="logoutBtn">Logout</button>
+      </div>
+    </details>
   `;
 }
 
@@ -99,6 +149,7 @@ function renderGuestNav() {
   if (!navAuth) return;
   navAuth.dataset.authState = 'guest';
   navAuth.innerHTML = guestNavMarkup();
+  syncPrimaryNav(false);
   setupMobileNav();
 }
 
@@ -107,6 +158,7 @@ function renderAuthedNav(user) {
 
   navAuth.dataset.authState = 'authenticated';
   navAuth.innerHTML = authedNavMarkup(user);
+  syncPrimaryNav(true);
   setupMobileNav();
 
   const logoutBtn = document.getElementById('logoutBtn');
