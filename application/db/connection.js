@@ -1,3 +1,24 @@
+/**
+ * Why:
+ *   This file is meant to create/share connection pool to the database that
+ *   is used by the backend.
+ *
+ * What:
+ *   This file exposes the helper functions to create/fetch the shared resources
+ *   of the promise pool, test the database connection by sending small query,
+ *   and other functions that retrieve small sample read for checking.
+ *
+ * Where used:
+ *   This file is imported by the route files, controllers, the user models 
+ *   and the services we have in our backend.
+ *
+ * Notes:
+ *   - This file uses the env variables to know the credentials to the database
+ *   - For the app, this should be the only database connection entry point
+ *   - It is used by the '/api/db-test' and any of the startup connection checks
+ *     we perform
+ */
+
 const mysql = require('mysql2/promise');
 
 const config = {

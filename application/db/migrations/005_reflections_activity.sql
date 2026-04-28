@@ -1,3 +1,27 @@
+------------------------------------------------------------------------------------------
+
+-- Why:
+--   This is needed for adding one of the features we promised which
+--   is journaling and activity tracking across meaningful set of pages
+--   so Pathwise can support activity summaries and reflection entries.
+--
+-- What:
+--   It creates the Reflections and ActivityLogs tables with foreign keys 
+--   to link to the users and the planning nested layer of componenets.
+--
+-- Where used:
+--   It is supports the reflection page, and profile activity feeds.
+--
+-- Notes:
+--   - Run this after the schema for goals and projects exist as well as 
+--     Users table
+--   - This is safe for one-time migration on an existing Pathwise DB.
+--   - The table it touches: 
+--        Reflections, 
+--        ActivityLogs.
+--
+------------------------------------------------------------------------------------------
+
 -- Pathwise: reflections journal + activity audit trail
 
 CREATE TABLE IF NOT EXISTS Reflections (

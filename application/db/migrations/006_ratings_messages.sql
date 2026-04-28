@@ -1,3 +1,26 @@
+------------------------------------------------------------------------------------------
+
+-- Why:
+--   This is schema is needed for resource ratings and allow users to message
+--   in-site without leaving the platform
+--
+-- What:
+--   Technically, it creates the tables ResourceRatings and Messages with the 
+--   necessary constraints and indexes.
+--
+-- Where used:
+--   This is used to support resource recommendations to users on the platform
+--   as well as messaging inbox/thread UI.
+--
+-- Notes:
+--   - Run if the Users and Resources already exist
+--   - This is safe for one-time migration on an existing Pathwise DB.
+--   - The table it touches: 
+--         ResourceRatings, 
+--         Messages.
+--
+------------------------------------------------------------------------------------------
+
 -- Pathwise: resource star ratings + in-app messaging
 
 CREATE TABLE IF NOT EXISTS ResourceRatings (

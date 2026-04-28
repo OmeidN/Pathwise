@@ -1,3 +1,26 @@
+/**
+ * Why:
+ *   This is needed so we have a very clear centralized loading of data
+ *   for the dashboard. Also in the case we need this logic to be usable 
+ *   accross different parts of our program.
+ *
+ * What:
+ *   It gets the goals, projects, milestones, and resources it saved for 
+ *   a specified user from the database and returns them as single data objects.
+ *
+ * Where used:
+ *   It is imported by routes/dashboard.js for its GET route
+ *
+ * Notes:
+ *   - It expects the user it goes is authenticated
+ *   - The table it touchess: 
+ *         Goals, 
+ *         Projects, 
+ *         Milestones, 
+ *         Bookmarks, 
+ *         Resources.
+ */
+
 const db = require('../db/connection');
 
 async function loadDashboardData(userId) {
