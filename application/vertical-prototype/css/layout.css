@@ -97,6 +97,11 @@
   color: var(--color-header-text);
 }
 
+/* Keep the menu button hidden on desktop and reserve it for small screens. */
+.nav-toggle {
+  display: none;
+}
+
 /* --- Responsive --- */
 
 @media (max-width: 768px) {
@@ -104,9 +109,10 @@
     padding: var(--space-md);
   }
 
+  /* Let the title and hamburger share the first row, with the menu below. */
   .header-inner {
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: wrap;
+    align-items: center;
     gap: var(--space-sm);
   }
 
@@ -115,26 +121,79 @@
     align-self: flex-start;
   }
 
-  #main-nav {
-    gap: var(--space-sm);
-    margin-left: 0;
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    -webkit-overflow-scrolling: touch;
+  /* This simple hamburger keeps the nav compact during the demo on smaller screens. */
+  .nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    width: 44px;
+    height: 44px;
+    margin-left: auto;
+    border: 1px solid var(--color-header-divider);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    padding: 0 10px;
+    cursor: pointer;
   }
 
-  #main-nav::-webkit-scrollbar {
+  .nav-toggle__line {
+    width: 100%;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--color-header-text);
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+
+  .nav-toggle.is-open .nav-toggle__line:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  .nav-toggle.is-open .nav-toggle__line:nth-child(2) {
+    opacity: 0;
+  }
+
+  .nav-toggle.is-open .nav-toggle__line:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  /* Collapse the nav into a vertical menu so it does not overflow on phones. */
+  #main-nav {
+    margin-left: 0;
+    width: 100%;
     display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-xs);
+    padding-top: var(--space-sm);
+  }
+
+  #main-nav.is-open {
+    display: flex;
+  }
+
+  /* Stack links and auth actions so the tap targets stay easy to use. */
+  .nav-link,
+  .nav-btn,
+  .nav-logout {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    text-align: left;
+  }
+
+  .nav-link {
+    background: rgba(74, 124, 111, 0.06);
   }
 
   #nav-auth {
+    width: 100%;
     margin-left: 0;
     padding-left: 0;
     border-left: none;
-    flex-wrap: nowrap;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-xs);
   }
 
   .nav-user {

@@ -394,7 +394,12 @@
       100% { background-position: 0 0; }
     }
 
+    /* Tighten the dashboard layout earlier so the stat grid stays readable on laptops and tablets. */
     @media (max-width: 1180px) {
+      .dashboard-main {
+        padding: var(--space-lg);
+      }
+
       .dashboard-layout {
         grid-template-columns: 1fr;
       }
@@ -422,6 +427,7 @@
       }
     }
 
+    /* Collapse the page further on mobile so the content fits without cramped spacing. */
     @media (max-width: 860px) {
       .dashboard-main {
         padding: var(--space-md);

@@ -1,9 +1,65 @@
 const navAuth = document.getElementById('nav-auth');
 const currentPage = document.body.dataset.page || '';
 const siteTitle = document.querySelector('.site-title');
+const mainNav = document.getElementById('main-nav');
+const headerInner = document.querySelector('.header-inner');
 
 if (siteTitle) {
   siteTitle.setAttribute('href', 'landing.html');
+}
+
+// This toggle keeps the nav usable on phones without changing every HTML file by hand.
+function setupMobileNav() {
+  if (!mainNav || !headerInner) return;
+
+  let navToggle = document.getElementById('nav-toggle');
+  if (!navToggle) {
+    navToggle = document.createElement('button');
+    navToggle.type = 'button';
+    navToggle.id = 'nav-toggle';
+    navToggle.className = 'nav-toggle';
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.setAttribute('aria-label', 'Toggle navigation menu');
+    navToggle.innerHTML = `
+      <span class="nav-toggle__line"></span>
+      <span class="nav-toggle__line"></span>
+      <span class="nav-toggle__line"></span>
+    `;
+    headerInner.insertBefore(navToggle, mainNav);
+  }
+
+  const closeMobileNav = () => {
+    mainNav.classList.remove('is-open');
+    navToggle.classList.remove('is-open');
+    navToggle.setAttribute('aria-expanded', 'false');
+  };
+
+  if (!navToggle.dataset.bound) {
+    navToggle.addEventListener('click', () => {
+      const isOpen = mainNav.classList.toggle('is-open');
+      navToggle.classList.toggle('is-open', isOpen);
+      navToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+    navToggle.dataset.bound = 'true';
+  }
+
+  if (!mainNav.dataset.bound) {
+    mainNav.addEventListener('click', (event) => {
+      if (event.target.closest('a, button')) {
+        closeMobileNav();
+      }
+    });
+    mainNav.dataset.bound = 'true';
+  }
+
+  if (!window.__pathwiseMobileNavBound) {
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+        closeMobileNav();
+      }
+    });
+    window.__pathwiseMobileNavBound = true;
+  }
 }
 
 function guestNavMarkup() {
@@ -43,6 +99,7 @@ function renderGuestNav() {
   if (!navAuth) return;
   navAuth.dataset.authState = 'guest';
   navAuth.innerHTML = guestNavMarkup();
+  setupMobileNav();
 }
 
 function renderAuthedNav(user) {
@@ -50,6 +107,7 @@ function renderAuthedNav(user) {
 
   navAuth.dataset.authState = 'authenticated';
   navAuth.innerHTML = authedNavMarkup(user);
+  setupMobileNav();
 
   const logoutBtn = document.getElementById('logoutBtn');
   if (!logoutBtn) return;

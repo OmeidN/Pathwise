@@ -377,6 +377,24 @@
         alert('This action could not be completed. Try again or check that you are still signed in.');
       }
 
+      // Update one stat card in place so the admin view reacts immediately after actions.
+      function adjustStatValue(id, delta) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const current = parseInt(el.textContent || '0', 10);
+        if (Number.isNaN(current)) return;
+        el.textContent = String(Math.max(0, current + delta));
+      }
+
+      // When the queue empties out, show the same empty row used by the initial load.
+      function ensureQueueEmptyState() {
+        const body = document.getElementById('queue-body');
+        if (!body) return;
+        if (body.querySelectorAll('tr').length === 0) {
+          body.innerHTML = emptyRow(6, 'No pending submissions');
+        }
+      }
+
       async function loadStats() {
         try {
           const res = await fetch('/api/admin/stats', { credentials: 'include' });
@@ -406,6 +424,7 @@
         return data.user || data;
       }
 
+      // The queue can now approve or reject real backend items, so keep the UI counters in sync too.
       async function loadQueue() {
         const body = document.getElementById('queue-body');
         let rows;
@@ -447,12 +466,15 @@
             const res = await fetch(endpoint, { method: 'POST', credentials: 'include' });
             if (!res.ok) throw new Error();
             btn.closest('tr').remove();
+            adjustStatValue('stat-pending', -1);
+            ensureQueueEmptyState();
           } catch {
             notConnected();
           }
         });
       }
 
+      // The user list now reflects the backend admin endpoints, so keep stats synced after removals.
       async function loadUsers() {
         const body = document.getElementById('users-body');
         let rows;
@@ -513,6 +535,10 @@
             });
             if (!res.ok) throw new Error();
             btn.closest('tr').remove();
+            adjustStatValue('stat-users', -1);
+            if (body.querySelectorAll('tr').length === 0) {
+              body.innerHTML = emptyRow(5, 'No users found');
+            }
           } catch {
             notConnected();
           }

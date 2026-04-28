@@ -263,12 +263,8 @@ if (clearFiltersBtn) {
   clearFiltersBtn.addEventListener("click", () => {
     resetFilters();
     updateUrl(new URLSearchParams());
-
-    // Keep the cleared state obvious so users know the button worked.
-    resultsEl.innerHTML = emptyStateMarkup(
-      "Filters cleared",
-      "Enter a new search or try one of the categories to start browsing again."
-    );
+    // After clearing filters, reload the full catalog so Browse always has content ready.
+    searchForm.dispatchEvent(new Event("submit"));
   });
 }
 
@@ -286,14 +282,8 @@ if (pageParams.get("tags")) {
   });
 }
 
-if ([...pageParams.keys()].length > 0) {
-  searchForm.dispatchEvent(new Event("submit"));
-} else {
-  resultsEl.innerHTML = emptyStateMarkup(
-    "Start a search",
-    "Enter a keyword or use the filters to explore resources, templates, and workflows."
-  );
-}
+// Load all approved resources on first visit so the page behaves like a browse experience right away.
+searchForm.dispatchEvent(new Event("submit"));
 
 loadRecommendations();
 loadTemplateRecommendations();

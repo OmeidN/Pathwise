@@ -20,6 +20,8 @@ const recommendationsRoutes = require('./routes/recommendations');
 const ratingsRoutes = require('./routes/ratings');
 const usersRoutes = require('./routes/users');
 const adminRoutes = require('./routes/admin');
+// Mount the reports router so the dashboard/reporting API is reachable during the final demo.
+const reportsRoutes = require('./routes/reports');
 const templatesRoutes = require('./routes/templates');
 const workflowsRoutes = require('./routes/workflows');
 const sharesRoutes = require('./routes/shares');
@@ -110,6 +112,8 @@ app.use('/api', recommendationsRoutes);
 app.use('/api', ratingsRoutes);
 app.use('/api', usersRoutes);
 app.use('/api', adminRoutes);
+// Keep the reports endpoints under /api so the frontend can call /api/reports/summary.
+app.use('/api', reportsRoutes);
 app.use('/api', templatesRoutes);
 app.use('/api', workflowsRoutes);
 app.use('/api', sharesRoutes);
