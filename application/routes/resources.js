@@ -116,23 +116,57 @@ async function resolveTagIds(conn, tagValuesRaw) {
   return Array.from(resolvedIds);
 }
 
-router.patch('/resources/:id/ai-meta', requireAuth, requireRole('faculty', 'staff'), async (req, res) => {
-  try {
-    const id = parseInt(req.params.id, 10);
-    if (Number.isNaN(id) || id < 1) {
-      return res.status(400).json({ success: false, error: 'Invalid resource id' });
+router.patch(
+  '/resources/:id/ai-meta',
+  requireAuth,
+  requireRole('admin', 'faculty', 'staff'),
+  async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (Number.isNaN(id) || id < 1) {
+        return res.status(400).json({ success: false, error: 'Invalid resource id' });
+      }
+      const enabled = Boolean((req.body || {}).is_ai_enabled);
+      const [result] = await db.getPool().query(
+        'UPDATE Resources SET is_ai_enabled = ? WHERE resource_id = ?',
+        [enabled ? 1 : 0, id]
+      );
+      if (!result.affectedRows) return res.status(404).json({ success: false, error: 'Resource not found' });
+      res.json({ success: true, is_ai_enabled: enabled ? 1 : 0 });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
     }
-    const enabled = Boolean((req.body || {}).is_ai_enabled);
-    const [result] = await db.getPool().query(
-      'UPDATE Resources SET is_ai_enabled = ? WHERE resource_id = ?',
-      [enabled ? 1 : 0, id]
-    );
-    if (!result.affectedRows) return res.status(404).json({ success: false, error: 'Resource not found' });
-    res.json({ success: true, is_ai_enabled: enabled ? 1 : 0 });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
   }
-});
+);
+
+/**
+ * Admin/moderator queue: pending resource submissions.
+ */
+router.get(
+  '/resources',
+  requireAuth,
+  requireRole('admin', 'faculty', 'staff'),
+  async (req, res) => {
+    const status = String(req.query.status || '').toLowerCase();
+    if (status !== 'pending') {
+      return res.status(400).json({ success: false, error: 'Use ?status=pending' });
+    }
+    try {
+      const [rows] = await db.getPool().query(
+        `SELECT r.resource_id, r.title, r.moderation_status AS status, r.created_at,
+                c.category_name, u.username AS submitted_by_name, r.submitted_by
+         FROM Resources r
+         LEFT JOIN Users u ON u.user_id = r.submitted_by
+         LEFT JOIN Categories c ON c.category_id = r.category_id
+         WHERE r.moderation_status = 'pending'
+         ORDER BY r.created_at ASC`
+      );
+      res.json({ success: true, resources: rows });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  }
+);
 
 router.get('/resources/:id', async (req, res) => {
   try {
@@ -143,25 +177,31 @@ router.get('/resources/:id', async (req, res) => {
 
     const pool = db.getPool();
 
-    // private resource should not be readable to randomg guests
     const userId = req.session?.userId ?? null;
-    const params = [id];
-    let visibilityClause = 'r.visibility = "public"';
+    const submitterCheck = userId == null ? 0 : userId;
+    let isMod = false;
     if (userId != null) {
-      visibilityClause += ' OR r.submitted_by = ?';
-      params.push(userId);
+      const [[u]] = await pool.query('SELECT role FROM Users WHERE user_id = ? LIMIT 1', [userId]);
+      const r0 = (u && u.role) || 'student';
+      isMod = r0 === 'faculty' || r0 === 'staff' || r0 === 'admin';
     }
+
+    const accessClause = `(
+        (r.visibility = 'public' AND r.moderation_status = 'approved')
+        OR (r.submitted_by = ?)
+        OR (? = 1)
+      )`;
     const sql = `
       SELECT r.resource_id, r.title, r.description, r.url, r.image_path, r.category_id,
-            r.submitted_by, r.cost, r.is_ai_enabled, r.visibility, r.created_at,
+            r.submitted_by, r.cost, r.is_ai_enabled, r.visibility, r.moderation_status, r.created_at,
             c.category_name
       FROM Resources r
       LEFT JOIN Categories c ON c.category_id = r.category_id
       WHERE r.resource_id = ?
-        AND (${visibilityClause})
+        AND ${accessClause}
       LIMIT 1
     `;
-    const [rows] = await pool.query(sql, params);
+    const [rows] = await pool.query(sql, [id, submitterCheck, isMod ? 1 : 0]);
 
     if (!rows.length) {
       return res.status(404).json({ success: false, error: 'Resource not found' });
@@ -222,7 +262,7 @@ router.post('/resources', requireAuth, uploadOptional, async (req, res) => {
     req.session.userId
   ]);
   const role = userRow?.role || 'student';
-  const canPublishPublic = role === 'faculty' || role === 'staff';
+  const canPublishPublic = role === 'faculty' || role === 'staff' || role === 'admin';
 
   const titleStr = String(title).trim();
   const descStr = String(description).trim();
@@ -233,6 +273,8 @@ router.post('/resources', requireAuth, uploadOptional, async (req, res) => {
   if (!canPublishPublic) {
     visibility = 'private';
   }
+
+  const moderationStatus = canPublishPublic ? 'approved' : 'pending';
 
   let isAiEnabled = 0;
   if (canPublishPublic) {
@@ -268,9 +310,20 @@ router.post('/resources', requireAuth, uploadOptional, async (req, res) => {
 
     const [insertResult] = await conn.query(
       `INSERT INTO Resources
-        (title, description, url, image_path, category_id, submitted_by, cost, is_ai_enabled, visibility)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [titleStr, descStr, urlStr, imagePath, categoryId, req.session.userId, costStr, isAiEnabled, visibility]
+        (title, description, url, image_path, category_id, submitted_by, cost, is_ai_enabled, visibility, moderation_status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        titleStr,
+        descStr,
+        urlStr,
+        imagePath,
+        categoryId,
+        req.session.userId,
+        costStr,
+        isAiEnabled,
+        visibility,
+        moderationStatus
+      ]
     );
 
     const resourceId = insertResult.insertId;
@@ -283,7 +336,7 @@ router.post('/resources', requireAuth, uploadOptional, async (req, res) => {
 
     const [created] = await conn.query(
       `SELECT r.resource_id, r.title, r.description, r.url, r.image_path, r.category_id,
-              r.submitted_by, r.cost, r.is_ai_enabled, r.visibility, r.created_at, c.category_name
+              r.submitted_by, r.cost, r.is_ai_enabled, r.visibility, r.moderation_status, r.created_at, c.category_name
        FROM Resources r
        LEFT JOIN Categories c ON c.category_id = r.category_id
        WHERE r.resource_id = ?`,
@@ -300,7 +353,7 @@ router.post('/resources', requireAuth, uploadOptional, async (req, res) => {
     resource.avg_rating = null;
     resource.rating_count = 0;
 
-    if (visibility === 'public') {
+    if (visibility === 'public' && moderationStatus === 'approved') {
       await logActivity({
         userId: req.session.userId,
         actionType: 'resource_published',
@@ -322,5 +375,75 @@ router.post('/resources', requireAuth, uploadOptional, async (req, res) => {
     conn.release();
   }
 });
+
+router.post(
+  '/resources/:id/approve',
+  requireAuth,
+  requireRole('admin', 'faculty', 'staff'),
+  async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id) || id < 1) {
+      return res.status(400).json({ success: false, error: 'Invalid resource id' });
+    }
+    try {
+      const [result] = await db
+        .getPool()
+        .query(
+          `UPDATE Resources
+           SET visibility = 'public', moderation_status = 'approved'
+           WHERE resource_id = ? AND moderation_status = 'pending'`,
+          [id]
+        );
+      if (!result.affectedRows) {
+        return res.status(404).json({ success: false, error: 'Pending resource not found' });
+      }
+      const [[row]] = await db.getPool().query('SELECT title FROM Resources WHERE resource_id = ?', [id]);
+      await logActivity({
+        userId: req.session.userId,
+        actionType: 'resource_approved',
+        entityType: 'resource',
+        entityId: id,
+        detail: { title: row && row.title }
+      });
+      res.json({ success: true, resource_id: id, moderation_status: 'approved' });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  }
+);
+
+router.post(
+  '/resources/:id/reject',
+  requireAuth,
+  requireRole('admin', 'faculty', 'staff'),
+  async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id) || id < 1) {
+      return res.status(400).json({ success: false, error: 'Invalid resource id' });
+    }
+    try {
+      const [result] = await db
+        .getPool()
+        .query(
+          "UPDATE Resources SET moderation_status = 'rejected' WHERE resource_id = ? AND moderation_status = 'pending'",
+          [id]
+        );
+      if (!result.affectedRows) {
+        return res.status(404).json({ success: false, error: 'Pending resource not found' });
+      }
+      const [[row]] = await db.getPool().query('SELECT title FROM Resources WHERE resource_id = ?', [id]);
+      await logActivity({
+        userId: req.session.userId,
+        actionType: 'resource_rejected',
+        entityType: 'resource',
+        entityId: id,
+        detail: { title: row && row.title }
+      });
+      res.json({ success: true, resource_id: id, moderation_status: 'rejected' });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  }
+);
 
 module.exports = router;

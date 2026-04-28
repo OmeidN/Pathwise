@@ -276,17 +276,17 @@
         <div class="admin-stat-card">
           <div class="admin-stat-card__label">Total Users</div>
           <div class="admin-stat-card__value" id="stat-users">0</div>
-          <div class="admin-stat-card__note">(live data coming soon)</div>
+          <div class="admin-stat-card__note" data-stat-note></div>
         </div>
         <div class="admin-stat-card">
           <div class="admin-stat-card__label">Total Resources</div>
           <div class="admin-stat-card__value" id="stat-resources">0</div>
-          <div class="admin-stat-card__note">(live data coming soon)</div>
+          <div class="admin-stat-card__note" data-stat-note></div>
         </div>
         <div class="admin-stat-card">
           <div class="admin-stat-card__label">Pending Approvals</div>
           <div class="admin-stat-card__value" id="stat-pending">0</div>
-          <div class="admin-stat-card__note">(live data coming soon)</div>
+          <div class="admin-stat-card__note" data-stat-note></div>
         </div>
       </div>
     </section>
@@ -374,7 +374,28 @@
       }
 
       function notConnected() {
-        alert('Admin actions not yet connected to backend');
+        alert('This action could not be completed. Try again or check that you are still signed in.');
+      }
+
+      async function loadStats() {
+        try {
+          const res = await fetch('/api/admin/stats', { credentials: 'include' });
+          if (!res.ok) throw new Error('not available');
+          const data = await res.json();
+          const u = data.totalUsers;
+          const r = data.totalResources;
+          const p = data.pendingApprovals;
+          document.getElementById('stat-users').textContent = u != null ? String(u) : '0';
+          document.getElementById('stat-resources').textContent = r != null ? String(r) : '0';
+          document.getElementById('stat-pending').textContent = p != null ? String(p) : '0';
+          document.querySelectorAll('[data-stat-note]').forEach((el) => {
+            el.textContent = '';
+          });
+        } catch {
+          document.querySelectorAll('[data-stat-note]').forEach((el) => {
+            el.textContent = 'Stats unavailable';
+          });
+        }
       }
 
       async function fetchMe() {
@@ -531,7 +552,8 @@
 
         await Promise.all([
           loadQueue(),
-          role === 'admin' ? loadUsers() : Promise.resolve()
+          role === 'admin' ? loadUsers() : Promise.resolve(),
+          role === 'admin' ? loadStats() : Promise.resolve()
         ]);
       }
 

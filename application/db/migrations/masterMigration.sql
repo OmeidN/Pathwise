@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS Users (
   email VARCHAR(255) NOT NULL,
   username VARCHAR(100) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
-  role ENUM('student', 'faculty', 'staff') NOT NULL DEFAULT 'student',
+  role ENUM('student', 'faculty', 'staff', 'admin') NOT NULL DEFAULT 'student',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (user_id),
   UNIQUE KEY uq_users_email (email),
@@ -42,10 +42,12 @@ CREATE TABLE IF NOT EXISTS Resources (
   cost VARCHAR(32) NULL,
   is_ai_enabled TINYINT(1) NOT NULL DEFAULT 0,
   visibility ENUM('public', 'private') NOT NULL DEFAULT 'public',
+  moderation_status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'approved',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (resource_id),
   KEY idx_resources_category (category_id),
   KEY idx_resources_submitter (submitted_by),
+  KEY idx_resources_moderation (moderation_status),
   CONSTRAINT fk_resources_category FOREIGN KEY (category_id) REFERENCES Categories (category_id)
     ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT fk_resources_submitter FOREIGN KEY (submitted_by) REFERENCES Users (user_id)

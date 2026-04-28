@@ -39,6 +39,7 @@ const messagesRoutes = require('./routes/messages');
 const recommendationsRoutes = require('./routes/recommendations');
 const ratingsRoutes = require('./routes/ratings');
 const usersRoutes = require('./routes/users');
+const adminRoutes = require('./routes/admin');
 const templatesRoutes = require('./routes/templates');
 const workflowsRoutes = require('./routes/workflows');
 const sharesRoutes = require('./routes/shares');
@@ -128,6 +129,7 @@ app.use('/api', messagesRoutes);
 app.use('/api', recommendationsRoutes);
 app.use('/api', ratingsRoutes);
 app.use('/api', usersRoutes);
+app.use('/api', adminRoutes);
 app.use('/api', templatesRoutes);
 app.use('/api', workflowsRoutes);
 app.use('/api', sharesRoutes);
@@ -175,6 +177,7 @@ app.get('/api/search', async (req, res) => {
       params.push(userId);
     }
     wherePieces.push(`(${resourceVisibility.join(' OR ')})`);
+    wherePieces.push("r.moderation_status = 'approved'");
 
     if (q && !/^[a-z0-9 ]{1,40}$/i.test(q)) {
       return res.status(400).json({

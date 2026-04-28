@@ -309,7 +309,11 @@ router.post('/goals/:id/resources', requireAuth, async (req, res) => {
 
     const [resources] = await db.getPool().query(
       `SELECT resource_id FROM Resources
-       WHERE resource_id = ? AND (visibility = 'public' OR submitted_by = ?)
+       WHERE resource_id = ?
+         AND (
+           (visibility = 'public' AND moderation_status = 'approved')
+           OR submitted_by = ?
+         )
        LIMIT 1`,
       [resourceId, req.session.userId]
     );
