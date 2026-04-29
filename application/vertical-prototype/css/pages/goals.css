@@ -19,6 +19,12 @@
   font-size: var(--font-size-sm);
 }
 
+.goals-token-pill {
+  margin-top: var(--space-sm);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
 .goals-toolbar {
   margin-bottom: var(--space-lg);
   display: grid;
@@ -223,6 +229,12 @@
   gap: var(--space-sm);
 }
 
+.goal-create-options {
+  display: grid;
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -249,9 +261,74 @@
   box-shadow: var(--shadow-lg);
 }
 
+.modal-card--wide {
+  max-width: 860px;
+}
+
 .modal-card h2 {
   margin: 0 0 var(--space-md);
   font-size: var(--font-size-lg);
+}
+
+.goal-question-set {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.goal-question-set legend {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+  padding: 0 var(--space-xs);
+}
+
+.goal-question-set label {
+  display: grid;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+}
+
+.ai-draft-section {
+  margin-top: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.ai-draft-project {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.ai-draft-milestone-wrap {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.ai-draft-milestone {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.ai-draft-milestone label {
+  display: grid;
+  gap: var(--space-xs);
+  font-size: var(--font-size-sm);
+}
+
+.ai-resource-item {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+}
+
+.ai-resource-item input[type='checkbox'] {
+  margin-top: 4px;
 }
 
 /* Goal detail (projects / milestones) */

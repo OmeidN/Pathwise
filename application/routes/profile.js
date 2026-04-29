@@ -31,7 +31,7 @@ router.get('/profile', requireAuth, async (req, res) => {
   try {
     const pool = db.getPool();
     const [users] = await pool.query(
-      'SELECT user_id, email, username, role, created_at FROM Users WHERE user_id = ? LIMIT 1',
+      'SELECT user_id, email, username, role, ai_goal_tokens, created_at FROM Users WHERE user_id = ? LIMIT 1',
       [req.session.userId]
     );
     if (!users.length) {

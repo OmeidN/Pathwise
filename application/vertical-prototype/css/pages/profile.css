@@ -57,6 +57,21 @@
   padding: var(--space-xl);
 }
 
+.profile-token-card {
+  margin-top: var(--space-md);
+}
+
+.profile-token-count {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+}
+
+.goal-create-options {
+  display: grid;
+  gap: var(--space-sm);
+}
+
 .profile-avatar {
   width: 56px;
   height: 56px;

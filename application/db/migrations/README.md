@@ -13,6 +13,8 @@ Run incremental migrations in order from the `application/db/migrations` directo
 9. `009_shares_reports_support.sql` (`Shares`)
 10. `010_visibility_hardening.sql` (`Resources.visibility`, `Resources.is_ai_enabled`, `Resources.skill_area` safety)
 11. `011_goal_templates_as_goals.sql` (`Goals.template_kind`, `Goals.template_copied_count`, `GoalTemplateRatings`)
+12. `012_admin_resource_moderation.sql` (adds `admin` user role and `Resources.moderation_status`)
+13. `013_ai_goal_tokens.sql` (adds `Users.ai_goal_tokens` with default/backfill of 5)
 
 `007` and `010` add `Resources` columns only when missing (Oracle MySQL does not support `ADD COLUMN IF NOT EXISTS`). Other steps use `CREATE TABLE IF NOT EXISTS` where applicable.
 
@@ -37,6 +39,8 @@ Get-Content .\008_goal_template_copy_links.sql -Raw | docker exec -i pathwise-my
 Get-Content .\009_shares_reports_support.sql -Raw | docker exec -i pathwise-mysql mysql -uroot -prootpass pathwise
 Get-Content .\010_visibility_hardening.sql -Raw | docker exec -i pathwise-mysql mysql -uroot -prootpass pathwise
 Get-Content .\011_goal_templates_as_goals.sql -Raw | docker exec -i pathwise-mysql mysql -uroot -prootpass pathwise
+Get-Content .\012_admin_resource_moderation.sql -Raw | docker exec -i pathwise-mysql mysql -uroot -prootpass pathwise
+Get-Content .\013_ai_goal_tokens.sql -Raw | docker exec -i pathwise-mysql mysql -uroot -prootpass pathwise
 ```
 
 Verify:
