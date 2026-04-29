@@ -150,6 +150,7 @@
     });
   }
 
+  // Keep the empty state and loaded list in the same spot so the page stays easy to scan.
   if (submissions.length === 0) {
     submittedEl.innerHTML = `
       <div class="submitted-empty">
@@ -170,11 +171,18 @@
   }
 })();
 
+// Use the new moderation_status field first, then fall back to older visibility data if needed.
 function buildRow(r) {
+  const moderation = String(r.moderation_status || '').toLowerCase();
   const statusMap = { public: 'approved', pending: 'pending', private: 'rejected' };
-  const labelMap = { approved: 'Approved', pending: 'Pending', rejected: 'Rejected' };
-  const status = statusMap[r.visibility] ?? 'pending';
+  const labelMap = { approved: 'Approved', pending: 'Pending Review', rejected: 'Rejected' };
+  const status = moderation || statusMap[r.visibility] || 'pending';
   const label = labelMap[status];
+  const reviewCopy = status === 'approved'
+    ? 'Approved for public browse.'
+    : status === 'rejected'
+      ? 'Not approved for the public catalog.'
+      : 'Waiting for faculty, staff, or admin review.';
 
   const date = r.created_at
     ? new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -189,6 +197,7 @@ function buildRow(r) {
       <div class="submitted-row__body">
         <p class="submitted-row__title">${titleLink}</p>
         ${date ? `<p class="submitted-row__meta">Submitted ${esc(date)}</p>` : ''}
+        <p class="submitted-row__meta">${esc(reviewCopy)}</p>
       </div>
       <span class="status-badge status-badge--${escAttr(status)}">${esc(label)}</span>
     </div>`;

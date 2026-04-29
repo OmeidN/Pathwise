@@ -110,6 +110,20 @@
                 <button type="button" class="btn-clear-filters">Clear</button>
             </div>
 
+            <!-- These quick themes broaden the demo beyond the base category list without hiding how browse works. -->
+            <div class="theme-shortcuts">
+                <p class="theme-shortcuts__label">Explore themes</p>
+                <div class="theme-shortcuts__grid">
+                    <button type="button" class="theme-shortcut" data-theme-query="" data-theme-category="1">Academic</button>
+                    <button type="button" class="theme-shortcut" data-theme-query="" data-theme-category="2">Career</button>
+                    <button type="button" class="theme-shortcut" data-theme-query="" data-theme-category="4">Wellness</button>
+                    <button type="button" class="theme-shortcut" data-theme-query="leadership">Leadership</button>
+                    <button type="button" class="theme-shortcut" data-theme-query="finance">Finance</button>
+                    <button type="button" class="theme-shortcut" data-theme-query="creativity">Creativity</button>
+                    <button type="button" class="theme-shortcut" data-theme-query="research">Research</button>
+                </div>
+            </div>
+
             <div class="guest-note">
                 <p class="guest-note-title">Guest Note</p>
                 <p>Guests can browse. Saving prompts sign-in.</p>
@@ -119,9 +133,9 @@
 
         <!-- Results populated by app.js via GET /api/search?q=...&category=... -->
         <section id="results-section">
-            <!-- This helper text gives the results area a stronger starting state before users search. -->
+            <!-- This helper text explains that users can browse immediately, then refine with filters. -->
             <p class="results-helper">
-                Start with a keyword like “resume,” “research,” or “wellness,” then refine the list with filters.
+                Browse the full catalog first, then narrow the list with keywords, categories, and filters.
             </p>
             <section id="recommended-section" hidden>
                 <h2>Recommended for you</h2>
@@ -129,7 +143,8 @@
             </section>
             <h2>Results</h2>
             <div id="results">
-                <p>Waiting for input...</p>
+                <!-- This placeholder is replaced quickly by the loading skeleton from app.js. -->
+                <p>Loading resources...</p>
             </div>
             <section id="template-recommended-section" hidden>
                 <h2>Goal template recommendations</h2>

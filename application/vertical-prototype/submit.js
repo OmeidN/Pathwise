@@ -11,6 +11,7 @@ function showSubmitMessage(element, message) {
   element.hidden = false;
 }
 
+// Keep the submit request simple while matching the new moderation flow.
 submitForm.addEventListener('submit', async (event) => {
   event.preventDefault();
 
@@ -60,7 +61,7 @@ submitForm.addEventListener('submit', async (event) => {
       throw new Error(data.error || 'Could not submit resource.');
     }
 
-    showSubmitMessage(submitSuccess, 'Saved as a private resource on your account.');
+    showSubmitMessage(submitSuccess, 'Resource submitted. It is now waiting for review.');
     window.location.href = `resource.html?id=${data.resource.resource_id}`;
   } catch (error) {
     showSubmitMessage(submitError, error.message);

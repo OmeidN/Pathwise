@@ -10,6 +10,36 @@
   const projectsTableBody = document.getElementById("projects-table-body");
   const milestonesTableBody = document.getElementById("milestones-table-body");
   const savedResourcesTableBody = document.getElementById("saved-resources-table-body");
+  // These nodes power the lightweight report panel that now reads from /api/reports/summary.
+  const reportRange = document.getElementById("report-range");
+  const reportRangeLabel = document.getElementById("report-range-label");
+  const reportHighlights = document.getElementById("report-highlights");
+  const reportCompletedGoals = document.getElementById("report-completed-goals");
+  const reportReflections = document.getElementById("report-reflections");
+  const reportSaved = document.getElementById("report-saved");
+  const reportActivity = document.getElementById("report-activity");
+  const reportValueMap = {
+    completedGoals: {
+      valueEl: document.getElementById("report-completed-goals"),
+      labelEl: document.getElementById("report-completed-goals-label"),
+      barEl: document.getElementById("report-completed-goals-bar")
+    },
+    activeGoals: {
+      valueEl: null,
+      labelEl: document.getElementById("report-active-goals-label"),
+      barEl: document.getElementById("report-active-goals-bar")
+    },
+    completedMilestones: {
+      valueEl: null,
+      labelEl: document.getElementById("report-completed-milestones-label"),
+      barEl: document.getElementById("report-completed-milestones-bar")
+    },
+    pendingMilestones: {
+      valueEl: null,
+      labelEl: document.getElementById("report-pending-milestones-label"),
+      barEl: document.getElementById("report-pending-milestones-bar")
+    }
+  };
 
   function esc(value) {
     return String(value ?? "")
@@ -33,6 +63,96 @@
   function setTableRows(element, markup) {
     if (element) {
       element.innerHTML = markup;
+    }
+  }
+
+  // Convert report timestamps into a shorter dashboard-friendly label.
+  function formatDateTime(value) {
+    if (!value) return "Recently";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return esc(String(value).slice(0, 10));
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }
+
+  // Give the report panel a simple readable label for the selected time range.
+  function rangeLabel(range) {
+    if (range === "semester") return "Semester activity";
+    if (range === "monthly") return "Last 30 days";
+    return "Last 7 days";
+  }
+
+  // Keep the report bars proportional without adding a chart dependency.
+  function setReportMetric(key, value, maxValue) {
+    const config = reportValueMap[key];
+    if (!config) return;
+    const safeValue = Number(value) || 0;
+    const width = maxValue > 0 ? Math.max(8, Math.round((safeValue / maxValue) * 100)) : 0;
+    if (config.valueEl) config.valueEl.textContent = safeValue;
+    if (config.labelEl) config.labelEl.textContent = safeValue;
+    if (config.barEl) config.barEl.style.width = `${width}%`;
+  }
+
+  // Load the reporting endpoint separately so the main dashboard still works if reporting is unavailable.
+  async function loadReports(range = "weekly") {
+    if (!reportRangeLabel || !reportHighlights) return;
+
+    reportRangeLabel.textContent = `Loading ${rangeLabel(range).toLowerCase()}...`;
+    reportHighlights.innerHTML = `
+      <li class="dashboard-report-highlights__item">
+        <span class="dashboard-report-highlights__action">Loading report activity...</span>
+      </li>`;
+
+    try {
+      const response = await fetch(`/api/reports/summary?range=${encodeURIComponent(range)}`, {
+        credentials: "include"
+      });
+      if (response.status === 401) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Could not load report summary.");
+      }
+
+      if (reportCompletedGoals) reportCompletedGoals.textContent = data.completedGoals ?? 0;
+      if (reportReflections) reportReflections.textContent = data.reflectionsCount ?? 0;
+      if (reportSaved) reportSaved.textContent = data.resourcesSaved ?? 0;
+      if (reportActivity) reportActivity.textContent = data.activityCount ?? 0;
+      reportRangeLabel.textContent = rangeLabel(data.range || range);
+
+      const maxValue = Math.max(
+        1,
+        Number(data.completedGoals) || 0,
+        Number(data.activeGoals) || 0,
+        Number(data.completedMilestones) || 0,
+        Number(data.pendingMilestones) || 0
+      );
+      setReportMetric("completedGoals", data.completedGoals, maxValue);
+      setReportMetric("activeGoals", data.activeGoals, maxValue);
+      setReportMetric("completedMilestones", data.completedMilestones, maxValue);
+      setReportMetric("pendingMilestones", data.pendingMilestones, maxValue);
+
+      const highlights = Array.isArray(data.recentHighlights) ? data.recentHighlights : [];
+      reportHighlights.innerHTML = highlights.length
+        ? highlights.map((item) => `
+            <li class="dashboard-report-highlights__item">
+              <span class="dashboard-report-highlights__action">${esc((item.action_type || "activity").replace(/_/g, " "))}</span>
+              <span class="dashboard-report-highlights__time">${esc(formatDateTime(item.created_at))}</span>
+            </li>
+          `).join("")
+        : `
+            <li class="dashboard-report-highlights__item">
+              <span class="dashboard-report-highlights__action">No report activity yet</span>
+              <span class="dashboard-report-highlights__time">Try again after using the app more.</span>
+            </li>`;
+    } catch (error) {
+      reportRangeLabel.textContent = "Report summary unavailable";
+      reportHighlights.innerHTML = `
+        <li class="dashboard-report-highlights__item">
+          <span class="dashboard-report-highlights__action">${esc(error.message || "Could not load report summary.")}</span>
+        </li>`;
     }
   }
 
@@ -117,7 +237,15 @@
     setTableRows(projectsTableBody, projectsRows);
     setTableRows(milestonesTableBody, milestonesRows);
     setTableRows(savedResourcesTableBody, savedRows);
+    loadReports(reportRange?.value || "weekly");
   } catch (error) {
     root.innerHTML = `<p class="error">${esc(error.message)}</p>`;
+  }
+
+  // Let demo presenters switch between short-term and semester views without leaving the page.
+  if (reportRange) {
+    reportRange.addEventListener("change", () => {
+      loadReports(reportRange.value);
+    });
   }
 })();
