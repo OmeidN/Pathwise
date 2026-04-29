@@ -582,6 +582,10 @@
   aiModal.addEventListener('click', (e) => {
     if (e.target === aiModal) closeAiModal();
   });
+  aiForm?.addEventListener('submit', (e) => {
+    // Prevent Enter-key default form submit; AI flow uses explicit buttons.
+    e.preventDefault();
+  });
 
   aiGenerateBtn.addEventListener('click', generateAiDraft);
   aiSaveBtn.addEventListener('click', saveAiGoal);

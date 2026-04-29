@@ -67,6 +67,11 @@
   margin: 0;
 }
 
+.goal-create-options {
+  display: grid;
+  gap: var(--space-sm);
+}
+
 .profile-avatar {
   width: 56px;
   height: 56px;

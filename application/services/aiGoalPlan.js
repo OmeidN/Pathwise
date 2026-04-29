@@ -196,13 +196,19 @@ async function generateDraftWithGemini(goal, answers, preset) {
 
   const result = await model.generateContent(buildPrompt(goal, answers, preset));
   const text = result.response.text();
+  
+  // TEMP DEBUG: inspect model output when JSON parse fails
+  console.log('[ai-goal][gemini-raw]', text);
+  console.log('[ai-goal][gemini-raw-length]', text.length);
+  
   let json;
   try {
     json = JSON.parse(text);
   } catch (_err) {
+    console.log('[ai-goal][gemini-raw-head]', text.slice(0, 300));
+    console.log('[ai-goal][gemini-raw-tail]', text.slice(-300));
     throw new Error('Gemini did not return valid JSON.');
-  }
-  return sanitizePlanDraft(json, goal.target_date, preset);
+  }  return sanitizePlanDraft(json, goal.target_date, preset);
 }
 
 function validateSavePayload(rawBody) {
