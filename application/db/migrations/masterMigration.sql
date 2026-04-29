@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS Users (
   username VARCHAR(100) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   role ENUM('student', 'faculty', 'staff', 'admin') NOT NULL DEFAULT 'student',
+  ai_goal_tokens INT NOT NULL DEFAULT 5,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (user_id),
   UNIQUE KEY uq_users_email (email),

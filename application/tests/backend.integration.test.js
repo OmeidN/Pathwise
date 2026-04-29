@@ -44,4 +44,24 @@ describe('Pathwise API smoke integration', () => {
     const res = await request(app).get('/api/template-recommendations');
     expect(res.statusCode).toBe(401);
   });
+
+  test('ai token balance endpoint requires auth', async () => {
+    const res = await request(app).get('/api/ai-tokens/balance');
+    expect(res.statusCode).toBe(401);
+  });
+
+  test('ai draft endpoint requires auth', async () => {
+    const res = await request(app).post('/api/ai/goal-plan-draft').send({});
+    expect(res.statusCode).toBe(401);
+  });
+
+  test('preview recommendations endpoint requires auth', async () => {
+    const res = await request(app).post('/api/recommendations/preview').send({});
+    expect(res.statusCode).toBe(401);
+  });
+
+  test('ai save endpoint requires auth', async () => {
+    const res = await request(app).post('/api/ai/goal-plan/save').send({});
+    expect(res.statusCode).toBe(401);
+  });
 });

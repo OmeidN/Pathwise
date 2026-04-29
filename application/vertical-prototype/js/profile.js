@@ -6,6 +6,9 @@
   const errorMsg = document.getElementById('profile-error-msg');
   const personalizeForm = document.getElementById('personalize-form');
   const activityEl = document.getElementById('activity-feed');
+  const profileTokenBalance = document.getElementById('profileTokenBalance');
+  const profileTokenMsg = document.getElementById('profileTokenMsg');
+  const profileTokenButtons = Array.from(document.querySelectorAll('.profile-token-pack'));
 
   errorBanner.hidden = true;
   errorMsg.textContent = '';
@@ -64,6 +67,7 @@
   }
 
   const roleLabel = user.role ? esc(user.role) : 'student';
+  let tokenBalance = Number(user.ai_goal_tokens) || 0;
   profileCard.innerHTML = `
     <div class="profile-avatar" aria-hidden="true">${esc(initials(user.username))}</div>
     <div>
@@ -81,6 +85,30 @@
         <span class="profile-stat__label">Saved</span>
       </div>
     </div>`;
+  if (profileTokenBalance) profileTokenBalance.textContent = String(tokenBalance);
+  profileTokenButtons.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      profileTokenMsg.textContent = '';
+      const res = await fetch('/api/ai-tokens/purchase', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pack_id: btn.dataset.pack })
+      });
+      if (res.status === 401) {
+        window.location.href = 'login.html';
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!data.success) {
+        profileTokenMsg.textContent = data.error || 'Could not add tokens.';
+        return;
+      }
+      tokenBalance = Number(data.balance) || tokenBalance;
+      profileTokenBalance.textContent = String(tokenBalance);
+      profileTokenMsg.textContent = `Added ${data.added_tokens} tokens. Balance is now ${tokenBalance}.`;
+    });
+  });
 
   if (personalizeForm) {
     const q = (name) => personalizeForm.querySelector(`[name="${name}"]`);
