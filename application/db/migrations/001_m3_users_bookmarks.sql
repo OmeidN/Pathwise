@@ -1,10 +1,38 @@
+------------------------------------------------------------------------------------------
+
+-- Why:
+--   This sql adds the foundational table for user account verification as 
+--   well as bookmark table that will serve for saved-resourceworkflows.
+--
+-- What:
+--   It creates the User table, and Bookmarks join table as well as column additions
+--   such as the submitted_by and costs fields to Resources.
+--
+-- Where used:
+--   This the backbone for backend authentication routes, bookmark routes
+--   and profile views
+--
+-- Notes:
+--   - You run this after the base schema becuase resource needs to already have
+--     existed to be altered properly
+--   - This is safe for those who already have an existing DB with Resources 
+--     already present.
+--   - The table it touches: 
+--        Users, 
+--        Resources, 
+--        Bookmarks, 
+--
+
+------------------------------------------------------------------------------------------
+
 -- Pathwise M3: authentication, bookmarks, resource ownership & cost filter
 -- Target database: pathwise (MySQL 8.0+)
 --
 -- Apply once from repo root or application/db/migrations:
 --   mysql -h <RDS_HOST> -P 3306 -u <USER> -p pathwise < 001_m3_users_bookmarks.sql
 --
--- Safe to run only once. If a column or table already exists, fix manually or skip that statement.
+-- Safe to run only once. If a column or table already exists, fix manually or skip that 
+-- statement.
 
 -- ---------------------------------------------------------------------------
 -- 1. Users (register / login)

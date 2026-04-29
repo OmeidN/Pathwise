@@ -1,3 +1,28 @@
+------------------------------------------------------------------------------------------
+
+-- Why:
+--   It adds role based feature that is needed for when faculty/staff restricted
+--   elevated access are upheld and it also includes the profile personalization 
+--   fields we need later to power our recommendation engine 
+--
+-- What:
+--   Technically, it just addes a role column to Users (alter) and creates a 
+--   new entirely table called UserProfiles that will store perferences for each 
+--   user
+--
+-- Where used:
+--   It will be used for authorization prievelges checks and personalizing 
+--   resource/materials recommendations
+--
+-- Notes:
+--   - Run this after 003
+--   - This is safe to run for when on a DB Users already exists.
+--   - The table it touches: 
+--        Users, 
+--        UserProfiles.
+--
+------------------------------------------------------------------------------------------
+
 -- Pathwise: user roles + extended profile (run after 001–003)
 
 ALTER TABLE Users

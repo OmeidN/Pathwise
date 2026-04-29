@@ -1,3 +1,28 @@
+/**
+ * Why:
+ *   This is where the implementation for the browse of resources like templates, workflows,
+ *   and simple readable resources is at. This allows the user to search, and filter through
+ *   all the resources. If user doesn't have any particular resource, they can use the re-
+ *   commended resources.
+ *
+ * What:
+ *   This will handle search query, uses filter states to give filtered results 
+ *   (also updates URL query) and fetches search results back to the user. In addition to 
+ *   that it loads the recommended results to users
+ *
+ * Where used:
+ *   It is loaded/called by vertical-prototype/index.html which is really the browse page
+ *
+ * Notes:
+ *   - The APIs it calls: 
+ *        /api/search, 
+ *        /api/me, 
+ *        /api/recommendations.
+ *   - This file expects the controls for the search/filters to be in index.html
+ *   - Beside keyword searching, the filters include things like keyword, category, tag, 
+ *     cost, and AI-enabled
+ */
+
 const searchForm = document.getElementById("searchForm");
 const searchInput = document.getElementById("searchInput");
 const categoryInput = document.getElementById("category");

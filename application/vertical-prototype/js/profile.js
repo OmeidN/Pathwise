@@ -1,3 +1,26 @@
+/**
+ * Why:
+ *   This file implements the page file so that users manage their account info through
+ *   editing them and by just viewing their activity, resources and what they contributed
+ *
+ * What:
+ *   This file fetches profile (simple user identification), submissions, bookmarks and 
+ *   their activity. It renders the actual page including a personlization form that 
+ *   could help with recommending relevant resources for the user.
+ *
+ * Where used:
+ *   It is loaded/called by vertical-prototype/profile.html
+ *
+ * Notes:
+ *   - The APIs it calls: 
+ *        /api/profile, 
+ *        /api/me/submissions, 
+ *        /api/bookmarks, 
+ *        /api/activity.
+ *   - As usual, we redirect user to the login.html on 401
+ *   - From the profile html it expects a profile card, personalization form, and more
+ */
+
 (async () => {
   const profileCard = document.getElementById('profile-card');
   const submittedEl = document.getElementById('submitted-results');

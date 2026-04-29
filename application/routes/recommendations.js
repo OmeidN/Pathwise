@@ -1,3 +1,29 @@
+/**
+ * Why:
+ *   This file exists so users can discover resources like templates and normal readable
+ *   informations without having to search for them through a personalized system where
+ *   it figures out resources related to their goals, and profile.
+ *
+ * What:
+ *   It defines the routes that that derive tokens (keywords) from a user goals and tries
+ *   to text match with public resources, which then spits out a score. If not sucessful,
+ *   it recommends random public resources that are not saved by the current user.
+ *
+ * Where used:
+ *   It is mounted under '/api' in server.js
+ *   It is called by vertical-prototype/app.js
+ *
+ * Notes:
+ *   - It expects an authenticated session
+ *   - The table it touches: 
+ *        Goals, 
+ *        Projects, 
+ *        Resources, 
+ *        Bookmarks.
+ *   - It uses a simple heuristic matching instead of AI based analysis, although
+ *     if enough time to spare we can implement a very simple version of it
+ */
+
 const express = require('express');
 const db = require('../db/connection');
 const { requireAuth } = require('../middleware/requireAuth');

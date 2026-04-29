@@ -1,3 +1,25 @@
+/**
+ * Why:
+ *   Will allow users to see what resources are available, and they can rate and save 
+ *   the resources. Also faculty/staff can modifiy the AI metadata
+ *
+ * What:
+ *   It gets one resource, loads bookmark state, figure out user role. It also handles
+ *   how its bookmarked and rated as well as any AI label handling.
+ *
+ * Where used:
+ *   Called by vertical-prototype/resource.html.
+ *
+ * Notes:
+ *   - The APIs it calls: 
+ *         /api/resources/:id, 
+ *         /api/bookmarks, 
+ *         /api/resources/:id/rating,
+ *         /api/resources/:id/ai-meta, 
+ *         /api/me.
+ *   - For error handling on 401, redirect user to the login.html
+ */
+
 const params = new URLSearchParams(window.location.search);
 const resourceId = params.get('id');
 const detailEl = document.getElementById('resource-detail');

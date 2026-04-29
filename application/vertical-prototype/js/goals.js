@@ -1,3 +1,27 @@
+/**
+ * Why:
+ *   This file implements the goals page where users can create new goals, edit an already
+ *   existing goal metadata and delete. Can also filter, and sort the goals as well as add
+ *   markers of the goal (done, active or paused)
+ *
+ * What:
+ *   For each goals, it fetches their overview data, renders their card, manages the 
+ *   create/edit modal, as well as send CRUD requests and automatically refershes the page
+ *   after immediate valid change.
+ *
+ * Where used:
+ *   It is loaded/called by vertical-prototype/goals.html
+ *
+ * Notes:
+ *   - The APIs it calls: 
+ *        /api/goals-overview, 
+ *        /api/goals, 
+ *        /api/goals/:id,
+ *     /api/goals/:id/status.
+ *   - As usual, we redirect user to the login.html on 401
+ *   - This file expects the modal and all the form elements to be present in goals.html.
+ */
+
 (function () {
   const listEl = document.getElementById('goals-list');
   const errEl = document.getElementById('goals-error');

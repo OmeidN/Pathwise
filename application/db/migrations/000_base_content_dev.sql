@@ -1,5 +1,31 @@
--- Pathwise base content schema for fresh dev environments.
--- Run this BEFORE 001_m3_users_bookmarks.sql only if you do NOT already have the dump imported.
+------------------------------------------------------------------------------------------
+
+-- Why:
+--   This sql is supposed to be the base content schema for those who
+--   don't already have the full Pathwise SQL dump imported into their
+--   system.
+--
+-- What:
+--   Creates the Categories, Tags, Resources, and ResourceTags as well as
+--   some small set of samples inserted into the Categories and tags tables.
+--
+-- Where used:
+--   These tables will support materials/resources discovery, filtering, 
+--   inserting and tagging.
+--
+-- Notes:
+--   - You have to run this before before 001_m3_users_bookmarks.sql
+--   - This is totally safe for: 
+--         fresh dev databases only and not those who already have the base.
+--   - Do not run if the full dump has already been imported.
+--   - The table it touches: 
+--        Categories, 
+--        Tags, 
+--        Resources, 
+--        ResourceTags, 
+--
+
+------------------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS Categories (
   category_id INT NOT NULL AUTO_INCREMENT,
