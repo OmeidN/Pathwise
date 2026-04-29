@@ -1,8 +1,26 @@
+/**
+ * Why:
+ *   This file is meant to record user activity within the platforms accross important 
+ *   pages without us having to insert a duplicated logic in the route files.
+ *
+ * What:
+ *   It takes in the action, entity, the id of the user as well as details to update their
+ *   activity log and then export them.
+ *
+ * Where used:
+ *   It is called by the routes we decided were meaningful enough to track such as goals, 
+ *   bookmarks, milestones and the reflection although we can add more such as messages 
+ *   and others.
+ *
+ * Notes:
+ *   - Failures are intentionally logged
+ *   - The table it touches: 
+ *        ActivityLogs
+ *   - This helps the routes remain consistent and clear
+ */
+
 const db = require('../db/connection');
 
-/**
- * Best-effort activity row; failures are logged and do not throw.
- */
 async function logActivity({ userId, actionType, entityType = null, entityId = null, detail = null }) {
   try {
     const pool = db.getPool();

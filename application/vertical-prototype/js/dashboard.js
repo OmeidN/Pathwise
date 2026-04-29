@@ -1,3 +1,25 @@
+/**
+ * Why:
+ *   This file implements the dashboard page so users can see all their goals, projects,
+ *   milestones as well as their resources and so on in one place without having the user
+ *   go to each page to gather the informations.
+ *
+ * What:
+ *   After it fetches the dashboard, it does simple computation to figure out the progress
+ *   and render summaries as well as data tables.
+ *
+ * Where used:
+ *   It is loaded/called by vertical-prototype/dashboard.html.
+ *
+ * Notes:
+ *   - The APIs it calls: 
+ *       /api/dashboard, 
+ *       /api/recommendations.
+ *   - As usual, we redirect user to the login.html on 401
+ *   - It expects #dashboard-content to exist in the dashboard html page so it can properly
+ *     showcase all the computed results.
+ */
+
 (async function loadDashboard() {
   const root = document.getElementById("dashboard-content");
   const activeGoalsCount = document.getElementById("active-goals-count");

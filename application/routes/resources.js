@@ -1,5 +1,25 @@
 /**
- * Single resource fetch, create (submit), faculty AI flag, optional image upload.
+ * Why:
+ *   This file is needed so resource discovery can be possible and users to be able to
+ *   submit resources as well as correctly displaying all the detailed metadata
+ *
+ * What:
+ *   It defines the routes to fetch resources by specifing a single one, and create a new
+ *   resource. There is another route so an admin user can update/modify the AI metadata
+ *
+ * Where used:
+ *   It is mounted under '/api' in server.js
+ *   it is called by vertical-prototype/resource.js and submit.js (to create resource).
+ *
+ * Notes:
+ *   - File uploads use multer and store the files in public/uploads.
+ *   - Touches tables: 
+ *        Resources, 
+ *        Categories, 
+ *        Tags, 
+ *        ResourceTags, 
+ *        ResourceRatings.
+ *   - The AI-label modification require roles with faculty or/and staff
  */
 
 const path = require('path');

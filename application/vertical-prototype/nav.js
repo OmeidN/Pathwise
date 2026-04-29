@@ -1,3 +1,24 @@
+/**
+ * Why:
+ *   So we can have a resusable navigation across all our pages and to handle for different
+ *   representation depending on the user role
+ *
+ * What:
+ *   It loads user authentication state, renders different markups depending on if guest
+ *   or an actual verified user
+ *
+ * Where used:
+ *   Will be loaded by all of our vertical-prototype/* pages before any of their specfic 
+ *   scripts run
+ *
+ * Notes:
+ *   - APIs it calls:
+ *        /api/me
+ *        /api/logout
+ *   - To correctly work on each of its calling page a #nav-auth container is expected
+ *     in its header.
+ */
+
 const navAuth = document.getElementById('nav-auth');
 const currentPage = document.body.dataset.page || '';
 const siteTitle = document.querySelector('.site-title');

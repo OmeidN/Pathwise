@@ -1,3 +1,28 @@
+/**
+ * Why:
+ *   This file helps users to be able to rate materials whether that be resources or 
+ *   templates. So pathwise can priortize on showing the high quality portions first and
+ *   imporve on material selection confidence.
+ *
+ * What:
+ *   It defines the routes for submitting rating for both templates and resources as well
+ *   fetching the ratings to perform rating statstics for each. The user has to be logged
+ *   in to be able to do so in the first place.
+ *
+ * Where used:
+ *   It is mounted under '/api' in server.js
+ *   it is called by vertical-prototype/resource.js
+ *
+ * Notes:
+ *   - POST expects an authenticated session; 
+ *     GET simply doesn't.
+ *   - The table it touches: 
+ *        ResourceRatings, 
+ *        Resources
+ *   - The staring system is from 1-5 although we can make out of 10 for more precise
+ *     stastical computation to differentiate quality among all materials.
+ */
+
 const express = require('express');
 const db = require('../db/connection');
 const { requireAuth } = require('../middleware/requireAuth');

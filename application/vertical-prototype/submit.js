@@ -1,3 +1,23 @@
+/**
+ * Why:
+ *   So a properly autheticated user can submit resources they want to share with others
+ *   on the platform.
+ *
+ * What:
+ *   We first check if the user is authenticated properly, take in a valid user input (as
+ *   well as images if possible), and we package that into a formData. Afterwards we 
+ *   submit the new resource. Then so the user can see the resource, we re-direct them to
+ *   a page of the resource
+ *
+ * Where used:
+ *   Its referenced/loaded by vertical-prototype/submit.html
+ *
+ * Notes:
+ *   - Calls APIs: /api/resources so we can properly validate and update our database
+ *   - On 401 error, we take the user to the login page
+ *   - It allows multipart form as well as a optional picture to upload
+ */
+
 const submitForm = document.getElementById('submitForm');
 const submitButton = document.getElementById('submitButton');
 const submitError = document.getElementById('submit-error');

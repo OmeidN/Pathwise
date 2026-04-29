@@ -1,3 +1,25 @@
+------------------------------------------------------------------------------------------
+
+-- Why:
+--   So we can test the planning workflow properly we provide starter demo
+--   data so without us manually inserting data entry first.
+--
+-- What:
+--   It inserts on demo goal, some possibly related project, as well as milestone
+--   for a specified user in the database
+--
+-- Where used:
+--   It is used to populate the dasboard (overview) and the goal managment 
+--   to see through demo/dev if it looks as expected and see if it possibly 
+--   needs improvement
+--
+-- Notes:
+--   - Run after all previous schema as well as 002.
+--   - This is safe for demo/dev seeding but not really for production use.
+--   - This assumes that at least one user exists in the database
+
+------------------------------------------------------------------------------------------
+
 -- Pathwise M3 demo seed for goals/projects/milestones relationships.
 -- Run after 001 and 002.
 

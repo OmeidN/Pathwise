@@ -1,3 +1,26 @@
+/**
+ * Why:
+ *   This file provides users each with their own personal profile and personalization 
+ *   layer (So recommendations of materials is related to user) so its tailored toward
+ *   a student-specific exprience Pathwise aims to help with.
+ *
+ * What:
+ *   It defines the routes for fetching/reading current users account information and 
+ *   creating/updating user profiles data.
+ *
+ * Where used:
+ *   It is mounted under '/api' in server.js
+ *   It is called by vertical-prototype/js/profile.js
+ *
+ * Notes:
+ *   - It expects an authenticated session
+ *   - The tables it touches: 
+ *        Users, 
+ *        UserProfiles
+ *   - It uses an upsert pattern, meaning it performs an insert if a userProfile does not 
+ *     exist and an update if it does
+ */
+
 const express = require('express');
 const db = require('../db/connection');
 const { requireAuth } = require('../middleware/requireAuth');

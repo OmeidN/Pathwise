@@ -1,3 +1,32 @@
+------------------------------------------------------------------------------------------
+
+-- Why:
+--   This is needed to support the main planning data model for our 
+--   vertical protoype: like goals, projects, milestones, and resource 
+--   attachements
+--
+-- What:
+--   This sql basically creates Goals, Projects, Milestones, GoalResources, 
+--   and ProjectsResources with foregin keys used across the tables to link
+--   the chain of relationships needed for structured and correct planning
+--
+-- Where used:
+--   It helps teh backend routes such as goal, project, and milestone and 
+--   the goals and goal hub pages.
+--
+-- Notes:
+--   - Run this sql schema after 001_m3_users_bookmarks.sql
+--   - This is safe for where the Users and Resources table already exist on their system
+--   - The table it touches: 
+--        Goals, 
+--        Projects, 
+--        Milestones, 
+--        GoalResources, 
+--        ProjectResources.
+--
+
+------------------------------------------------------------------------------------------
+
 -- Pathwise M3: Goals / Projects / Milestones + resource attachments
 
 CREATE TABLE IF NOT EXISTS Goals (

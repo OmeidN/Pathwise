@@ -1,3 +1,24 @@
+/**
+ * Why:
+ *   This file is meant to handle the major goal planning process, which is the core
+ *   feature our platform, Pathwise is trying to solve and stand out as.
+ *
+ * What:
+ *   It defines the CRUD (create, read, update, delete) routes for Goals, goal overview, 
+ *   goal detail, goal hub, and status marker (done, paused, or in-progress) as well as 
+ *   the goal material attachement behavior.
+ *
+ * Where used:
+ *   It is mounted under '/api' in server.js
+ *   It is called by vertical-prototype/js/goals.js and js/goal-detail.js.
+ *
+ * Notes:
+ *   - All routes require an authenticated session.
+ *   - Ownership is enforced by matching goal.user_id to req.session.userId.
+ *   - Touches tables: Goals, Projects, Milestones, GoalResources.
+ *   - Also logs activity for goal creation.
+ */
+
 const express = require('express');
 const db = require('../db/connection');
 const { requireAuth } = require('../middleware/requireAuth');
