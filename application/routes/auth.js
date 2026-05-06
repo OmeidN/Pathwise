@@ -16,12 +16,11 @@
  * Notes:
  *   - For password hashing, we use bcryptjs here for simple security handling
  *   - Uses express-session for session-based login.
- *   - The table it touchess: 
- *        Users, 
- *        Resources.
+ *   - Tables: Users (demo reset), Resources (via /me/submissions).
  *   - Session cookie: frontend should use fetch(..., { credentials: 'include' }).
  */
 
+const crypto = require('crypto');
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const db = require('../db/connection');
@@ -29,6 +28,10 @@ const { requireAuth } = require('../middleware/requireAuth');
 
 const router = express.Router();
 const BCRYPT_ROUNDS = 10;
+/** Demo helper: accept any numeric code input. */
+function normalizeResetCode(code) {
+  return String(code == null ? '' : code).replace(/\D/g, '');
+}
 
 function validateEmail(email) {
   return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -128,6 +131,76 @@ router.post('/logout', (req, res) => {
     res.clearCookie('connect.sid');
     res.json({ success: true });
   });
+});
+
+/** Demo reset: generates a random code for display only (no email service yet). */
+router.post('/password-reset/request', async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    const em = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    if (!validateEmail(em)) {
+      return res.status(400).json({ success: false, error: 'Valid email is required' });
+    }
+
+    const pool = db.getPool();
+    const [rows] = await pool.query('SELECT user_id FROM Users WHERE email = ? LIMIT 1', [em]);
+    if (!rows.length) {
+      return res.json({
+        success: true,
+        message: 'No account found for that email.'
+      });
+    }
+
+    const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
+
+    return res.json({
+      success: true,
+      message:
+        'Demo mode: a random code is shown below. Enter any numeric code to proceed with password reset.',
+      code
+    });
+  } catch (err) {
+    console.error('[password-reset/request]', err);
+    return res.status(500).json({ success: false, error: 'Something went wrong. Try again later.' });
+  }
+});
+
+router.post('/password-reset/confirm', async (req, res) => {
+  try {
+    const { email, code, password } = req.body || {};
+    const em = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    const normalized = normalizeResetCode(code);
+    const pw = typeof password === 'string' ? password : '';
+
+    if (!validateEmail(em)) {
+      return res.status(400).json({ success: false, error: 'Valid email is required' });
+    }
+    if (!normalized) {
+      return res.status(400).json({ success: false, error: 'Enter any numeric code.' });
+    }
+    if (pw.length < 8) {
+      return res.status(400).json({ success: false, error: 'Password must be at least 8 characters' });
+    }
+
+    const pool = db.getPool();
+    const [rows] = await pool.query('SELECT user_id FROM Users WHERE email = ? LIMIT 1', [em]);
+    if (!rows.length) {
+      return res.json({
+        success: true,
+        message: 'No account found for that email.'
+      });
+    }
+    const passwordHash = await bcrypt.hash(pw, BCRYPT_ROUNDS);
+    await pool.query('UPDATE Users SET password_hash = ? WHERE user_id = ?', [passwordHash, rows[0].user_id]);
+
+    return res.json({
+      success: true,
+      message: 'Password updated. You can log in with your new password.'
+    });
+  } catch (err) {
+    console.error('[password-reset/confirm]', err);
+    return res.status(500).json({ success: false, error: 'Something went wrong. Try again later.' });
+  }
 });
 
 router.get('/me/submissions', requireAuth, async (req, res) => {

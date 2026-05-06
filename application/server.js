@@ -398,7 +398,14 @@ app.get('/about', (req, res) => {
 app.use(express.static(path.join(__dirname)));
 
 // 404 catch-all — must come after static middleware and all routes.
-app.use((_req, res) => {
+app.use((req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(404).json({
+      success: false,
+      error:
+        'API route not found. Stop and restart the Node server (npm start in application/) so new routes load, then try again.'
+    });
+  }
   res.redirect('/vertical-prototype/404.html');
 });
 
