@@ -37,6 +37,29 @@
     errEl.hidden = !msg;
   }
 
+  // ------------------------------------------
+  function formatDate(value) {
+    if (!value) return '';
+    return String(value).slice(0, 10);
+  }
+
+  function getCheckedValues(name) {
+    return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`))
+      .map((input) => Number(input.value))
+      .filter((value) => Number.isInteger(value) && value > 0);
+  }
+
+  function renderChips(label, items, className, idKey) {
+    if (!items || items.length === 0) return '';
+
+    return items.map((item) => `
+      <span class="reflection-chip ${className}">
+        ${label}: ${esc(item.title || item[idKey])}
+      </span>
+    `).join('');
+  }
+  // ------------------------------------------
+
   async function load() {
     showErr('');
     const res = await fetch('/api/reflections', { credentials: 'include' });
