@@ -210,8 +210,7 @@ async function loadTemplateRecommendations() {
 
 // The search flow now shares loading and empty states so it feels steadier.
 async function runSearch(event) {
-  event.preventDefault();
-
+  event?.preventDefault?.();
   const q = searchInput.value.trim();
   const category = categoryInput.value;
   const contentType = contentTypeInput?.value || "";
@@ -274,25 +273,25 @@ searchForm.addEventListener("submit", runSearch);
 
 if (costInput) {
   costInput.addEventListener("change", () => {
-    searchForm.dispatchEvent(new Event("submit"));
+    runSearch();
   });
 }
 
 tagCheckboxes.forEach((checkbox) => {
   checkbox.addEventListener("change", () => {
-    searchForm.dispatchEvent(new Event("submit"));
+    runSearch();
   });
 });
 
 if (aiOnlyInput) {
   aiOnlyInput.addEventListener("change", () => {
-    searchForm.dispatchEvent(new Event("submit"));
+    runSearch();
   });
 }
 
 if (applyFiltersBtn) {
   applyFiltersBtn.addEventListener("click", () => {
-    searchForm.dispatchEvent(new Event("submit"));
+    runSearch();
   });
 }
 
@@ -301,7 +300,7 @@ if (clearFiltersBtn) {
     resetFilters();
     updateUrl(new URLSearchParams());
     // After clearing filters, reload the full catalog so Browse always has content ready.
-    searchForm.dispatchEvent(new Event("submit"));
+    runSearch();
   });
 }
 
@@ -333,12 +332,12 @@ themeShortcuts.forEach((button) => {
       skillAreaInput.value = themeQuery.toLowerCase();
     }
     setActiveTheme(button);
-    searchForm.dispatchEvent(new Event("submit"));
+    runSearch();
   });
 });
 
 // Load all approved resources on first visit so the page behaves like a browse experience right away.
-searchForm.dispatchEvent(new Event("submit"));
+runSearch();
 
 loadRecommendations();
 loadTemplateRecommendations();
