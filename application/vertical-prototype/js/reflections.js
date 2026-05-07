@@ -187,6 +187,12 @@
     }
   }
 
+  clearLinksBtn.addEventListener('click', () => {
+    linkTreeEl.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+      input.checked = false;
+    });
+  });
+
   // ==========================================
   async function load() {
     showErr('');
@@ -302,5 +308,9 @@
 
   });
 
+  // ----------
+  loadLinkOptions();
   load();
+  // ----------
+
 })();
