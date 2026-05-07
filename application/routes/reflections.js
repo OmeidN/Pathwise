@@ -41,6 +41,97 @@ const { logActivity } = require('../services/activityLog');
 
 const router = express.Router();
 
+// ------------------------------
+function parseIdArray(value) {
+  if (!Array.isArray(value)) return [];
+
+  return Array.from(
+    new Set(
+      value
+        .map((item) => Number(item))
+        .filter((item) => Number.isInteger(item) && item > 0)
+    )
+  );
+}
+
+async function getOwnedGoalIds(pool, userId, goalIds) {
+  if (goalIds.length === 0) return [];
+
+  const [rows] = await pool.query(
+    `SELECT goal_id
+     FROM Goals
+     WHERE user_id = ?
+       AND goal_id IN (${goalIds.map(() => '?').join(',')})`,
+    [userId, ...goalIds]
+  );
+
+  return rows.map((row) => row.goal_id);
+}
+
+async function getOwnedProjectIds(pool, userId, projectIds) {
+  if (projectIds.length === 0) return [];
+
+  const [rows] = await pool.query(
+    `SELECT p.project_id
+     FROM Projects p
+     JOIN Goals g ON g.goal_id = p.goal_id
+     WHERE g.user_id = ?
+       AND p.project_id IN (${projectIds.map(() => '?').join(',')})`,
+    [userId, ...projectIds]
+  );
+
+  return rows.map((row) => row.project_id);
+}
+
+async function getOwnedMilestoneIds(pool, userId, milestoneIds) {
+  if (milestoneIds.length === 0) return [];
+
+  const [rows] = await pool.query(
+    `SELECT m.milestone_id
+     FROM Milestones m
+     JOIN Projects p ON p.project_id = m.project_id
+     JOIN Goals g ON g.goal_id = p.goal_id
+     WHERE g.user_id = ?
+       AND m.milestone_id IN (${milestoneIds.map(() => '?').join(',')})`,
+    [userId, ...milestoneIds]
+  );
+
+  return rows.map((row) => row.milestone_id);
+}
+
+function ownsAllRequestedIds(requested, owned) {
+  if (requested.length !== owned.length) return false;
+  const ownedSet = new Set(owned);
+  return requested.every((id) => ownedSet.has(id));
+}
+
+async function insertReflectionLinks(conn, reflectionId, goalIds, projectIds, milestoneIds) {
+  for (const goalId of goalIds) {
+    await conn.query(
+      `INSERT IGNORE INTO ReflectionGoals (reflection_id, goal_id)
+       VALUES (?, ?)`,
+      [reflectionId, goalId]
+    );
+  }
+
+  for (const projectId of projectIds) {
+    await conn.query(
+      `INSERT IGNORE INTO ReflectionProjects (reflection_id, project_id)
+       VALUES (?, ?)`,
+      [reflectionId, projectId]
+    );
+  }
+
+  for (const milestoneId of milestoneIds) {
+    await conn.query(
+      `INSERT IGNORE INTO ReflectionMilestones (reflection_id, milestone_id)
+       VALUES (?, ?)`,
+      [reflectionId, milestoneId]
+    );
+  }
+}
+// ------------------------------
+
 async function assertGoalOwned(pool, userId, goalId) {
   if (!goalId) return true;
   const [g] = await pool.query('SELECT goal_id FROM Goals WHERE goal_id = ? AND user_id = ?', [
