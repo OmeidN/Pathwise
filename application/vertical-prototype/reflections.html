@@ -32,6 +32,140 @@ Where used:
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/pages/goals.css" />
+  <style>
+    .reflection-link-box {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      background: var(--color-background);
+      overflow: hidden;
+    }
+
+    .reflection-link-box__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-surface);
+    }
+
+    .reflection-link-box__title {
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text);
+    }
+
+    .reflection-link-box__help {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-top: var(--space-xs);
+    }
+
+    .reflection-link-tree {
+      display: grid;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      max-height: 420px;
+      overflow: auto;
+    }
+
+    .reflection-goal-node {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-surface);
+      padding: var(--space-md);
+    }
+
+    .reflection-node-label {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      cursor: pointer;
+      font-weight: var(--font-weight-medium);
+    }
+
+    .reflection-node-label input {
+      margin-top: 5px;
+      flex: 0 0 auto;
+    }
+
+    .reflection-node-title {
+      display: block;
+      color: var(--color-text);
+    }
+
+    .reflection-node-meta {
+      display: block;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-normal);
+      margin-top: 2px;
+    }
+
+    .reflection-project-list {
+      display: grid;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+      margin-left: var(--space-lg);
+    }
+
+    .reflection-project-node {
+      border-left: 2px solid var(--color-border);
+      padding-left: var(--space-md);
+    }
+
+    .reflection-milestone-list {
+      display: grid;
+      gap: var(--space-xs);
+      margin-top: var(--space-sm);
+      margin-left: var(--space-lg);
+    }
+
+    .reflection-milestone-node {
+      font-size: var(--font-size-sm);
+    }
+
+    .reflection-link-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      margin-top: var(--space-sm);
+    }
+
+    .reflection-chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: var(--radius-full);
+      padding: 4px 10px;
+      font-size: var(--font-size-sm);
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      border: 1px solid rgba(74, 124, 111, 0.18);
+    }
+
+    .reflection-chip--project {
+      background: var(--color-background);
+      color: var(--color-text-muted);
+      border-color: var(--color-border);
+    }
+
+    .reflection-chip--milestone {
+      background: var(--color-warning-soft);
+      color: var(--color-warning);
+      border-color: var(--color-warning-border);
+    }
+
+    @media (max-width: 600px) {
+      .reflection-link-box__head {
+        flex-direction: column;
+      }
+
+      .reflection-project-list,
+      .reflection-milestone-list {
+        margin-left: var(--space-md);
+      }
+    }
+  </style>
 </head>
 <body data-page="reflections">
   <header id="site-header">
