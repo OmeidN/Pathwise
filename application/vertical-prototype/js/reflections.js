@@ -206,21 +206,40 @@
       listEl.innerHTML = '<p>No reflections yet.</p>';
       return;
     }
+
+    // =========================================
     listEl.innerHTML = rows
-      .map(
-        (r) => `
-      <article class="goal-row">
-        <div>
-          <p>${esc(r.body)}</p>
-          <p class="goal-row__meta">${esc(String(r.created_at).slice(0, 19).replace('T', ' '))}
-            ${r.goal_id ? ` · Goal #${r.goal_id}` : ''}${r.project_id ? ` · Project #${r.project_id}` : ''}</p>
-        </div>
-        <div class="goal-row__actions">
-          <button type="button" class="btn btn-secondary btn-del" data-id="${r.reflection_id}">Delete</button>
-        </div>
-      </article>`
-      )
+      .map((r) => {
+        const goalChips = renderChips('Goal', r.linked_goals, '', 'goal_id');
+        const projectChips = renderChips('Project', r.linked_projects, 'reflection-chip--project', 'project_id');
+        const milestoneChips = renderChips('Milestone', r.linked_milestones, 'reflection-chip--milestone', 'milestone_id');
+        const hasLinks = goalChips || projectChips || milestoneChips;
+
+        return `
+          <article class="goal-row">
+            <div>
+              <p>${esc(r.body)}</p>
+              <p class="goal-row__meta">
+                ${esc(String(r.created_at).slice(0, 19).replace('T', ' '))}
+              </p>
+
+              ${
+                hasLinks
+                  ? `<div class="reflection-link-summary">${goalChips}${projectChips}${milestoneChips}</div>`
+                  : '<p class="goal-row__meta">No goals, projects, or milestones linked.</p>'
+              }
+            </div>
+
+            <div class="goal-row__actions">
+              <button type="button" class="btn btn-secondary btn-del" data-id="${r.reflection_id}">
+                Delete
+              </button>
+            </div>
+          </article>`;
+      })
       .join('');
+    // =========================================
+
 
     listEl.querySelectorAll('.btn-del').forEach((btn) => {
       btn.addEventListener('click', async () => {
