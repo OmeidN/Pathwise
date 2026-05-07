@@ -216,14 +216,81 @@ router.get('/reflections/link-options', requireAuth, async (req, res) => {
 
 router.get('/reflections', requireAuth, async (req, res) => {
   try {
-    const [rows] = await db.getPool().query(
+    const pool = db.getPool();
+
+    const [rows] = await pool.query(
       `SELECT reflection_id, user_id, body, goal_id, project_id, created_at, updated_at
        FROM Reflections
        WHERE user_id = ?
        ORDER BY created_at DESC`,
       [req.session.userId]
     );
-    res.json({ success: true, results: rows });
+
+    const reflectionIds = rows.map((row) => row.reflection_id);
+
+    if (reflectionIds.length === 0) {
+      return res.json({ success: true, results: [] });
+    }
+
+    const placeholders = reflectionIds.map(() => '?').join(',');
+
+    const [goalLinks] = await pool.query(
+      `SELECT rg.reflection_id, g.goal_id, g.title
+       FROM ReflectionGoals rg
+       JOIN Goals g ON g.goal_id = rg.goal_id
+       WHERE rg.reflection_id IN (${placeholders})
+       ORDER BY g.title ASC`,
+      reflectionIds
+    );
+
+    const [projectLinks] = await pool.query(
+      `SELECT rp.reflection_id, p.project_id, p.goal_id, p.title
+       FROM ReflectionProjects rp
+       JOIN Projects p ON p.project_id = rp.project_id
+       WHERE rp.reflection_id IN (${placeholders})
+       ORDER BY p.title ASC`,
+      reflectionIds
+    );
+
+    const [milestoneLinks] = await pool.query(
+      `SELECT rm.reflection_id, m.milestone_id, m.project_id, m.title
+       FROM ReflectionMilestones rm
+       JOIN Milestones m ON m.milestone_id = rm.milestone_id
+       WHERE rm.reflection_id IN (${placeholders})
+       ORDER BY m.title ASC`,
+      reflectionIds
+    );
+
+    const goalsByReflection = new Map();
+    const projectsByReflection = new Map();
+    const milestonesByReflection = new Map();
+
+    for (const row of goalLinks) {
+      const list = goalsByReflection.get(row.reflection_id) || [];
+      list.push({ goal_id: row.goal_id, title: row.title });
+      goalsByReflection.set(row.reflection_id, list);
+    }
+
+    for (const row of projectLinks) {
+      const list = projectsByReflection.get(row.reflection_id) || [];
+      list.push({ project_id: row.project_id, goal_id: row.goal_id, title: row.title });
+      projectsByReflection.set(row.reflection_id, list);
+    }
+
+    for (const row of milestoneLinks) {
+      const list = milestonesByReflection.get(row.reflection_id) || [];
+      list.push({ milestone_id: row.milestone_id, project_id: row.project_id, title: row.title });
+      milestonesByReflection.set(row.reflection_id, list);
+    }
+
+    const results = rows.map((row) => ({
+      ...row,
+      linked_goals: goalsByReflection.get(row.reflection_id) || [],
+      linked_projects: projectsByReflection.get(row.reflection_id) || [],
+      linked_milestones: milestonesByReflection.get(row.reflection_id) || []
+    }));
+
+    res.json({ success: true, results });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
