@@ -297,43 +297,78 @@ router.get('/reflections', requireAuth, async (req, res) => {
 });
 
 router.post('/reflections', requireAuth, async (req, res) => {
+  const conn = await db.getPool().getConnection();
+
   try {
-    const { body, goal_id: gid, project_id: pid } = req.body || {};
+    const { body } = req.body || {};
     const text = body != null ? String(body).trim() : '';
+
     if (text.length < 1) {
-      return res.status(400).json({ success: false, error: 'body is required' });
-    }
-    const goalId = gid != null && gid !== '' ? Number(gid) : null;
-    const projectId = pid != null && pid !== '' ? Number(pid) : null;
-    if (goalId && Number.isNaN(goalId)) {
-      return res.status(400).json({ success: false, error: 'Invalid goal_id' });
-    }
-    if (projectId && Number.isNaN(projectId)) {
-      return res.status(400).json({ success: false, error: 'Invalid project_id' });
+      return res.status(400).json({ success: false, error: 'Reflection entry is required.' });
     }
 
-    const pool = db.getPool();
-    if (!(await assertGoalOwned(pool, req.session.userId, goalId))) {
-      return res.status(404).json({ success: false, error: 'Goal not found' });
-    }
-    if (!(await assertProjectOwned(pool, req.session.userId, projectId))) {
-      return res.status(404).json({ success: false, error: 'Project not found' });
+    const goalIds = parseIdArray(req.body.goal_ids);
+    const projectIds = parseIdArray(req.body.project_ids);
+    const milestoneIds = parseIdArray(req.body.milestone_ids);
+
+    const ownedGoalIds = await getOwnedGoalIds(conn, req.session.userId, goalIds);
+    const ownedProjectIds = await getOwnedProjectIds(conn, req.session.userId, projectIds);
+    const ownedMilestoneIds = await getOwnedMilestoneIds(conn, req.session.userId, milestoneIds);
+
+    if (!ownsAllRequestedIds(goalIds, ownedGoalIds)) {
+      return res.status(404).json({ success: false, error: 'One or more selected goals were not found.' });
     }
 
-    const [result] = await pool.query(
-      `INSERT INTO Reflections (user_id, body, goal_id, project_id) VALUES (?, ?, ?, ?)`,
-      [req.session.userId, text, goalId, projectId]
+    if (!ownsAllRequestedIds(projectIds, ownedProjectIds)) {
+      return res.status(404).json({ success: false, error: 'One or more selected projects were not found.' });
+    }
+
+    if (!ownsAllRequestedIds(milestoneIds, ownedMilestoneIds)) {
+      return res.status(404).json({ success: false, error: 'One or more selected milestones were not found.' });
+    }
+
+    await conn.beginTransaction();
+
+    const [result] = await conn.query(
+      `INSERT INTO Reflections (user_id, body, goal_id, project_id)
+       VALUES (?, ?, ?, ?)`,
+      [
+        req.session.userId,
+        text,
+        goalIds.length > 0 ? goalIds[0] : null,
+        projectIds.length > 0 ? projectIds[0] : null
+      ]
     );
+
     const reflectionId = result.insertId;
+
+    await insertReflectionLinks(conn, reflectionId, goalIds, projectIds, milestoneIds);
+
+    await conn.commit();
+
     await logActivity({
       userId: req.session.userId,
       actionType: 'reflection_created',
       entityType: 'reflection',
-      entityId: reflectionId
+      entityId: reflectionId,
+      detail: {
+        linked_goals: goalIds.length,
+        linked_projects: projectIds.length,
+        linked_milestones: milestoneIds.length
+      }
     });
+
     res.status(201).json({ success: true, reflection_id: reflectionId });
   } catch (err) {
+    try {
+      await conn.rollback();
+    } catch (_) {
+      // ignore rollback failure
+    }
+
     res.status(500).json({ success: false, error: err.message });
+  } finally {
+    conn.release();
   }
 });
 
