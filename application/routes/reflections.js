@@ -152,6 +152,68 @@ async function assertProjectOwned(pool, userId, projectId) {
   return p.length > 0;
 }
 
+// --------------------------------------
+router.get('/reflections/link-options', requireAuth, async (req, res) => {
+  try {
+    const pool = db.getPool();
+    const userId = req.session.userId;
+
+    const [goals] = await pool.query(
+      `SELECT goal_id, title, category, status, target_date
+       FROM Goals
+       WHERE user_id = ? AND template_kind = 'none'
+       ORDER BY updated_at DESC`,
+      [userId]
+    );
+
+    const [projects] = await pool.query(
+      `SELECT p.project_id, p.goal_id, p.title, p.description
+       FROM Projects p
+       JOIN Goals g ON g.goal_id = p.goal_id
+       WHERE g.user_id = ?
+       ORDER BY p.updated_at DESC`,
+      [userId]
+    );
+
+    const [milestones] = await pool.query(
+      `SELECT m.milestone_id, m.project_id, m.title, m.target_date, m.is_completed
+       FROM Milestones m
+       JOIN Projects p ON p.project_id = m.project_id
+       JOIN Goals g ON g.goal_id = p.goal_id
+       WHERE g.user_id = ?
+       ORDER BY m.target_date IS NULL, m.target_date ASC, m.created_at ASC`,
+      [userId]
+    );
+
+    const milestonesByProject = new Map();
+    for (const milestone of milestones) {
+      const list = milestonesByProject.get(milestone.project_id) || [];
+      list.push(milestone);
+      milestonesByProject.set(milestone.project_id, list);
+    }
+
+    const projectsByGoal = new Map();
+    for (const project of projects) {
+      const list = projectsByGoal.get(project.goal_id) || [];
+      list.push({
+        ...project,
+        milestones: milestonesByProject.get(project.project_id) || []
+      });
+      projectsByGoal.set(project.goal_id, list);
+    }
+
+    const results = goals.map((goal) => ({
+      ...goal,
+      projects: projectsByGoal.get(goal.goal_id) || []
+    }));
+
+    res.json({ success: true, results });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+// --------------------------------------
+
 router.get('/reflections', requireAuth, async (req, res) => {
   try {
     const [rows] = await db.getPool().query(
