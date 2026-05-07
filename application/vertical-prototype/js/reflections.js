@@ -289,8 +289,17 @@
       showErr(data.error || 'Could not save.');
       return;
     }
+    
+    // ---------------
     form.reset();
+
+    linkTreeEl.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+      input.checked = false;
+    });
+
     load();
+    // ---------------
+
   });
 
   load();
