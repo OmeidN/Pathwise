@@ -14,10 +14,14 @@
  *
  * Notes:
  *   - It expects an authenticated session
- *   - Touches tables: 
+ *   - The table it touches: 
  *        Reflections, 
  *        Goals, 
  *        Projects.
+ *        Milestones,
+ *        ReflectionGoals,
+ *        ReflectionProjects,
+ *        ReflectionMilestones.
  *   - It validates the goal/project attributed to the reflection belongs to the user
  *     themselves
  *   - Log activity occurs here when a new reflection is made
