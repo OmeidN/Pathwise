@@ -273,11 +273,12 @@
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        body,
-        goal_id: goalRaw ? Number(goalRaw) : null,
-        project_id: projRaw ? Number(projRaw) : null
-      })
+
+      // --------------------------------------
+      body: JSON.stringify(payload)
+      // --------------------------------------
+
+      
     });
     if (res.status === 401) {
       window.location.href = 'login.html';
