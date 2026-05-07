@@ -22,6 +22,8 @@
   const listEl = document.getElementById('refl-list');
   const errEl = document.getElementById('refl-error');
   const form = document.getElementById('refl-form');
+  const linkTreeEl = document.getElementById('reflection-link-tree');
+  const clearLinksBtn = document.getElementById('clear-reflection-links');
 
   function esc(s) {
     return String(s ?? '')
