@@ -240,7 +240,6 @@
       .join('');
     // =========================================
 
-
     listEl.querySelectorAll('.btn-del').forEach((btn) => {
       btn.addEventListener('click', async () => {
         if (!confirm('Delete this reflection?')) return;
@@ -258,9 +257,18 @@
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // --------------------------------------------------
     const body = document.getElementById('refl-body').value.trim();
-    const goalRaw = document.getElementById('refl-goal').value.trim();
-    const projRaw = document.getElementById('refl-project').value.trim();
+
+    const payload = {
+      body,
+      goal_ids: getCheckedValues('reflection_goal_ids'),
+      project_ids: getCheckedValues('reflection_project_ids'),
+      milestone_ids: getCheckedValues('reflection_milestone_ids')
+    };
+    // --------------------------------------------------
+
     const res = await fetch('/api/reflections', {
       method: 'POST',
       credentials: 'include',
