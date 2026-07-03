@@ -21,8 +21,10 @@
 
 const mysql = require('mysql2/promise');
 
+const host = process.env.DB_HOST || 'localhost';
+
 const config = {
-  host: process.env.DB_HOST || 'localhost',
+  host,
   port: parseInt(process.env.DB_PORT, 10) || 3306,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -32,13 +34,32 @@ const config = {
   queueLimit: 0
 };
 
-// Cloud MySQL hosts (e.g. TiDB Serverless) often require TLS.
-if (process.env.DB_SSL === 'true') {
-  config.ssl = { rejectUnauthorized: true };
+function shouldUseSsl() {
+  if (process.env.DB_SSL === 'true') return true;
+  if (process.env.DB_SSL === 'false') return false;
+  // TiDB public endpoints reject non-TLS connections.
+  return host.includes('tidbcloud.com');
+}
+
+// Cloud MySQL hosts (e.g. TiDB) require TLS.
+if (shouldUseSsl()) {
+  config.ssl = {
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false'
+  };
+  if (process.env.DB_SSL_CA) {
+    config.ssl.ca = process.env.DB_SSL_CA;
+  }
 }
 
 if (!config.user || !config.password) {
   console.error('[db] Missing DB_USER or DB_PASSWORD. Set them in .env.');
+}
+
+if (shouldUseSsl()) {
+  console.log('[db] TLS enabled for', host);
+} else {
+  console.log('[db] TLS disabled for', host);
 }
 
 let pool = null;
