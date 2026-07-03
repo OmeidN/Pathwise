@@ -141,6 +141,10 @@ app.use('/api', workflowsRoutes);
 app.use('/api', sharesRoutes);
 
 // GET /api/db-test - simple DB test
+app.get('/api/db-debug', (_req, res) => {
+  res.json({ success: true, ...db.getDebugInfo() });
+});
+
 app.get('/api/db-test', async (req, res) => {
   try {
     const connectionTest = await db.testConnection();
@@ -148,7 +152,8 @@ app.get('/api/db-test', async (req, res) => {
       return res.status(503).json({
         success: false,
         error: 'Database connection failed',
-        details: connectionTest.error || connectionTest.message
+        details: connectionTest.error || connectionTest.message,
+        debug: db.getDebugInfo()
       });
     }
     const sample = await db.getResourcesSample();
@@ -156,6 +161,7 @@ app.get('/api/db-test', async (req, res) => {
       success: true,
       database: connectionTest.message,
       tls: connectionTest.tls,
+      mode: connectionTest.mode,
       resourcesSample: sample
     });
   } catch (err) {

@@ -9,7 +9,7 @@
  *   and other functions that retrieve small sample read for checking.
  *
  * Where used:
- *   This file is imported by the route files, controllers, the user models 
+ *   This file is imported by the route files, controllers, the user models
  *   and the services we have in our backend.
  *
  * Notes:
@@ -23,14 +23,15 @@ const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql2/promise');
 
-const host = (process.env.DB_HOST || 'localhost').trim();
+const BUILD_ID = 'tidb-tls-url-v1';
 
-const config = {
-  host,
-  port: parseInt(process.env.DB_PORT, 10) || 3306,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || 'pathwise',
+const host = (process.env.DB_HOST || 'localhost').trim();
+const port = parseInt(process.env.DB_PORT, 10) || 3306;
+const user = process.env.DB_USER;
+const password = process.env.DB_PASSWORD;
+const database = process.env.DB_NAME || 'pathwise';
+
+const poolOptions = {
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -41,97 +42,158 @@ function isLocalHost(hostname) {
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 }
 
-function readCaBundle() {
-  if (process.env.DB_SSL_CA) {
-    return process.env.DB_SSL_CA;
-  }
-
-  const candidates = [
-    path.join(__dirname, 'certs', 'isrgrootx1.pem'),
-    '/etc/ssl/certs/ca-certificates.crt',
-    '/etc/ssl/cert.pem',
-    '/etc/pki/tls/certs/ca-bundle.crt'
-  ];
-
-  for (const candidate of candidates) {
-    try {
-      if (fs.existsSync(candidate)) {
-        return fs.readFileSync(candidate);
-      }
-    } catch (_err) {
-      // try next path
-    }
-  }
-
-  return null;
+function isTiDbHost(hostname) {
+  return hostname.includes('tidbcloud.com');
 }
 
-function shouldUseSsl() {
+function mustUseTls(hostname) {
+  if (isTiDbHost(hostname)) return true;
+  if (isLocalHost(hostname)) return false;
+
   const flag = String(process.env.DB_SSL || '').trim().toLowerCase();
   if (flag === 'true' || flag === '1' || flag === 'yes') return true;
   if (flag === 'false' || flag === '0' || flag === 'no') return false;
-  if (isLocalHost(host)) return false;
-  // TiDB Cloud and other remote MySQL hosts require TLS.
-  return true;
+
+  return process.env.NODE_ENV === 'production';
 }
 
-function buildSslConfig() {
-  const ca = readCaBundle();
-  const strict = process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true';
+function buildTlsOptions() {
+  const caPath = path.join(__dirname, 'certs', 'isrgrootx1.pem');
+  const tls = {
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true'
+  };
 
-  if (ca) {
+  if (process.env.DB_SSL_CA) {
+    tls.ca = process.env.DB_SSL_CA;
+    return tls;
+  }
+
+  if (fs.existsSync(caPath)) {
+    tls.ca = fs.readFileSync(caPath, 'utf8');
+  }
+
+  if (!tls.ca) {
+    tls.rejectUnauthorized = false;
+  }
+
+  return tls;
+}
+
+function buildPoolConfig() {
+  const useTls = mustUseTls(host);
+
+  if (!useTls) {
     return {
-      minVersion: 'TLSv1.2',
-      ca,
-      rejectUnauthorized: strict
+      ...poolOptions,
+      host,
+      port,
+      user,
+      password,
+      database,
+      mode: 'plain'
     };
   }
 
+  if (!user || !password) {
+    return {
+      ...poolOptions,
+      host,
+      port,
+      user,
+      password,
+      database,
+      mode: 'tls-missing-credentials'
+    };
+  }
+
+  const tls = buildTlsOptions();
+  const sslQuery = encodeURIComponent(JSON.stringify(tls));
+  const uri =
+    `mysql://${encodeURIComponent(user)}:${encodeURIComponent(password)}` +
+    `@${host}:${port}/${encodeURIComponent(database)}?ssl=${sslQuery}`;
+
   return {
-    minVersion: 'TLSv1.2',
-    rejectUnauthorized: false
+    ...poolOptions,
+    uri,
+    mode: 'tls-url',
+    tls,
+    host,
+    port,
+    database
   };
 }
 
-if (shouldUseSsl()) {
-  config.ssl = buildSslConfig();
-}
+const resolvedConfig = buildPoolConfig();
+const useTls = resolvedConfig.mode.startsWith('tls');
 
-if (!config.user || !config.password) {
+if (!user || !password) {
   console.error('[db] Missing DB_USER or DB_PASSWORD. Set them in .env.');
 }
 
-console.log('[db] host:', host, '| tls:', Boolean(config.ssl));
+console.log(
+  '[db]',
+  BUILD_ID,
+  '| host:', host,
+  '| mode:', resolvedConfig.mode,
+  '| tls:', useTls
+);
 
 let pool = null;
 
-// returns the shared pool, creating it on first call
 function getPool() {
   if (!pool) {
-    pool = mysql.createPool(config);
+    if (resolvedConfig.uri) {
+      pool = mysql.createPool(resolvedConfig.uri);
+    } else {
+      pool = mysql.createPool({
+        host: resolvedConfig.host,
+        port: resolvedConfig.port,
+        user,
+        password,
+        database: resolvedConfig.database,
+        ...poolOptions
+      });
+    }
   }
   return pool;
 }
 
-// runs SELECT 1 to verify the connection is alive
+function getDebugInfo() {
+  const caPath = path.join(__dirname, 'certs', 'isrgrootx1.pem');
+  return {
+    buildId: BUILD_ID,
+    host,
+    port,
+    database,
+    mode: resolvedConfig.mode,
+    tls: useTls,
+    nodeEnv: process.env.NODE_ENV || null,
+    dbSslEnv: process.env.DB_SSL || null,
+    caFileExists: fs.existsSync(caPath),
+    hasDbHost: Boolean(process.env.DB_HOST),
+    hasDbUser: Boolean(process.env.DB_USER),
+    hasDbPassword: Boolean(process.env.DB_PASSWORD)
+  };
+}
+
 async function testConnection() {
   const p = getPool();
   try {
     const [rows] = await p.query('SELECT 1 AS one');
     if (Array.isArray(rows) && rows[0] && rows[0].one === 1) {
-      return { ok: true, message: 'Database connection OK', tls: Boolean(config.ssl) };
+      return { ok: true, message: 'Database connection OK', tls: useTls, mode: resolvedConfig.mode };
     }
     return { ok: false, message: 'Unexpected response from database' };
   } catch (err) {
-    return { ok: false, error: err.message };
+    return { ok: false, error: err.message, tls: useTls, mode: resolvedConfig.mode };
   }
 }
 
-// used by /api/db-test to confirm the Resources table is readable
 async function getResourcesSample() {
   const p = getPool();
   const [rows] = await p.query('SELECT resource_id, title FROM Resources LIMIT 5');
   return rows;
 }
 
-module.exports = { getPool, testConnection, getResourcesSample };
+module.exports = { getPool, testConnection, getResourcesSample, getDebugInfo };
