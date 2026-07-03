@@ -19,9 +19,11 @@
  *     we perform
  */
 
+const fs = require('fs');
+const path = require('path');
 const mysql = require('mysql2/promise');
 
-const host = process.env.DB_HOST || 'localhost';
+const host = (process.env.DB_HOST || 'localhost').trim();
 
 const config = {
   host,
@@ -31,36 +33,75 @@ const config = {
   database: process.env.DB_NAME || 'pathwise',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  enableKeepAlive: true
 };
 
-function shouldUseSsl() {
-  if (process.env.DB_SSL === 'true') return true;
-  if (process.env.DB_SSL === 'false') return false;
-  // TiDB public endpoints reject non-TLS connections.
-  return host.includes('tidbcloud.com');
+function isLocalHost(hostname) {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 }
 
-// Cloud MySQL hosts (e.g. TiDB) require TLS.
-if (shouldUseSsl()) {
-  config.ssl = {
-    minVersion: 'TLSv1.2',
-    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false'
-  };
+function readCaBundle() {
   if (process.env.DB_SSL_CA) {
-    config.ssl.ca = process.env.DB_SSL_CA;
+    return process.env.DB_SSL_CA;
   }
+
+  const candidates = [
+    path.join(__dirname, 'certs', 'isrgrootx1.pem'),
+    '/etc/ssl/certs/ca-certificates.crt',
+    '/etc/ssl/cert.pem',
+    '/etc/pki/tls/certs/ca-bundle.crt'
+  ];
+
+  for (const candidate of candidates) {
+    try {
+      if (fs.existsSync(candidate)) {
+        return fs.readFileSync(candidate);
+      }
+    } catch (_err) {
+      // try next path
+    }
+  }
+
+  return null;
+}
+
+function shouldUseSsl() {
+  const flag = String(process.env.DB_SSL || '').trim().toLowerCase();
+  if (flag === 'true' || flag === '1' || flag === 'yes') return true;
+  if (flag === 'false' || flag === '0' || flag === 'no') return false;
+  if (isLocalHost(host)) return false;
+  // TiDB Cloud and other remote MySQL hosts require TLS.
+  return true;
+}
+
+function buildSslConfig() {
+  const ca = readCaBundle();
+  const strict = process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true';
+
+  if (ca) {
+    return {
+      minVersion: 'TLSv1.2',
+      ca,
+      rejectUnauthorized: strict
+    };
+  }
+
+  return {
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: false
+  };
+}
+
+if (shouldUseSsl()) {
+  config.ssl = buildSslConfig();
 }
 
 if (!config.user || !config.password) {
   console.error('[db] Missing DB_USER or DB_PASSWORD. Set them in .env.');
 }
 
-if (shouldUseSsl()) {
-  console.log('[db] TLS enabled for', host);
-} else {
-  console.log('[db] TLS disabled for', host);
-}
+console.log('[db] host:', host, '| tls:', Boolean(config.ssl));
 
 let pool = null;
 
@@ -78,7 +119,7 @@ async function testConnection() {
   try {
     const [rows] = await p.query('SELECT 1 AS one');
     if (Array.isArray(rows) && rows[0] && rows[0].one === 1) {
-      return { ok: true, message: 'Database connection OK' };
+      return { ok: true, message: 'Database connection OK', tls: Boolean(config.ssl) };
     }
     return { ok: false, message: 'Unexpected response from database' };
   } catch (err) {

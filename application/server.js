@@ -152,7 +152,12 @@ app.get('/api/db-test', async (req, res) => {
       });
     }
     const sample = await db.getResourcesSample();
-    res.json({ success: true, database: connectionTest.message, resourcesSample: sample });
+    res.json({
+      success: true,
+      database: connectionTest.message,
+      tls: connectionTest.tls,
+      resourcesSample: sample
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
