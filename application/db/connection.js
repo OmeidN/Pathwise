@@ -32,6 +32,11 @@ const config = {
   queueLimit: 0
 };
 
+// Cloud MySQL hosts (e.g. TiDB Serverless) often require TLS.
+if (process.env.DB_SSL === 'true') {
+  config.ssl = { rejectUnauthorized: true };
+}
+
 if (!config.user || !config.password) {
   console.error('[db] Missing DB_USER or DB_PASSWORD. Set them in .env.');
 }
